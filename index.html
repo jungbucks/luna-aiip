@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>런칭! 나의 첫 AI 아이돌 — IP를 지켜라</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="modulepreload" href="js/main.js">
+<link rel="modulepreload" href="js/engine.js">
+<link rel="modulepreload" href="js/state.js">
+<link rel="modulepreload" href="js/ui/chat.js">
+<link rel="modulepreload" href="js/ui/popup.js">
+<link rel="modulepreload" href="js/ui/ending.js">
+<link rel="modulepreload" href="js/ui/character.js">
+<link rel="modulepreload" href="data/episodes.js">
+<link rel="modulepreload" href="data/strings.js">
+</head>
+<body>
+<div id="app">
+
+  <!-- 타이틀 -->
+  <section class="scr" id="scr-title">
+    <div class="luna-char" id="lunaTitleChar"></div>
+    <h1 class="title-logo">런칭!<br>나의 첫 AI 아이돌</h1>
+    <p class="title-sub">지식재산권 6종을 지켜라 — 스타트업 생존 스토리</p>
+    <button class="title-btn" id="btnNew">▶ 처음부터</button>
+    <button class="title-btn ghost" id="btnContinue">💾 이어하기</button>
+    <button class="title-reset" id="btnReset">기록 초기화</button>
+  </section>
+
+  <!-- 인트로 -->
+  <section class="scr" id="scr-intro">
+    <div id="introCard"></div>
+  </section>
+
+  <!-- 에피소드 -->
+  <section class="scr" id="scr-ep">
+    <div class="statbar">
+      <div class="stat-nums">
+        <span>💰 <span id="stMoney">50</span></span>
+        <span>📈 <span id="stFame">20</span></span>
+        <span class="safety">🛡️ <span id="stSafety">70</span></span>
+      </div>
+      <div id="badgeRow"></div>
+    </div>
+    <div id="epHead"></div>
+    <div class="ep-char-row"><div class="luna-char" id="lunaEpChar"></div></div>
+    <div id="chatRoom"></div>
+    <div id="chatLog"></div>
+    <div id="chatTapHint">👆 눌러서 대화 진행</div>
+    <div id="chatChoices"></div>
+  </section>
+
+  <!-- 법정 / 엔딩 -->
+  <section class="scr" id="scr-court"></section>
+  <section class="scr" id="scr-end"></section>
+
+  <!-- 팝업 오버레이 -->
+  <div id="popup"><div class="pop-card">
+    <div class="pop-title"></div>
+    <div class="pop-body"></div>
+    <div class="pop-btns"></div>
+  </div></div>
+
+</div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
