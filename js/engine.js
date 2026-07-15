@@ -20,6 +20,7 @@ export function halfDelta(d) {
 export function newGame() {
   return {
     schemaVersion: 1,
+    idol: 'luna',                            // 선택 캐릭터 'sol'|'luna' — 표시용, 규칙에 영향 없음
     ep: 1,                                   // 현재 에피소드 1~6
     stats: { ...START_STATS },
     badges: [null, null, null, null, null, null],  // null | 'full' | 'half' | 'none'

@@ -2,6 +2,8 @@
    기대값이 하나라도 어긋나면 exit 1 — 배포 금지. */
 import * as E from '../js/engine.js';
 import { EPISODES } from '../data/episodes.js';
+import { STRINGS } from '../data/strings.js';
+import { T, setIdol } from '../js/ui/character.js';
 
 let pass = 0, fail = 0;
 const t = (name, cond, extra = '') => {
@@ -86,6 +88,18 @@ console.log('[데이터 정합] episodes.js');
       [{ money: -20, safety: -25, fame: 10 }, { money: -5, safety: 10, fame: 10 }],
       [{ money: -25, safety: -25, fame: 15 }, { money: -15, safety: 15, fame: 15 }],
     ]));
+}
+
+console.log('[토큰 치환] 캐릭터 이름·조사 (character.js T)');
+{
+  const raw = JSON.stringify(EPISODES) + JSON.stringify(STRINGS) + STRINGS.bridgeNext(EPISODES[2]);
+  t('데이터에 하드코딩 루나/LUNA 없음', !raw.includes('루나') && !raw.includes('LUNA'));
+  setIdol('sol');
+  t('솔 조사(이/은/을/이랑)', T('{n가} {n는} {n를} {n랑} {N}') === '솔이 솔은 솔을 솔이랑 SOL');
+  t('솔 적용 후 토큰 잔여 없음', !/\{[nN][가는를랑와]?\}/.test(T(raw)));
+  setIdol('luna');
+  t('루나 조사(가/는/를/랑)', T('{n가} {n는} {n를} {n랑} {N}') === '루나가 루나는 루나를 루나랑 LUNA');
+  t('루나 적용 후 토큰 잔여 없음', !/\{[nN][가는를랑와]?\}/.test(T(raw)));
 }
 
 console.log('─'.repeat(40));

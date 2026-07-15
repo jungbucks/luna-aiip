@@ -1,10 +1,11 @@
 /* chat.js — 채팅 로그 렌더 (SPEC §7-3). 탭/클릭마다 1줄, 전부 출력 후 선택지 콜백. */
+import { T } from './character.js';
 
 let msgs = [], idx = 0, onDone = null, logEl = null;
 
 export function startChat(ep, doneCb) {
   msgs = ep.messages; idx = 0; onDone = doneCb;
-  document.getElementById('chatRoom').textContent = '💬 단톡방: ' + ep.roomName;
+  document.getElementById('chatRoom').textContent = '💬 단톡방: ' + T(ep.roomName);
   logEl = document.getElementById('chatLog');
   logEl.innerHTML = '';
   document.getElementById('chatChoices').innerHTML = '';
@@ -34,7 +35,7 @@ export function showChoices(title, choices) {
   choices.forEach(c => {
     const b = document.createElement('button');
     b.className = 'choice-btn ' + (c.cls || '');
-    b.textContent = c.label;
+    b.textContent = T(c.label);
     if (c.disabled) { b.disabled = true; b.classList.add('dead'); }
     else b.onclick = c.cb;
     box.appendChild(b);
@@ -42,6 +43,7 @@ export function showChoices(title, choices) {
   box.scrollIntoView({ behavior: 'smooth', block: 'end' });
 }
 
+/* 데이터 텍스트의 단일 통로: 이름 토큰({n}·{N}·조사) 치환 후 HTML 이스케이프 */
 export function esc(s) {
-  return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+  return T(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 }

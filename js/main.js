@@ -7,7 +7,7 @@ import { STRINGS } from '../data/strings.js';
 import { startChat, advance, showChoices, esc } from './ui/chat.js';
 import { showPopup, deltaLine } from './ui/popup.js';
 import { renderCourt, renderEnding } from './ui/ending.js';
-import { lunaSVG, setExpression, autoExpression } from './ui/character.js';
+import { IDOLS, idolSVG, setIdol, getIdol, T, setExpression, autoExpression } from './ui/character.js';
 
 let G = null;
 const $ = id => document.getElementById(id);
@@ -29,16 +29,31 @@ function updateStatbar() {
   }).join('');
 }
 
-/* ── 타이틀 / 인트로 ── */
+/* ── 타이틀 / 캐릭터 선택 / 인트로 ── */
 function boot() {
-  $('lunaTitleChar').innerHTML = lunaSVG();
-  $('lunaEpChar').innerHTML = lunaSVG();
+  $('titleChars').innerHTML = idolSVG('sol') + idolSVG('luna');
+  $('selRow').innerHTML = Object.keys(IDOLS).map(k =>
+    `<button class="sel-card" data-idol="${k}" aria-label="${IDOLS[k].label} 선택">
+      <div class="sel-svg">${idolSVG(k)}</div><b>${IDOLS[k].label}</b><i>${IDOLS[k].tag}</i></button>`).join('');
+  $('selRow').querySelectorAll('.sel-card').forEach(btn => btn.onclick = () => pickIdol(btn.dataset.idol));
   const saved = store.load();
   $('btnContinue').style.display = saved ? '' : 'none';
-  $('btnContinue').onclick = () => { G = saved.game; enterEp(); };
-  $('btnNew').onclick = () => { store.clear(); G = engine.newGame(); store.save(G, 'intro'); intro(0); };
+  $('btnContinue').onclick = () => { G = saved.game; applyIdol(G.idol); enterEp(); };
+  $('btnNew').onclick = () => { store.clear(); G = engine.newGame(); show('scr-select'); };
   $('btnReset').onclick = () => { store.clear(); location.reload(); };
   show('scr-title');
+}
+
+function applyIdol(key) {
+  setIdol(key);
+  $('epChar').innerHTML = idolSVG(getIdol());
+}
+
+function pickIdol(key) {
+  G.idol = key;
+  applyIdol(key);
+  store.save(G, 'intro');
+  intro(0);
 }
 
 function intro(i) {
@@ -54,7 +69,7 @@ function intro(i) {
 function enterEp() {
   updateStatbar();
   autoExpression(G);
-  $('epHead').textContent = `EP${G.ep} 「${ep().title}」 — ${ep().rightEmoji} ${ep().right}`;
+  $('epHead').textContent = T(`EP${G.ep} 「${ep().title}」 — ${ep().rightEmoji} ${ep().right}`);
   show('scr-ep');
   startChat(ep(), choicesPhase);
 }

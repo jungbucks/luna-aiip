@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<!-- probe.html — E2E 프로브 (CLAUDE.md 검증 §2 절차).
+     실행: 이 파일을 루트에 __probe.html로 복사 → Node 정적 서버로 서빙(같은 오리진 필수)
+     → msedge --headless=new --user-data-dir=<임시> --virtual-time-budget=20000 --dump-dom http://localhost:PORT/__probe.html
+     → <pre id="out">의 PASS/FAIL 수확 → __probe.html 삭제. -->
+<meta charset="utf-8">
+<pre id="out"></pre>
+<iframe id="f" src="/index.html" width="480" height="800"></iframe>
+<script>
+const out = document.getElementById('out');
+const log = (name, ok, extra = '') => out.textContent += (ok ? 'PASS ' : 'FAIL ') + name + (extra ? ' — ' + extra : '') + '\n';
+const f = document.getElementById('f');
+const D = () => f.contentDocument, W = () => f.contentWindow;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function until(fn, ms = 8000) {
+  const t0 = Date.now();
+  while (Date.now() - t0 < ms) { try { if (fn()) return true; } catch (e) {} await sleep(50); }
+  return false;
+}
+const active = id => D().getElementById(id).classList.contains('active');
+const txt = id => D().getElementById(id).textContent;
+const popupShown = () => D().getElementById('popup').classList.contains('show');
+
+async function run() {
+  try {
+    await until(() => W().LUNA && D().getElementById('btnNew'));
+    W().localStorage.removeItem('luna_save_v1');
+    log('부트: 타이틀 활성', active('scr-title'));
+    log('타이틀 듀오 SVG 2개', D().querySelectorAll('#titleChars .idol-svg').length === 2);
+
+    D().getElementById('btnNew').click();
+    await until(() => active('scr-select'));
+    log('캐릭터 선택 화면 + 카드 2개', active('scr-select') && D().querySelectorAll('.sel-card').length === 2);
+
+    D().querySelector('.sel-card[data-idol="sol"]').click();
+    await until(() => active('scr-intro'));
+    log('솔 선택: 인트로 이름 치환', txt('introCard').includes('솔(SOL)'));
+    for (let i = 0; i < 4; i++) { D().getElementById('introCard').click(); await sleep(80); }
+    await until(() => active('scr-ep'));
+    log('EP1 진입', active('scr-ep'));
+    log('단톡방 이름 치환(솔 프로젝트)', txt('chatRoom').includes('솔 프로젝트'));
+
+    for (let i = 0; i < 12 && !D().querySelector('#chatChoices .choice-btn'); i++) { D().getElementById('chatLog').click(); await sleep(60); }
+    await until(() => D().querySelector('#chatChoices .choice-btn'));
+    log('조사 자동 치환(솔이 직접 작곡함)', txt('chatLog').includes('솔이 직접 작곡함'));
+    log('화면에 토큰 잔여 없음', !/\{[nN]/.test(D().body.textContent));
+
+    D().querySelectorAll('#chatChoices .choice-btn')[1].click();   // B 정답
+    await until(popupShown);
+    log('정답 팝업(배지 획득)', D().querySelector('.pop-title').textContent.includes('배지 획득'));
+    log('상태 idol=sol', W().LUNA.state.idol === 'sol');
+
+    D().querySelector('.pop-btn').click();                          // 계속 → 브릿지
+    await until(() => popupShown() && D().querySelector('.pop-title').textContent.includes('정산'));
+    log('브릿지 정산 이름 치환(솔 활동)', D().querySelector('.pop-title').textContent.includes('솔 활동'));
+    D().querySelector('.pop-btn').click();                          // EP2 시작
+    await until(() => txt('epHead').includes('EP2'));
+    log('EP2 진입', txt('epHead').includes('EP2'));
+    const save = JSON.parse(W().localStorage.getItem('luna_save_v1'));
+    log('저장에 idol=sol', save && save.game.idol === 'sol');
+
+    // 이어하기 복원
+    f.src = '/index.html?r=1';
+    await sleep(200);
+    await until(() => W().LUNA && D().getElementById('btnContinue') && D().getElementById('btnContinue').style.display !== 'none');
+    D().getElementById('btnContinue').click();
+    await until(() => active('scr-ep'));
+    const epSvg = D().querySelector('#epChar .idol-svg');
+    log('이어하기: 솔 캐릭터+EP2 복원', !!epSvg && epSvg.dataset.idol === 'sol' && txt('epHead').includes('EP2'));
+
+    // 루나 경로
+    W().localStorage.removeItem('luna_save_v1');
+    f.src = '/index.html?r=2';
+    await sleep(200);
+    await until(() => W().LUNA && D().getElementById('btnNew'));
+    D().getElementById('btnNew').click();
+    await until(() => active('scr-select'));
+    D().querySelector('.sel-card[data-idol="luna"]').click();
+    await until(() => active('scr-intro'));
+    log('루나 선택: 인트로 이름 치환', txt('introCard').includes('루나(LUNA)'));
+    const lunaSvg = D().querySelector('#epChar .idol-svg');
+    log('루나 캐릭터 SVG 장착', !!lunaSvg && lunaSvg.dataset.idol === 'luna');
+  } catch (e) { log('예외 발생', false, e.message); }
+  out.textContent += 'PROBE-DONE\n';
+  document.title = 'PROBE-DONE';
+}
+run();
+</script>
