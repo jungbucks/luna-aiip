@@ -17,16 +17,40 @@ function show(id) {
   document.querySelectorAll('.scr').forEach(s => s.classList.toggle('active', s.id === id));
 }
 
-/* ── 스탯바 ── */
+/* ── 스탯바 (카운트업 연출 — ROADMAP #2. 규칙 계산 아님, 표시만) ── */
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const shownStats = {};      // 마지막으로 화면에 그린 값
+let shownBadges = [];
+
+function animateStat(el, from, to) {
+  if (REDUCED || from === to || from == null) { el.textContent = to; return; }
+  el.classList.remove('st-up', 'st-down'); void el.offsetWidth;
+  el.classList.add(to < from ? 'st-down' : 'st-up');
+  const t0 = performance.now(), dur = 400;
+  const tick = now => {
+    const p = Math.min(1, (now - t0) / dur);
+    el.textContent = Math.round(from + (to - from) * p);
+    if (p < 1) requestAnimationFrame(tick);
+    else setTimeout(() => el.classList.remove('st-up', 'st-down'), 250);
+  };
+  requestAnimationFrame(tick);
+}
+
 function updateStatbar() {
-  $('stMoney').textContent = G.stats.money;
-  $('stFame').textContent = G.stats.fame;
-  $('stSafety').textContent = G.stats.safety;
+  [['stMoney', 'money'], ['stFame', 'fame'], ['stSafety', 'safety']].forEach(([id, k]) => {
+    animateStat($(id), shownStats[k], G.stats[k]);
+    shownStats[k] = G.stats[k];
+  });
+  const prev = shownBadges;
+  shownBadges = [...G.badges];
   $('badgeRow').innerHTML = EPISODES.map((e, i) => {
     const b = G.badges[i];
     const cls = b === 'full' ? 'bd-full' : b === 'half' ? 'bd-half' : 'bd-off';
     return `<span class="bd ${cls}" title="${esc(e.right)}">${e.rightEmoji}</span>`;
   }).join('');
+  if (!REDUCED) G.badges.forEach((b, i) => {          // 새로 획득한 배지는 팝!
+    if (b && b !== 'none' && b !== prev[i]) $('badgeRow').children[i].classList.add('bd-pop');
+  });
 }
 
 /* ── 타이틀 / 캐릭터 선택 / 인트로 ── */

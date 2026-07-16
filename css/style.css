@@ -14,9 +14,10 @@ button{font-family:inherit;cursor:pointer}
 
 #app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;position:relative}
 
-/* 화면 전환 */
+/* 화면 전환 (페이드 인 — 연출 폴리시) */
 .scr{display:none;flex:1;flex-direction:column}
-.scr.active{display:flex}
+.scr.active{display:flex;animation:scrIn .3s ease both}
+@keyframes scrIn{from{opacity:0}to{opacity:1}}
 
 /* ── 타이틀 ── */
 #scr-title{align-items:center;justify-content:center;text-align:center;padding:32px 20px;gap:14px}
@@ -64,6 +65,12 @@ button{font-family:inherit;cursor:pointer}
 .bd-off{opacity:.25;filter:grayscale(1)}
 .bd-full{border-color:var(--gold);box-shadow:0 0 8px rgba(250,204,21,.35)}
 .bd-half{border-color:var(--gold);opacity:.65;border-style:dashed}
+.bd-pop{animation:bdPop .7s cubic-bezier(.22,1,.36,1)}
+@keyframes bdPop{0%{transform:scale(.4)}45%{transform:scale(1.5);box-shadow:0 0 22px rgba(250,204,21,.8)}100%{transform:scale(1)}}
+/* 스탯 카운트업 색 플래시 */
+.stat-nums .st-up{color:var(--good)}
+.stat-nums .st-down{color:var(--bad)}
+.stat-nums span span{transition:color .25s}
 
 /* ── 에피소드 ── */
 #epHead{padding:12px 16px 4px;font-weight:800;font-size:15.5px;color:var(--neon)}
@@ -75,6 +82,12 @@ button{font-family:inherit;cursor:pointer}
 .msg.show{opacity:1;transform:none}
 .msg .who{display:block;font-size:12.5px;color:var(--dim);margin-bottom:2px}
 .msg .bubble{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:4px 14px 14px 14px;padding:9px 13px;font-size:15.5px;max-width:88%}
+/* 타이핑 인디케이터 (··· ) — 탭하면 즉시 확정 */
+.msg .dots{display:inline-flex;gap:4px;padding:4px 2px}
+.msg .dots s{width:6px;height:6px;border-radius:50%;background:var(--dim);text-decoration:none;animation:dotBounce 1s infinite}
+.msg .dots s:nth-child(2){animation-delay:.15s}
+.msg .dots s:nth-child(3){animation-delay:.3s}
+@keyframes dotBounce{0%,60%,100%{opacity:.35;transform:none}30%{opacity:1;transform:translateY(-3px)}}
 #chatTapHint{text-align:center;color:var(--dim);font-size:13.5px;padding:8px;cursor:pointer;animation:pulse 1.6s infinite}
 #chatChoices{padding:10px 16px 22px;display:flex;flex-direction:column;gap:9px}
 .choice-title{font-weight:800;color:var(--neon2);font-size:15px;margin-bottom:2px}
@@ -141,4 +154,4 @@ button{font-family:inherit;cursor:pointer}
 .idol-svg[data-expr="panic"] .eyes-panic{display:block}
 .idol-svg[data-expr="shock"]{animation:idolShake .4s}
 @keyframes idolShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-@media (prefers-reduced-motion:reduce){.idol-svg,.idol-svg .blink{animation:none}}
+@media (prefers-reduced-motion:reduce){.idol-svg,.idol-svg .blink,.scr.active,.bd-pop,.msg .dots s{animation:none}}

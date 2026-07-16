@@ -40,8 +40,10 @@ async function run() {
     log('EP1 진입', active('scr-ep'));
     log('단톡방 이름 치환(솔 프로젝트)', txt('chatRoom').includes('솔 프로젝트'));
 
-    for (let i = 0; i < 12 && !D().querySelector('#chatChoices .choice-btn'); i++) { D().getElementById('chatLog').click(); await sleep(60); }
+    // 타이핑 인디케이터(500ms) 도입으로 메시지당 최대 2탭 — 넉넉히 40탭
+    for (let i = 0; i < 40 && !D().querySelector('#chatChoices .choice-btn'); i++) { D().getElementById('chatLog').click(); await sleep(70); }
     await until(() => D().querySelector('#chatChoices .choice-btn'));
+    log('타이핑 인디케이터 겪고 완주', true);
     log('조사 자동 치환(솔이 직접 작곡함)', txt('chatLog').includes('솔이 직접 작곡함'));
     log('화면에 토큰 잔여 없음', !/\{[nN]/.test(D().body.textContent));
 
