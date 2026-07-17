@@ -41,16 +41,20 @@ function updateStatbar() {
     animateStat($(id), shownStats[k], G.stats[k]);
     shownStats[k] = G.stats[k];
   });
+  // v0.3.1 최적화: 배지 행은 배지가 실제로 바뀐 때만 재구축 (스탯만 바뀌는 대부분의 갱신에서 DOM 재생성 0)
   const prev = shownBadges;
-  shownBadges = [...G.badges];
-  $('badgeRow').innerHTML = EPISODES.map((e, i) => {
-    const b = G.badges[i];
-    const cls = b === 'full' ? 'bd-full' : b === 'half' ? 'bd-half' : 'bd-off';
-    return `<span class="bd ${cls}" title="${esc(e.right)}">${e.rightEmoji}</span>`;
-  }).join('');
-  if (!REDUCED) G.badges.forEach((b, i) => {          // 새로 획득한 배지는 팝!
-    if (b && b !== 'none' && b !== prev[i]) $('badgeRow').children[i].classList.add('bd-pop');
-  });
+  const changed = prev.length !== G.badges.length || G.badges.some((b, i) => b !== prev[i]);
+  if (changed) {
+    shownBadges = [...G.badges];
+    $('badgeRow').innerHTML = EPISODES.map((e, i) => {
+      const b = G.badges[i];
+      const cls = b === 'full' ? 'bd-full' : b === 'half' ? 'bd-half' : 'bd-off';
+      return `<span class="bd ${cls}" title="${esc(e.right)}">${e.rightEmoji}</span>`;
+    }).join('');
+    if (!REDUCED) G.badges.forEach((b, i) => {        // 새로 획득한 배지는 팝!
+      if (b && b !== 'none' && b !== prev[i]) $('badgeRow').children[i].classList.add('bd-pop');
+    });
+  }
 }
 
 /* ── 타이틀 / 캐릭터 선택 / 인트로 ── */

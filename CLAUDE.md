@@ -39,6 +39,7 @@ test/probe.html     E2E 프로브 원본(16종) — 실행 절차는 아래 검�
 
 ## 이력
 
+- 2026-07-17 (Fable, v0.3.1): 저사양 최적화 — 스탯바 backdrop blur 제거(폰 스크롤 합성 비용 최대 항목), .msg transition 속성 한정, 배지 행 조건부 재구축(스탯만 바뀌면 DOM 재생성 0), 메타(theme-color·description). verify 23건·E2E 17종 PASS.
 - 2026-07-16 (Fable, v0.3): EP2~6 대사 완전판(ROADMAP #1) + 연출 폴리시(스탯 카운트업·배지 팝·화면 페이드) + 타이핑 인디케이터(탭=스킵). verify 23건·E2E 17종 PASS. reduced-motion 전부 존중.
 - 2026-07-15 (Fable, v0.2): 캐릭터 선택(솔/루나) + 일러스트 정교화 + 이름 토큰 치환(받침 자동 조사) + ROADMAP.md 10항목. verify 23건·E2E 16종 PASS. SPEC v2→v3(§12.5·§13 개정).
 - 2026-07-15 (Fable, v0.1): 뼈대 구현 — 엔진+검산 18건, UI 전 화면, EP1 완전판+EP2~6 자리표시자, E2E 17종 PASS. 로컬 git 초기화(원격 없음).
