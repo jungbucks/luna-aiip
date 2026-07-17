@@ -38,12 +38,23 @@ async function run() {
     for (let i = 0; i < 4; i++) { D().getElementById('introCard').click(); await sleep(80); }
     await until(() => active('scr-ep'));
     log('EP1 진입', active('scr-ep'));
+
+    // v0.4 스토리 씬: 무대가 먼저 뜨고, 탭으로 넘기면 폰이 슬라이드업
+    log('스토리 씬 무대 표시', D().getElementById('storyStage').classList.contains('on'));
+    log('씬 텍스트 토큰 치환', txt('storyText').includes('솔') || !txt('storyText').includes('{n'));
+    for (let i = 0; i < 6 && !D().getElementById('phoneWrap').classList.contains('on'); i++) {
+      D().getElementById('storyStage').click(); await sleep(80);
+    }
+    log('폰 프레임 등장', D().getElementById('phoneWrap').classList.contains('on'));
     log('단톡방 이름 치환(솔 프로젝트)', txt('chatRoom').includes('솔 프로젝트'));
 
-    // 타이핑 인디케이터(500ms) 도입으로 메시지당 최대 2탭 — 넉넉히 40탭
+    // v0.4 자동 재생: 클릭 없이도 메시지가 흐르는지 먼저 확인 → 이후 탭으로 빨리 감기
+    const n0 = D().querySelectorAll('#chatLog .msg:not(.typing)').length;
+    await sleep(2600);
+    log('채팅 자동 재생(무클릭 진행)', D().querySelectorAll('#chatLog .msg:not(.typing)').length > n0);
     for (let i = 0; i < 40 && !D().querySelector('#chatChoices .choice-btn'); i++) { D().getElementById('chatLog').click(); await sleep(70); }
     await until(() => D().querySelector('#chatChoices .choice-btn'));
-    log('타이핑 인디케이터 겪고 완주', true);
+    log('빨리 감기로 완주', true);
     log('조사 자동 치환(솔이 직접 작곡함)', txt('chatLog').includes('솔이 직접 작곡함'));
     log('화면에 토큰 잔여 없음', !/\{[nN]/.test(D().body.textContent));
 

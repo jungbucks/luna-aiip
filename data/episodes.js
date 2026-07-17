@@ -1,5 +1,6 @@
 /* [데이터] EP1~6 시나리오 — 엔진·UI는 이 데이터만 읽는다 (SPEC §8).
-   스키마: {id,title,right,rightEmoji,roomName,intro,messages[{who,text}],hint,
+   스키마: {id,title,right,rightEmoji,roomName,intro,scenes[{emoji,text}],messages[{who,text}],hint,
+   scenes(v0.4): 채팅 전에 탭으로 넘기는 스토리 씬 2~3장 — 마지막 씬은 "단톡방이 울린다"류로 폰 등장을 예고.
            choices:{wrong:{label,delta,popup:{title,analogy,lesson}},
                     right:{label,delta,popup:{title,body}},
                     info:{label}}}
@@ -14,6 +15,11 @@ export const EPISODES = [
     rightEmoji: '⚖️',
     roomName: '{n} 프로젝트 (3)',
     intro: '{n}의 데뷔곡이 필요하다. 그런데 통장 잔고가…',
+    scenes: [
+      { emoji: '🌅', text: '창업 3주째 아침.\n사무실이라 부르는 원룸의 공기는\n컵라면 냄새와 야심으로 반반이다.' },
+      { emoji: '📉', text: '{n}의 데뷔곡 프로젝트가 벽에 부딪혔다.\n견적서의 숫자가 통장 잔고를 비웃는다.' },
+      { emoji: '📱', text: '그때, 단톡방이 울리기 시작했다.' },
+    ],
     messages: [ /* SPEC §5 확정 대사 — 수정 금지 */
       { who: '개발자 준호', text: '대표님 큰일남' },
       { who: '개발자 준호', text: '데뷔곡 작곡 견적 받았는데 500만원 ㄷㄷ' },
@@ -55,6 +61,11 @@ export const EPISODES = [
     rightEmoji: '🛡️',
     roomName: '{n} 프로젝트 (3)',
     intro: '데뷔곡이 떴다! 준호의 실시간 립싱크 기술에 업계가 주목하는데…',
+    scenes: [
+      { emoji: '📰', text: '데뷔곡이 터졌다.\n함성 같은 알림들 속에서, 우리는 처음으로\n"회사"라는 단어가 어색하지 않았다.' },
+      { emoji: '🔬', text: '성공의 심장은 준호의 실시간 립싱크 엔진.\n업계 사람들이 킁킁대며\n냄새를 맡기 시작했다.' },
+      { emoji: '📱', text: '늦은 밤, 준호가 단톡방에 불을 질렀다.' },
+    ],
     messages: [
       { who: '개발자 준호', text: '대표님 우리 실시간 립싱크 기술 반응 미쳤음' },
       { who: '개발자 준호', text: '데모 영상 조회수 40만 찍었고 테크 커뮤니티에서 난리남' },
@@ -99,6 +110,11 @@ export const EPISODES = [
     rightEmoji: '📋',
     roomName: '{n} 프로젝트 (4)',
     intro: '\'{N}-AI\'라는 수상한 서비스가 나타났다. 그런데 우리도…?',
+    scenes: [
+      { emoji: '📈', text: '팔로워 50만.\n{n}의 이름이 실시간 검색어를 오르내리는 게\n일상이 됐다.' },
+      { emoji: '👀', text: '유명해진다는 건,\n그림자도 길어진다는 뜻이었다.' },
+      { emoji: '📱', text: '세아의 다급한 타이핑이 폰을 흔들었다.' },
+    ],
     messages: [
       { who: '마케터 세아', text: '대표님!! 큰일남 진짜 큰일남' },
       { who: '마케터 세아', text: '\'{N}-AI\'라는 앱이 스토어에 떴는데, 로고 폰트까지 우리 {n랑} 완전 똑같음' },
@@ -143,6 +159,11 @@ export const EPISODES = [
     rightEmoji: '🔐',
     roomName: '{n} 프로젝트 (3)',
     intro: '핵심 개발자가 경쟁사로 이직한다. 그의 USB에는…',
+    scenes: [
+      { emoji: '🍂', text: '창업 첫 가을.\n사무실엔 책상이 늘었고, 사람도 늘었다.\n늘어난 만큼, 떠나는 사람도 생긴다.' },
+      { emoji: '💼', text: '민재 선배 — {n}의 목소리를 조련해 온 1호 직원.\n요즘 부쩍 말이 없었다.' },
+      { emoji: '📱', text: '퇴근길 지하철에서,\n단톡방이 조용히 울렸다.' },
+    ],
     messages: [
       { who: '마케터 세아', text: '대표님… 민재 선배 얘기 들으셨어요?' },
       { who: '개발자 준호', text: '어 나도 방금 들음. 경쟁사 \'스텔라AI\'로 간대' },
@@ -187,6 +208,11 @@ export const EPISODES = [
     rightEmoji: '🙅',
     roomName: '{n} 프로젝트 (3)',
     intro: '첫 팬미팅 대성공! 세아가 현장 사진을 SNS에 올리려는데…',
+    scenes: [
+      { emoji: '🎪', text: '첫 팬미팅.\n리허설 때 이미 목이 멘 건 비밀이다.' },
+      { emoji: '🎉', text: '300명의 함성이 홀로그램을 흔들었다.\n우리가 만든 빛을,\n사람들이 사랑하고 있었다.' },
+      { emoji: '📱', text: '뒷정리가 끝나기도 전에\n세아의 폭풍 타이핑이 시작됐다.' },
+    ],
     messages: [
       { who: '마케터 세아', text: '대표님!!! 첫 팬미팅 대성공 🎉' },
       { who: '마케터 세아', text: '300석 만석에 굿즈 완판. 우리 해냈다고요' },
@@ -230,6 +256,11 @@ export const EPISODES = [
     rightEmoji: '💰',
     roomName: '{n} 프로젝트 (4)',
     intro: '대형 광고주의 제안: "{n를} 배우 K 닮은꼴로 리뉴얼하면 대박!"',
+    scenes: [
+      { emoji: '🏙️', text: '이제 미팅은 카페가 아니라 회의실에서 한다.\n명함이 두꺼워질수록\n질문도 무거워진다.' },
+      { emoji: '💰', text: '대형 광고주, 코스모 음료.\n계약서의 두께가\n우리 1년 매출의 무게였다.' },
+      { emoji: '📱', text: '미팅 초대장과 함께,\n단톡방에 낯선 프로필이 입장했다.' },
+    ],
     messages: [
       { who: '마케터 세아', text: '대표님, 대형 광고주 \'코스모 음료\'에서 미팅 요청이 왔어요' },
       { who: '코스모 담당자', text: '반갑습니다! {n} 님, 요즘 완전 대세더군요' },

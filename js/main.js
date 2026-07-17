@@ -93,12 +93,35 @@ function intro(i) {
   show('scr-intro');
 }
 
-/* ── 에피소드 ── */
+/* ── 에피소드 (v0.4: 스토리 씬 → 폰 슬라이드업 → 채팅 자동 재생) ── */
+let sceneIdx = 0;
+
 function enterEp() {
   updateStatbar();
   autoExpression(G);
   $('epHead').textContent = T(`EP${G.ep} 「${ep().title}」 — ${ep().rightEmoji} ${ep().right}`);
   show('scr-ep');
+  sceneIdx = 0;
+  $('phoneWrap').classList.remove('on');
+  renderScene();
+}
+
+function renderScene() {
+  const scenes = ep().scenes || [];
+  if (sceneIdx >= scenes.length) { showPhone(); return; }
+  const s = scenes[sceneIdx];
+  const stage = $('storyStage');
+  stage.classList.remove('on'); void stage.offsetWidth; stage.classList.add('on');
+  $('storyEmoji').textContent = s.emoji;
+  $('storyText').innerHTML = esc(T(s.text)).replace(/\n/g, '<br>');
+  $('storyIdx').textContent = (sceneIdx + 1) + '/' + scenes.length;
+}
+
+function showPhone() {
+  $('storyStage').classList.remove('on');
+  const d = new Date();
+  $('phoneTime').textContent = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  $('phoneWrap').classList.add('on');
   startChat(ep(), choicesPhase);
 }
 
@@ -205,5 +228,6 @@ function endingScene(key) {
 /* ── 부트 ── */
 document.getElementById('chatLog').addEventListener('click', advance);
 document.getElementById('chatTapHint').addEventListener('click', advance);
+document.getElementById('storyStage').addEventListener('click', () => { sceneIdx++; renderScene(); });
 window.LUNA = { get state() { return G; }, engine };   // 프로브·디버그용
 boot();

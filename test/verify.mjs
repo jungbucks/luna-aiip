@@ -75,6 +75,10 @@ console.log('[경로 D] EP1 오답→[다시 선택]→정답 + 나머지 정답
 console.log('[데이터 정합] episodes.js');
 {
   t('EP 6개', EPISODES.length === 6);
+  t('v0.4 스토리 씬 2~5장 + emoji/text', EPISODES.every(e =>
+    Array.isArray(e.scenes) && e.scenes.length >= 2 && e.scenes.length <= 5 &&
+    e.scenes.every(s => s.emoji && s.text)));
+  t('마지막 씬은 폰 등장 예고(📱)', EPISODES.every(e => e.scenes[e.scenes.length - 1].emoji === '📱'));
   t('스키마 필수 필드', EPISODES.every(e =>
     e.id && e.title && e.right && e.roomName && e.intro && Array.isArray(e.messages) && e.messages.length > 0 &&
     e.hint && e.choices?.wrong?.label && e.choices?.wrong?.delta && e.choices?.wrong?.popup?.title &&

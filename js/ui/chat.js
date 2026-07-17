@@ -1,16 +1,17 @@
-/* chat.js — 채팅 로그 렌더 (SPEC §7-3). 탭/클릭마다 1줄, 전부 출력 후 선택지 콜백.
-   타이핑 인디케이터(2026-07-16, ROADMAP #3): 탭하면 "···" 버블이 뜨고 500ms 뒤 대사 확정.
-   타이핑 중에 다시 탭하면 즉시 확정(스킵) — 참을성 없는 학생 배려. */
+/* chat.js — 채팅 로그 렌더 (SPEC §7-3).
+   v0.4(스토리텔링 개편): 폰이 등장하면 채팅이 "두루루룩" 자동 재생된다 —
+   타이핑 "···" 500ms → 대사 확정 → 700ms 뒤 다음 메시지 자동. 탭 = 빨리 감기(즉시 확정/즉시 다음). */
 import { T } from './character.js';
 
-const TYPING_MS = 500;
+const TYPING_MS = 500, AUTO_GAP = 700;
 let msgs = [], idx = 0, onDone = null, logEl = null;
-let typingEl = null, typingTimer = null;
+let typingEl = null, typingTimer = null, autoTimer = null;
 
 export function startChat(ep, doneCb) {
-  clearTimeout(typingTimer); typingTimer = null; typingEl = null;   // 이전 화면의 잔여 타이머 방어
+  clearTimeout(typingTimer); clearTimeout(autoTimer);               // 이전 화면의 잔여 타이머 방어
+  typingTimer = null; autoTimer = null; typingEl = null;
   msgs = ep.messages; idx = 0; onDone = doneCb;
-  document.getElementById('chatRoom').textContent = '💬 단톡방: ' + T(ep.roomName);
+  document.getElementById('chatRoom').textContent = '💬 ' + T(ep.roomName);
   logEl = document.getElementById('chatLog');
   logEl.innerHTML = '';
   document.getElementById('chatChoices').innerHTML = '';
@@ -19,6 +20,7 @@ export function startChat(ep, doneCb) {
 }
 
 export function advance() {
+  clearTimeout(autoTimer); autoTimer = null;      // 탭이 자동 대기를 앞지른다
   if (typingEl) { finalizeMsg(); return; }        // 탭 = 타이핑 스킵, 즉시 출력
   if (idx >= msgs.length) return;
   const m = msgs[idx];
@@ -40,6 +42,8 @@ function finalizeMsg() {
   if (idx >= msgs.length) {
     document.getElementById('chatTapHint').style.display = 'none';
     onDone && onDone();
+  } else {
+    autoTimer = setTimeout(advance, AUTO_GAP);    // v0.4 자동 연쇄 — "두루루룩"
   }
 }
 

@@ -54,10 +54,20 @@
     </div>
     <div id="epHead"></div>
     <div class="ep-char-row"><div class="idol-char" id="epChar"></div></div>
-    <div id="chatRoom"></div>
-    <div id="chatLog"></div>
-    <div id="chatTapHint">👆 눌러서 대화 진행</div>
-    <div id="chatChoices"></div>
+    <!-- v0.4 스토리 씬 무대: 탭으로 넘기는 내레이션 → 마지막 씬에서 폰 등장 -->
+    <div id="storyStage" class="story-stage">
+      <div class="story-emoji" id="storyEmoji"></div>
+      <p class="story-text" id="storyText"></p>
+      <div class="tap-hint">👆 눌러서 계속 (<span id="storyIdx"></span>)</div>
+    </div>
+    <!-- v0.4 휴대폰 프레임: 채팅이 자동으로 흐른다(탭=빨리 감기) -->
+    <div id="phoneWrap" class="phone">
+      <div class="phone-notch" aria-hidden="true"></div>
+      <div class="phone-bar"><span id="chatRoom"></span><span class="phone-time" id="phoneTime"></span></div>
+      <div id="chatLog"></div>
+      <div id="chatTapHint">👆 탭하면 빨리 감기</div>
+      <div id="chatChoices"></div>
+    </div>
   </section>
 
   <!-- 법정 / 엔딩 -->
