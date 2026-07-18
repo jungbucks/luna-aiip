@@ -37,8 +37,18 @@ test/probe.html     E2E 프로브 원본(16종) — 실행 절차는 아래 검�
 2. E2E 프로브(구조·흐름 변경 시): 원본은 `test/probe.html`(17종 — 타이핑 인디케이터 때문에 **채팅은 메시지당 최대 2탭** — 듀오 타이틀→솔 선택→이름·조사 치환→EP1 정답→브릿지→EP2→이어하기 복원→루나 선택). 프로브 HTML을 **게임과 같은 오리진에서 서빙**해야 함(⚠️ file:// 프로브 + http iframe은 크로스 오리진으로 조용히 죽음 — 2026-07-15 실제로 겪음). 절차: `test/probe.html`을 루트에 `__probe.html`로 복사 → Node 정적 서버(scratchpad에 15줄) → `msedge --headless=new --user-data-dir=<임시> --virtual-time-budget=20000 --dump-dom http://localhost:PORT/__probe.html` → PASS/FAIL 수확 후 **__probe.html 삭제**. (구버전 기준이던 17종 프로브는 v0.2 흐름 변경으로 대체됨.)
 3. 이어하기 복원은 **현재 EP 시작 지점부터**(채팅 중간 저장 안 함 — 의도된 단순화).
 
+## 자매 페이지: dogam.html (AI 시대의 지식재산 쟁점 도감)
+
+게임이 지재권 6종 입문이라면, 도감은 그다음 — AI 시대의 정답 없는 논쟁 12건(저작권4·특허2·상표3·영업비밀3). 설계·검증표: `docs/superpowers/specs/2026-07-18-ip-dogam-design.md`.
+
+- 콘텐츠 = `data/issues.js`(ISSUES 12·STATUS_META, 양측 대립·상태 배지·실제 사례·출처), 엔진 = `js/dogam/render.js`·`main.js`(바닐라 ES 모듈), 스타일 = `css/dogam.css`(게임 다크 네온 팔레트 공유). 게임 코어 무변경 — `js/ui/ending.js`에 티저 링크 1줄(`.dogam-teaser`)만 추가.
+- **미결 사건을 확정처럼 쓰지 말 것** — status(decided/ongoing/varies) 배지로 표시, `verify-dogam.mjs`가 단정 금칙어 차단. 사례·법리는 **§8 검증표 = 교사(논문 저자) 검수 관문, 검수 전 배포 금지**.
+- **리서치 기반(2026-07)**: 각 사례는 웹 조사 실물 판례. 갱신 시 웹 재확인 후 issues.js의 realCase·status·sources·하단 기준일 함께 수정.
+- 검증: `node test/verify-dogam.mjs`(10건) + `test/probe-dogam.html`(14건 — **게임과 같은 오리진에서 서빙 필수**, 절차는 검증 §2. dogam은 자체 페이지라 iframe src=../dogam.html). 게임 `node test/verify.mjs`(25건) 재실행해 ending.js 회귀 없음 확인.
+
 ## 이력
 
+- 2026-07-18 (Opus, v0.5): **자매 페이지 도감(dogam.html) 신설** — AI 지재권 쟁점 12건(리서치 기반, 실제 판례+상태 배지), 게임 엔딩에 티저 링크 1줄. verify-dogam 10건·probe-dogam 14건·게임 verify 25건 회귀 PASS, 스크린샷 확인. 사례·법리는 교사 검수 관문(스펙 §8) 대기.
 - 2026-07-17 (Fable, v0.4): **스토리텔링 개편**(사용자 지시: 플레이타임·스토리 보강) — EP마다 스토리 씬 2~3장(탭 진행, EP당 3장 총 18장 신규 집필) → 휴대폰 프레임 슬라이드업 → 채팅 자동 재생(탭=빨리 감기, chat.js AUTO_GAP 700ms). 스키마에 scenes 추가(SPEC §12.4-2), verify 25건·프로브 **21종**(무클릭 자동 재생 검증 포함)·폰 프레임 스크린샷 확인.
 - 2026-07-17 (Fable, v0.3.1): 저사양 최적화 — 스탯바 backdrop blur 제거(폰 스크롤 합성 비용 최대 항목), .msg transition 속성 한정, 배지 행 조건부 재구축(스탯만 바뀌면 DOM 재생성 0), 메타(theme-color·description). verify 23건·E2E 17종 PASS.
 - 2026-07-16 (Fable, v0.3): EP2~6 대사 완전판(ROADMAP #1) + 연출 폴리시(스탯 카운트업·배지 팝·화면 페이드) + 타이핑 인디케이터(탭=스킵). verify 23건·E2E 17종 PASS. reduced-motion 전부 존중.

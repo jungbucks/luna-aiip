@@ -46,6 +46,7 @@ export function renderEnding(state, endingKey, restartCb) {
       <h3>${esc(r.reviewHead)}</h3>
       <div class="rv-list">${reviewList(state)}</div>
       <p class="disclaimer">${esc(r.disclaimer)}</p>
+      <a class="dogam-teaser" href="dogam.html">🧭 법은 여기까지 배웠어요. 그런데 AI 시대엔? → 쟁점 도감 열기</a>
       <button class="choice-btn primary" id="endRestart">🔄 처음부터 다시</button>
     </div>`;
   document.getElementById('endRestart').onclick = restartCb;

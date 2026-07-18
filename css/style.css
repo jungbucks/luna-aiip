@@ -171,3 +171,9 @@ button{font-family:inherit;cursor:pointer}
 .idol-svg[data-expr="shock"]{animation:idolShake .4s}
 @keyframes idolShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 @media (prefers-reduced-motion:reduce){.idol-svg,.idol-svg .blink,.scr.active,.bd-pop,.msg .dots s,.phone.on,.story-stage.on{animation:none}}
+
+/* 엔딩 → 도감 티저 링크 (dogam.html) */
+.dogam-teaser{display:block;margin:14px 0 4px;padding:12px 14px;border:1px solid var(--neon2);border-radius:12px;
+  background:linear-gradient(90deg,rgba(167,139,250,.14),rgba(34,211,238,.14));color:var(--text);
+  font-weight:700;text-decoration:none;text-align:center}
+.dogam-teaser:hover{border-color:var(--neon);background:linear-gradient(90deg,rgba(167,139,250,.24),rgba(34,211,238,.24))}
