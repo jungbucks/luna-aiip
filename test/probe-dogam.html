@@ -1,0 +1,36 @@
+<!DOCTYPE html><meta charset="utf-8"><title>probe-dogam</title>
+<ul id="out"></ul>
+<iframe id="f" src="../dogam.html" style="width:400px;height:1000px"></iframe>
+<script>
+const out = document.getElementById('out');
+const log = (name, ok) => out.insertAdjacentHTML('beforeend', `<li>${ok ? 'PASS' : 'FAIL'} ${name}</li>`);
+document.getElementById('f').addEventListener('load', () => setTimeout(run, 400));
+function run() {
+  const d = document.getElementById('f').contentDocument;
+  const $ = s => d.querySelector(s), $$ = s => [...d.querySelectorAll(s)];
+  try {
+    log('훅 헤드라인', d.body.textContent.includes('누구 것이죠') && d.body.textContent.includes('12개의 논쟁'));
+    log('쟁점 카드 12장', $$('.issue').length === 12);
+    log('필터 칩 5개(전체+4권리)', $$('.fchip').length === 5);
+    log('상태 배지 3종 존재', $('.s-decided') && $('.s-ongoing') && $('.s-varies'));
+    const cr = $$('.fchip').find(c => c.dataset.right === '저작권'); cr.click();
+    log('저작권 필터 → 4장', $$('.issue:not([hidden])').length === 4);
+    $$('.fchip').find(c => c.dataset.right === 'all').click();
+    log('전체 복원 → 12장', $$('.issue:not([hidden])').length === 12);
+    const q = $('#issue-train .issue-q'); q.click();
+    log('카드 펼침(aria)', q.getAttribute('aria-expanded') === 'true' && !$('#body-train').hidden);
+    log('양측 대립 2열 렌더', $$('#body-train .side').length === 2 && $('#body-train .vs'));
+    const three = $('#issue-tsstrategy .issue-q'); three.click();
+    log('영업비밀 보호방안 3열', $$('#body-tsstrategy .side').length === 3);
+    const mb = $('#body-train .more-btn'); mb.click();
+    log('더보기 → 사례·출처', !$('#more-train').hidden && $$('#more-train .sources a').length >= 1);
+    log('출처 링크 실제 URL', /^https?:\/\//.test($('#more-train .sources a').getAttribute('href')));
+    log('하단 고지(기준일·법률자문 아님)', d.body.textContent.includes('2026년 7월') && d.body.textContent.includes('법률 자문'));
+    log('게임 복귀 링크', !!$('a.d-back[href="index.html"]'));
+    const fs = parseFloat(getComputedStyle($('.issue-title')).fontSize);
+    log('본문 글자 ≥15px', fs >= 15);
+  } catch (e) { log('예외: ' + e.message, false); }
+  const fails = [...out.querySelectorAll('li')].filter(li => li.textContent.startsWith('FAIL')).length;
+  document.title = `PROBE-DOGAM ${out.querySelectorAll('li').length}건 — FAIL ${fails}`;
+}
+</script>
