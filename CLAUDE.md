@@ -42,12 +42,14 @@ test/probe.html     E2E 프로브 원본(16종) — 실행 절차는 아래 검�
 게임이 지재권 6종 입문이라면, 도감은 그다음 — AI 시대의 정답 없는 논쟁 12건(저작권4·특허2·상표3·영업비밀3). 설계·검증표: `docs/superpowers/specs/2026-07-18-ip-dogam-design.md`.
 
 - 콘텐츠 = `data/issues.js`(ISSUES 12·STATUS_META, 양측 대립·상태 배지·실제 사례·출처), 엔진 = `js/dogam/render.js`·`main.js`(바닐라 ES 모듈), 스타일 = `css/dogam.css`(게임 다크 네온 팔레트 공유). 게임 코어 무변경 — `js/ui/ending.js`에 티저 링크 1줄(`.dogam-teaser`)만 추가.
-- **미결 사건을 확정처럼 쓰지 말 것** — status(decided/ongoing/varies) 배지로 표시, `verify-dogam.mjs`가 단정 금칙어 차단. 사례·법리는 **§8 검증표 = 교사(논문 저자) 검수 관문, 검수 전 배포 금지**.
+- **미결 사건을 확정처럼 쓰지 말 것** — status(decided/ongoing/varies) 배지로 표시, `verify-dogam.mjs`가 단정 금칙어 차단.
+- **배포 게이트 상태(2026-07-20)**: §8 검증표는 여전히 9건 개별 미검수(☐). 다만 **교사(사용자)가 기존 고지(법률자문 아님·기준일·상태배지·출처) 하에 배포하기로 명시 결정** → 배포 진행. ⚠️ 개별 사실 검수는 추후 권장이며, 사례를 갱신할 땐 웹 재확인 후 §8 체크. 정답처럼 단정하는 서술은 계속 금지.
 - **리서치 기반(2026-07)**: 각 사례는 웹 조사 실물 판례. 갱신 시 웹 재확인 후 issues.js의 realCase·status·sources·하단 기준일 함께 수정.
 - 검증: `node test/verify-dogam.mjs`(10건) + `test/probe-dogam.html`(14건 — **게임과 같은 오리진에서 서빙 필수**, 절차는 검증 §2. dogam은 자체 페이지라 iframe src=../dogam.html). 게임 `node test/verify.mjs`(25건) 재실행해 ending.js 회귀 없음 확인.
 
 ## 이력
 
+- 2026-07-20 (Opus): **배포 진단·결정**. 사용자 문의(dogam 빈 화면) → 원인 = `<script type="module">`는 file://(더블클릭)에서 CORS로 안 뜸(플래그 없이 file:// = .issue 0개 / http = 12개, 헤드리스 검증). **코드 버그 아님·게임 실행 무관 — 게임 전체가 ES 모듈이라 HTTP/Pages용.** 배포 방식 = GitHub Pages 결정(원격 없음 → 사용자가 `luna-ip-game` public 레포 생성 후 "luna push" 지시하면 remote·push·Pages 확인). dogam §8 검수 게이트는 교사 판단으로 기존 고지 하 배포 결정(개별 미검수).
 - 2026-07-18 (Opus, v0.5): **자매 페이지 도감(dogam.html) 신설** — AI 지재권 쟁점 12건(리서치 기반, 실제 판례+상태 배지), 게임 엔딩에 티저 링크 1줄. verify-dogam 10건·probe-dogam 14건·게임 verify 25건 회귀 PASS, 스크린샷 확인. 사례·법리는 교사 검수 관문(스펙 §8) 대기.
 - 2026-07-17 (Fable, v0.4): **스토리텔링 개편**(사용자 지시: 플레이타임·스토리 보강) — EP마다 스토리 씬 2~3장(탭 진행, EP당 3장 총 18장 신규 집필) → 휴대폰 프레임 슬라이드업 → 채팅 자동 재생(탭=빨리 감기, chat.js AUTO_GAP 700ms). 스키마에 scenes 추가(SPEC §12.4-2), verify 25건·프로브 **21종**(무클릭 자동 재생 검증 포함)·폰 프레임 스크린샷 확인.
 - 2026-07-17 (Fable, v0.3.1): 저사양 최적화 — 스탯바 backdrop blur 제거(폰 스크롤 합성 비용 최대 항목), .msg transition 속성 한정, 배지 행 조건부 재구축(스탯만 바뀌면 DOM 재생성 0), 메타(theme-color·description). verify 23건·E2E 17종 PASS.
