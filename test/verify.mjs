@@ -3,7 +3,7 @@
 import * as E from '../js/engine.js';
 import { EPISODES } from '../data/episodes.js';
 import { STRINGS } from '../data/strings.js';
-import { T, setIdol } from '../js/ui/character.js';
+import { T, idolSVG, setIdol } from '../js/ui/character.js';
 
 let pass = 0, fail = 0;
 const t = (name, cond, extra = '') => {
@@ -104,6 +104,15 @@ console.log('[토큰 치환] 캐릭터 이름·조사 (character.js T)');
   setIdol('luna');
   t('루나 조사(가/는/를/랑)', T('{n가} {n는} {n를} {n랑} {N}') === '루나가 루나는 루나를 루나랑 LUNA');
   t('루나 적용 후 토큰 잔여 없음', !/\{[nN][가는를랑와]?\}/.test(T(raw)));
+}
+
+console.log('[캐릭터 에셋] PNG 표정 렌더링');
+{
+  const sol = idolSVG('sol');
+  const luna = idolSVG('luna');
+  t('솔 neutral PNG를 img로 렌더링', /<img[^>]+src="assets\/characters\/sol-neutral\.png"/.test(sol));
+  t('루나 neutral PNG를 img로 렌더링', /<img[^>]+src="assets\/characters\/luna-neutral\.png"/.test(luna));
+  t('기존 DOM 계약 유지', sol.includes('class="idol-svg"') && sol.includes('data-idol="sol"') && sol.includes('data-expr="neutral"'));
 }
 
 console.log('─'.repeat(40));

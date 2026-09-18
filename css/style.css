@@ -156,21 +156,12 @@ button{font-family:inherit;cursor:pointer}
 .rp-badge i{font-style:normal;color:var(--dim)}
 .disclaimer{margin-top:14px;font-size:12.5px;color:var(--dim);text-align:center}
 
-/* ── 아이돌 캐릭터(솔·루나 공용): 표정 토글 + idle 모션 (SPEC §12.5) ── */
+/* ── 아이돌 캐릭터(솔·루나 PNG): 이미지 교체 표정 + idle 모션 ── */
 .idol-svg{width:100%;height:auto;animation:idolFloat 3.4s ease-in-out infinite}
 @keyframes idolFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-.idol-svg .blink{animation:idolBlink 4s infinite}
-@keyframes idolBlink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.08)}}
-.idol-svg .blink{transform-origin:center;transform-box:fill-box}
-.idol-svg .exp,.idol-svg .eyes{display:none}
-.idol-svg[data-expr="neutral"] .exp-neutral,.idol-svg[data-expr="happy"] .exp-happy,
-.idol-svg[data-expr="shock"] .exp-shock,.idol-svg[data-expr="panic"] .exp-panic{display:block}
-.idol-svg[data-expr="neutral"] .eyes-open,.idol-svg[data-expr="happy"] .eyes-open,
-.idol-svg[data-expr="shock"] .eyes-open{display:block}
-.idol-svg[data-expr="panic"] .eyes-panic{display:block}
 .idol-svg[data-expr="shock"]{animation:idolShake .4s}
 @keyframes idolShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-@media (prefers-reduced-motion:reduce){.idol-svg,.idol-svg .blink,.scr.active,.bd-pop,.msg .dots s,.phone.on,.story-stage.on{animation:none}}
+@media (prefers-reduced-motion:reduce){.idol-svg,.scr.active,.bd-pop,.msg .dots s,.phone.on,.story-stage.on{animation:none}}
 
 /* 엔딩 → 도감 티저 링크 (dogam.html) */
 .dogam-teaser{display:block;margin:14px 0 4px;padding:12px 14px;border:1px solid var(--neon2);border-radius:12px;

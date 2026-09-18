@@ -26,7 +26,7 @@ async function run() {
     await until(() => W().LUNA && D().getElementById('btnNew'));
     W().localStorage.removeItem('luna_save_v1');
     log('부트: 타이틀 활성', active('scr-title'));
-    log('타이틀 듀오 SVG 2개', D().querySelectorAll('#titleChars .idol-svg').length === 2);
+    log('타이틀 듀오 PNG 2개', D().querySelectorAll('#titleChars img.idol-svg').length === 2);
 
     D().getElementById('btnNew').click();
     await until(() => active('scr-select'));
@@ -78,8 +78,8 @@ async function run() {
     await until(() => W().LUNA && D().getElementById('btnContinue') && D().getElementById('btnContinue').style.display !== 'none');
     D().getElementById('btnContinue').click();
     await until(() => active('scr-ep'));
-    const epSvg = D().querySelector('#epChar .idol-svg');
-    log('이어하기: 솔 캐릭터+EP2 복원', !!epSvg && epSvg.dataset.idol === 'sol' && txt('epHead').includes('EP2'));
+    const epImg = D().querySelector('#epChar img.idol-svg');
+    log('이어하기: 솔 캐릭터+EP2 복원', !!epImg && epImg.dataset.idol === 'sol' && txt('epHead').includes('EP2'));
 
     // 루나 경로
     W().localStorage.removeItem('luna_save_v1');
@@ -91,8 +91,8 @@ async function run() {
     D().querySelector('.sel-card[data-idol="luna"]').click();
     await until(() => active('scr-intro'));
     log('루나 선택: 인트로 이름 치환', txt('introCard').includes('루나(LUNA)'));
-    const lunaSvg = D().querySelector('#epChar .idol-svg');
-    log('루나 캐릭터 SVG 장착', !!lunaSvg && lunaSvg.dataset.idol === 'luna');
+    const lunaImg = D().querySelector('#epChar img.idol-svg');
+    log('루나 캐릭터 PNG 장착', !!lunaImg && lunaImg.dataset.idol === 'luna');
   } catch (e) { log('예외 발생', false, e.message); }
   out.textContent += 'PROBE-DONE\n';
   document.title = 'PROBE-DONE';

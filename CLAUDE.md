@@ -6,6 +6,7 @@
 ## 현재 상태 (2026-07-20)
 
 - **게임 v0.5 완성**: 타이틀 → 캐릭터 선택(솔/루나) → 인트로 → EP1~6(채팅·A/B/C 선택·결과·정산) → 법정 → 엔딩 3종 + 리포트 + 이어하기. EP2~6 대사·스토리 씬·연출(스탯 카운트업·타이핑 인디케이터) 완결.
+- **캐릭터 에셋 개선**: 솔·루나 각각 neutral/happy/panic/shock 4종의 512px 투명 PNG. 기존 `.idol-svg`, `data-idol`, `data-expr` DOM 계약과 표정 전환 규칙은 유지하고 `img.src`를 교체한다.
 - **도감 완성**: AI 지재권 쟁점 12건(저작권4·특허2·상표3·영업비밀3), 실제 판례 + 상태 배지, 게임 엔딩에 티저 링크 1줄.
 - **배포 대기**: GitHub Pages 예정. 원격 없음 → 사용자가 `luna-ip-game` public 레포 생성 후 "luna push" 지시 시 remote·push·Pages. dogam SPEC §8 개별 사실 검수는 교사 판단으로 기존 고지(법률자문 아님·기준일·상태배지·출처) 하에 배포 결정(미검수 상태).
 
@@ -20,7 +21,8 @@ js/state.js         localStorage(luna_save_v1, schemaVersion 검사)
 js/main.js          게임 루프 오케스트레이터(규칙 계산 금지 — engine 위임)
 js/ui/chat.js       채팅 로그·선택지 + esc()=토큰 치환+이스케이프 단일 통로
 js/ui/popup.js      팝업·델타 / ending.js 법정·엔딩·리포트
-js/ui/character.js  아이돌 SVG 2종(솔/루나)+표정 4종 + T() 토큰 치환. 계약: .idol-svg, data-idol, data-expr, .eyes-*, .exp-*, .blink
+assets/characters/  솔·루나 PNG 각 4표정(512×512, 투명 배경)
+js/ui/character.js  PNG 경로·표정 전환 + T() 토큰 치환. 계약: .idol-svg, data-idol, data-expr
 js/dogam/render.js·main.js  도감 엔진
 data/episodes.js    EP1~6 시나리오(스키마 SPEC §8), 이름은 {n} 토큰
 data/strings.js     인트로·브릿지·법정·엔딩·리포트 문구
