@@ -4,6 +4,8 @@ import * as E from '../js/engine.js';
 import { EPISODES } from '../data/episodes.js';
 import { STRINGS } from '../data/strings.js';
 import { T, idolSVG, setIdol } from '../js/ui/character.js';
+import { QUIZ } from '../data/quiz.js';
+import * as Q from '../js/quiz.js';
 
 let pass = 0, fail = 0;
 const t = (name, cond, extra = '') => {
@@ -113,6 +115,23 @@ console.log('[캐릭터 에셋] PNG 표정 렌더링');
   t('솔 neutral PNG를 img로 렌더링', /<img[^>]+src="assets\/characters\/sol-neutral\.png"/.test(sol));
   t('루나 neutral PNG를 img로 렌더링', /<img[^>]+src="assets\/characters\/luna-neutral\.png"/.test(luna));
   t('기존 DOM 계약 유지', sol.includes('class="idol-svg"') && sol.includes('data-idol="sol"') && sol.includes('data-expr="neutral"'));
+}
+
+console.log('[O/X 퀴즈] 문항·판정·기록 (2026-11-14, 스탯 무관)');
+{
+  const eps = [1, 2, 3, 4, 5, 6];
+  const ok = (it) => it && typeof it.q === 'string' && it.q.trim() && typeof it.exp === 'string' && it.exp.trim() && typeof it.a === 'boolean';
+  t('quiz-shape: EP1~6 본 문제·하나 더 = 12문항', Object.keys(QUIZ).length === 6 && eps.every(e => QUIZ[e] && ok(QUIZ[e].main) && ok(QUIZ[e].more)));
+  t('quiz-answers: 설계 표 그대로', JSON.stringify(eps.map(e => QUIZ[e].main.a)) === JSON.stringify([false, false, false, true, true, false]) && JSON.stringify(eps.map(e => QUIZ[e].more.a)) === JSON.stringify([false, true, true, false, true, true]));
+  const texts = eps.flatMap(e => [QUIZ[e].main.q, QUIZ[e].main.exp, QUIZ[e].more.q, QUIZ[e].more.exp]);
+  t('quiz-no-names: 이름 토큰·캐릭터 이름 없음', texts.every(x => !/{[nN]|솔|루나|SOL|LUNA/.test(x)));
+  t('quiz-guardrail: 단정 금칙어 없음', texts.every(x => !/무조건 불법|반드시|절대로/.test(x)));
+  t('resultOf: 맞음 ok / 둘째에서 맞음 more-ok / 둘 다 틀림 missed', Q.resultOf(true) === 'ok' && Q.resultOf(false, true) === 'more-ok' && Q.resultOf(false, false) === 'missed');
+  const s1 = {}; Q.record(s1, 2, 'missed'); Q.record(s1, 2, 'ok');
+  t('record-overwrite: 같은 EP는 덮어씀', s1.quiz && s1.quiz[2] === 'ok');
+  t('missed-excludes-unplayed: 둘 다 틀린 EP만, 오름차순', JSON.stringify(Q.missedEps({ quiz: { 5: 'missed', 1: 'missed', 3: 'ok' } })) === '[1,5]');
+  const old = {};
+  t('missed-old-save: quiz 없는 옛 저장 → [] (상태를 바꾸지 않음)', JSON.stringify(Q.missedEps(old)) === '[]' && !('quiz' in old));
 }
 
 console.log('─'.repeat(40));
