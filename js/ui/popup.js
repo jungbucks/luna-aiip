@@ -22,8 +22,21 @@ export function showPopup(opts) {
     btns.appendChild(el);
   });
   ov.classList.add('show');
+  setBackInert(true);
+  // 첫 버튼에 초점(잠금이 있으면 풀린 뒤) — 이 팝업이 아직 떠 있고 버튼이 그대로일 때만
+  const first = btns.firstElementChild;
+  setTimeout(() => { if (first && first.isConnected && !first.disabled && ov.classList.contains('show')) first.focus(); }, opts.guardMs || 0);
 }
 
 export function hidePopup() {
   document.getElementById('popup').classList.remove('show');
+  setBackInert(false);
+}
+
+/* 팝업이 떠 있는 동안 뒤 화면(#app의 다른 자식)에 inert — 키보드 Tab·클릭이 뒤 선택지에 닿아
+   같은 선택이 두 번 적용되던 것을 막는다(2026-11-14 퀴즈 최종 검토) */
+function setBackInert(on) {
+  const app = document.getElementById('app');
+  if (!app) return;
+  [...app.children].forEach(el => { if (el.id !== 'popup') el.toggleAttribute('inert', on); });
 }

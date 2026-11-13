@@ -70,6 +70,10 @@ async function run() {
     D().querySelector('.pop-btn').click();                          // 계속 → 퀴즈
     await until(() => popupShown() && ptitle().includes('개념 확인 O/X'));
     log('quiz-after-right: 정답 뒤 퀴즈(문장·버튼 2개)', ptitle().includes('개념 확인 O/X') && txt('popup').includes('출처만 밝히면') && pbtns().length === 2);
+    // 최종 검토(2026-11-14): 팝업이 떠 있는 동안 뒤 화면(선택지)에 Tab·클릭이 닿지 않음 + 버튼이 풀리면 첫 버튼에 초점
+    log('popup-inert: 팝업 동안 뒤 화면 선택지가 inert', !!D().querySelector('#chatChoices .choice-btn') && !!D().querySelector('#chatChoices .choice-btn').closest('[inert]') && !D().getElementById('popup').closest('[inert]'));
+    await until(() => !pbtns()[0].disabled);
+    log('popup-focus: 잠금이 풀리면 첫 버튼에 초점', D().activeElement === pbtns()[0]);
     await clickWhenReady(() => pbtns()[0]);                        // ⭕ (틀림)
     await until(() => popupShown() && ptitle().includes('아쉬워요'));
     log('quiz-wrong-more: 오답 → 아쉬워요·정답 X·해설·하나 더 버튼', ptitle().includes('아쉬워요') && txt('popup').includes('정답: X') && txt('popup').includes('허락을 대신하지') && pbtns().length === 1 && pbtns()[0].textContent.includes('하나 더'));
@@ -87,6 +91,7 @@ async function run() {
     D().querySelector('.pop-btn').click();                          // EP2 시작
     await until(() => txt('epHead').includes('EP2'));
     log('EP2 진입', txt('epHead').includes('EP2'));
+    log('popup-inert: 팝업이 닫히면 inert 해제', !D().querySelector('#app [inert]'));
     const save = JSON.parse(W().localStorage.getItem('luna_save_v1'));
     log('저장에 idol=sol', save && save.game.idol === 'sol');
 
