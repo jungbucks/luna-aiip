@@ -41,6 +41,15 @@ export const STRINGS = {
     },
   },
 
+  // O/X 확인 퀴즈(2026-11-14) — 스탯 무관. 문항은 data/quiz.js
+  quiz: {
+    title: '개념 확인 O/X',
+    o: '⭕ 맞아요', x: '❌ 아니에요',
+    right: '맞았어요!', wrong: '아쉬워요',
+    answer: a => '정답: ' + (a ? 'O' : 'X'),
+    more: '비슷한 문제 하나 더 →', cont: '계속 →',
+    reviewHead: '개념 확인 O/X에서 두 번 다 놓친 개념',
+  },
   report: {
     head: '📊 최종 리포트',
     badgeLabel: { full: '완전', half: '반쪽', none: '미획득' },

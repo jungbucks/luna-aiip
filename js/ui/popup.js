@@ -18,6 +18,7 @@ export function showPopup(opts) {
     el.className = 'pop-btn ' + (b.cls || '');
     el.textContent = b.label;
     el.onclick = () => { hidePopup(); b.cb && b.cb(); };
+    if (opts.guardMs) { el.disabled = true; setTimeout(() => { el.disabled = false; }, opts.guardMs); }
     btns.appendChild(el);
   });
   ov.classList.add('show');

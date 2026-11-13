@@ -6,6 +6,8 @@ import { EPISODES } from '../data/episodes.js';
 import { STRINGS } from '../data/strings.js';
 import { startChat, advance, showChoices, esc } from './ui/chat.js';
 import { showPopup, deltaLine } from './ui/popup.js';
+import { QUIZ } from '../data/quiz.js';
+import * as quiz from './quiz.js';
 import { renderCourt, renderEnding } from './ui/ending.js';
 import { IDOLS, idolSVG, setIdol, getIdol, T, setExpression, autoExpression } from './ui/character.js';
 
@@ -169,8 +171,8 @@ function acceptFlow() {
   const ev = engine.chooseWrongAccept(G, G.ep, ep().choices.wrong.delta);
   store.save(G, 'ep');
   updateStatbar(); autoExpression(G);
-  if (ev) return courtScene(ev === 'court', bridge);
-  bridge();
+  if (ev) return courtScene(ev === 'court', () => quizThen(bridge));   // 최종 법정이면 엔딩으로 가서 퀴즈 없음
+  quizThen(bridge);
 }
 
 function rightFlow() {
@@ -183,8 +185,35 @@ function rightFlow() {
   showPopup({
     title: r.popup.title + (isRetry ? ' (반쪽 배지)' : ''),
     html: `<p>${esc(r.popup.body)}</p><p class="delta good">${deltaLine(r.delta)}</p>`,
-    buttons: [{ label: '계속 →', cb: bridge }],
+    buttons: [{ label: '계속 →', cb: () => quizThen(bridge) }],
   });
+}
+
+/* ── O/X 확인 퀴즈(2026-11-14, 스탯 무관) — 정산(bridge) 직전. 틀리면 하나 더, 결과는 G.quiz에(js/quiz.js) ── */
+const QUIZ_GUARD_MS = 300;   // 팝업이 뜬 직후 연타가 다음 팝업 버튼을 누르지 않게
+function quizThen(next) {
+  const set = QUIZ[G.ep], E = ep(), S = STRINGS.quiz;
+  if (!set) return next();
+  let first;
+  const ask = (item, stage) => showPopup({
+    title: S.title,
+    html: `<p class="quiz-tag">${E.rightEmoji} ${esc(E.right)}</p><p class="quiz-q">${esc(item.q)}</p>`,
+    buttons: [{ label: S.o, cb: () => answer(item, stage, true) }, { label: S.x, cb: () => answer(item, stage, false) }],
+    guardMs: QUIZ_GUARD_MS,
+  });
+  const answer = (item, stage, v) => {
+    const correct = v === item.a;
+    if (stage === 'main') first = correct;
+    const more = stage === 'main' && !correct;
+    showPopup({
+      title: correct ? S.right : S.wrong,
+      html: `<p class="quiz-ans">${esc(S.answer(item.a))}</p><p>${esc(item.exp)}</p>`,
+      buttons: [more ? { label: S.more, cb: () => ask(set.more, 'more') }
+        : { label: S.cont, cb: () => { quiz.record(G, G.ep, quiz.resultOf(first, stage === 'more' ? correct : undefined)); store.save(G, 'ep'); next(); } }],
+      guardMs: QUIZ_GUARD_MS,
+    });
+  };
+  ask(set.main, 'main');
 }
 
 /* ── 브릿지(정산) → 다음 EP / 엔딩 ── */
@@ -229,5 +258,5 @@ function endingScene(key) {
 document.getElementById('chatLog').addEventListener('click', advance);
 document.getElementById('chatTapHint').addEventListener('click', advance);
 document.getElementById('storyStage').addEventListener('click', () => { sceneIdx++; renderScene(); });
-window.LUNA = { get state() { return G; }, engine };   // 프로브·디버그용
+window.LUNA = { get state() { return G; }, engine, showEnding: key => endingScene(key) };   // 프로브·디버그용(showEnding = 상태 주입 뒤 엔딩 화면 바로 그리기)
 boot();

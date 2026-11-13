@@ -126,6 +126,12 @@ button{font-family:inherit;cursor:pointer}
 .pop-body .delta{font-weight:900;font-size:16px}
 .pop-body .delta.bad{color:var(--bad)}
 .pop-body .delta.good{color:var(--good)}
+/* O/X 확인 퀴즈(2026-11-14) */
+.pop-body .quiz-tag{font-size:15px;color:var(--dim);margin-bottom:6px}
+.pop-body .quiz-q{font-size:17px;font-weight:700;line-height:1.6}
+.pop-body .quiz-ans{font-weight:900;font-size:16px;color:var(--neon)}
+.pop-btn:disabled{opacity:.55;cursor:default}
+.rv-sub{margin:12px 0 6px;font-size:15px;font-weight:700;color:var(--dim)}
 .pop-body .lesson{background:rgba(250,204,21,.08);border:1px solid rgba(250,204,21,.25);border-radius:10px;padding:10px 13px}
 .pop-body .money-zero{color:var(--warn);font-size:14px}
 .pop-btns{display:flex;flex-direction:column;gap:8px;margin-top:14px}

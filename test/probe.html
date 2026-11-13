@@ -63,8 +63,26 @@ async function run() {
     log('정답 팝업(배지 획득)', D().querySelector('.pop-title').textContent.includes('배지 획득'));
     log('상태 idol=sol', W().LUNA.state.idol === 'sol');
 
-    D().querySelector('.pop-btn').click();                          // 계속 → 브릿지
-    await until(() => popupShown() && D().querySelector('.pop-title').textContent.includes('정산'));
+    // 2026-11-14 O/X 확인 퀴즈: 정답 [계속] → 퀴즈 → (틀리면 하나 더) → 정산. 문항 원본은 data/quiz.js(EP1 본 문제 답 X, 하나 더 답 X)
+    const ptitle = () => D().querySelector('.pop-title').textContent;
+    const pbtns = () => [...D().querySelectorAll('#popup .pop-btn')];
+    const clickWhenReady = async (pick) => { await until(() => pbtns().length && !pick().disabled); pick().click(); };
+    D().querySelector('.pop-btn').click();                          // 계속 → 퀴즈
+    await until(() => popupShown() && ptitle().includes('개념 확인 O/X'));
+    log('quiz-after-right: 정답 뒤 퀴즈(문장·버튼 2개)', ptitle().includes('개념 확인 O/X') && txt('popup').includes('출처만 밝히면') && pbtns().length === 2);
+    await clickWhenReady(() => pbtns()[0]);                        // ⭕ (틀림)
+    await until(() => popupShown() && ptitle().includes('아쉬워요'));
+    log('quiz-wrong-more: 오답 → 아쉬워요·정답 X·해설·하나 더 버튼', ptitle().includes('아쉬워요') && txt('popup').includes('정답: X') && txt('popup').includes('허락을 대신하지') && pbtns().length === 1 && pbtns()[0].textContent.includes('하나 더'));
+    // quiz-no-double: 하나 더 버튼을 빠르게 두 번 — 둘째 문제의 ⭕가 눌리지 않아야 한다
+    await clickWhenReady(() => pbtns()[0]); D().querySelector('#popup .pop-btn') && D().querySelector('#popup .pop-btn').click();
+    await sleep(120);
+    log('quiz-no-double: 연타해도 둘째 문제가 열린 채 대기', popupShown() && ptitle().includes('개념 확인 O/X') && txt('popup').includes('등록한 작품에만'));
+    await clickWhenReady(() => pbtns()[1]);                        // ❌ (맞음)
+    await until(() => popupShown() && ptitle().includes('맞았어요'));
+    log('quiz-wrong-more: 둘째 문제 맞음 → 맞았어요', ptitle().includes('맞았어요') && txt('popup').includes('정답: X'));
+    await clickWhenReady(() => pbtns()[0]);                        // 계속 → 브릿지
+    await until(() => popupShown() && ptitle().includes('정산'));
+    log('quiz-wrong-more: 퀴즈 기록 more-ok · 스탯 그대로', W().LUNA.state.quiz && W().LUNA.state.quiz[1] === 'more-ok');
     log('브릿지 정산 이름 치환(솔 활동)', D().querySelector('.pop-title').textContent.includes('솔 활동'));
     D().querySelector('.pop-btn').click();                          // EP2 시작
     await until(() => txt('epHead').includes('EP2'));
@@ -93,6 +111,36 @@ async function run() {
     log('루나 선택: 인트로 이름 치환', txt('introCard').includes('루나(LUNA)'));
     const lunaImg = D().querySelector('#epChar img.idol-svg');
     log('루나 캐릭터 PNG 장착', !!lunaImg && lunaImg.dataset.idol === 'luna');
+
+    // quiz-after-accept(실제 플레이): 루나로 EP1 오답 → [대가를 치르고 진행] → 퀴즈 → 정산
+    for (let i = 0; i < 4; i++) { D().getElementById('introCard').click(); await sleep(80); }
+    await until(() => active('scr-ep'));
+    for (let i = 0; i < 6 && !D().getElementById('phoneWrap').classList.contains('on'); i++) { D().getElementById('storyStage').click(); await sleep(80); }
+    for (let i = 0; i < 40 && !D().querySelector('#chatChoices .choice-btn'); i++) { D().getElementById('chatLog').click(); await sleep(70); }
+    await until(() => D().querySelector('#chatChoices .choice-btn'));
+    D().querySelectorAll('#chatChoices .choice-btn')[0].click();   // A 오답
+    await until(() => popupShown() && pbtns().some(b => b.textContent.includes('대가를 치르고')));
+    pbtns().find(b => b.textContent.includes('대가를 치르고')).click();
+    await until(() => popupShown() && (ptitle().includes('개념 확인 O/X') || ptitle().includes('정산')) || active('scr-court'));
+    if (active('scr-court')) { D().getElementById('courtBtn').click(); await until(() => popupShown() && ptitle().includes('개념 확인 O/X')); }
+    log('quiz-after-accept: 오답 진행 뒤에도 정산 전에 퀴즈', popupShown() && ptitle().includes('개념 확인 O/X'));
+    await clickWhenReady(() => pbtns()[1]);                        // ❌ (맞음)
+    await until(() => popupShown() && ptitle().includes('맞았어요'));
+    await clickWhenReady(() => pbtns()[0]);
+    await until(() => popupShown() && ptitle().includes('정산'));
+    log('quiz-after-accept: 맞음 → 정산, 기록 ok', ptitle().includes('정산') && W().LUNA.state.quiz && W().LUNA.state.quiz[1] === 'ok');
+
+    // 엔딩 '다시 볼 개념'(상태 주입 — 실제 플레이 아님): 선택은 다 맞혔고 퀴즈만 EP2를 놓친 경우 / 퀴즈도 다 맞힌 경우
+    const st = W().LUNA.state;
+    st.wrongs = []; st.quiz = { 1: 'ok', 2: 'missed' };
+    W().LUNA.showEnding('unicorn');
+    await until(() => active('scr-end'));
+    const endTxt = () => txt('scr-end');
+    log('ending-clean-vs-quiz(주입): 놓친 EP2의 개념 요약이 보이고 "틀린 개념이 없습니다"는 없음', endTxt().includes('두 번 다 놓친 개념') && endTxt().includes('출원 전에 스스로 공개') && !endTxt().includes('틀린 개념이 없습니다'));
+    st.quiz = { 1: 'ok', 2: 'more-ok' };
+    W().LUNA.showEnding('unicorn');
+    await sleep(100);
+    log('ending-clean-vs-quiz(주입): 다 맞힌 경우 기존 문구만', endTxt().includes('틀린 개념이 없습니다') && !endTxt().includes('두 번 다 놓친 개념'));
   } catch (e) { log('예외 발생', false, e.message); }
   out.textContent += 'PROBE-DONE\n';
   document.title = 'PROBE-DONE';

@@ -7,6 +7,7 @@
 
 - **게임 v0.5 완성**: 타이틀 → 캐릭터 선택(솔/루나) → 인트로 → EP1~6(채팅·A/B/C 선택·결과·정산) → 법정 → 엔딩 3종 + 리포트 + 이어하기. EP2~6 대사·스토리 씬·연출(스탯 카운트업·타이핑 인디케이터) 완결.
 - **캐릭터 에셋 개선**: 솔·루나 각각 neutral/happy/panic/shock 4종의 512px 투명 PNG. 기존 `.idol-svg`, `data-idol`, `data-expr` DOM 계약과 표정 전환 규칙은 유지하고 `img.src`를 교체한다.
+- **O/X 확인 퀴즈(2026-11-14)**: 정산 직전 O/X(틀리면 하나 더), 스탯·배지·엔딩 무관, 엔딩 '다시 볼 개념'에 둘 다 놓친 개념. 설계 `docs/superpowers/specs/2026-11-14-ox-quiz-design.md`, 계획 `docs/superpowers/plans/2026-11-14-ox-quiz.md`. 팝업 `guardMs`(퀴즈만 0.3초 버튼 잠금 — 연타가 다음 문제를 누르지 않게). 프로브용 `window.LUNA.showEnding(key)`. **문항 법적 정확성 교사 검수 대기.**
 - **도감 완성**: AI 지재권 쟁점 12건(저작권4·특허2·상표3·영업비밀3), 실제 판례 + 상태 배지, 게임 엔딩에 티저 링크 1줄.
 - **배포 대기**: GitHub Pages 예정. 원격 없음 → 사용자가 `luna-ip-game` public 레포 생성 후 "luna push" 지시 시 remote·push·Pages. dogam SPEC §8 개별 사실 검수는 교사 판단으로 기존 고지(법률자문 아님·기준일·상태배지·출처) 하에 배포 결정(미검수 상태).
 
@@ -25,7 +26,9 @@ assets/characters/  솔·루나 PNG 각 4표정(512×512, 투명 배경)
 js/ui/character.js  PNG 경로·표정 전환 + T() 토큰 치환. 계약: .idol-svg, data-idol, data-expr
 js/dogam/render.js·main.js  도감 엔진
 data/episodes.js    EP1~6 시나리오(스키마 SPEC §8), 이름은 {n} 토큰
-data/strings.js     인트로·브릿지·법정·엔딩·리포트 문구
+data/strings.js     인트로·브릿지·법정·엔딩·리포트·퀴즈 문구
+data/quiz.js        O/X 확인 퀴즈 12문항(EP마다 본 문제+하나 더, 교사 검수 대기)
+js/quiz.js          퀴즈 판정·기록(G.quiz)·다시 볼 개념 목록(DOM 없음, verify가 검산)
 data/issues.js      도감 ISSUES 12·STATUS_META(양측 대립·상태 배지·실제 사례·출처)
 test/verify.mjs     게임 검산 25건 / verify-dogam.mjs 도감 10건
 test/probe.html     게임 E2E / probe-dogam.html 도감 E2E

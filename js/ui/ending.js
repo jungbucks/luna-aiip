@@ -2,6 +2,7 @@
 import { STRINGS } from '../../data/strings.js';
 import { EPISODES } from '../../data/episodes.js';
 import { esc } from './chat.js';
+import { missedEps } from '../quiz.js';
 
 /* 법정 복습 목록 — 오답 EP들의 권리·교훈 */
 function reviewList(state) {
@@ -26,6 +27,18 @@ export function renderCourt(state, isFinal, contBtnCb) {
   document.getElementById('courtBtn').onclick = contBtnCb;
 }
 
+/* 엔딩 '다시 볼 개념' = 선택에서 틀린 권리 + O/X에서 두 번 다 놓친 개념(2026-11-14). 둘 다 없을 때만 '틀린 개념이 없습니다' */
+function endReview(state) {
+  const missed = missedEps(state);
+  const wrongEps = EPISODES.filter(e => state.wrongs.includes(e.id));
+  if (!wrongEps.length && !missed.length) return reviewList(state);
+  const parts = [];
+  if (wrongEps.length) parts.push(reviewList(state));
+  if (missed.length) parts.push(`<p class="rv-sub">${esc(STRINGS.quiz.reviewHead)}</p>` + EPISODES.filter(e => missed.includes(e.id))
+    .map(e => `<div class="rv-item"><b>${e.rightEmoji} ${esc(e.right)}</b> — ${esc(e.hint)}</div>`).join(''));
+  return parts.join('');
+}
+
 export function renderEnding(state, endingKey, restartCb) {
   const e = STRINGS.endings[endingKey];
   const r = STRINGS.report;
@@ -44,7 +57,7 @@ export function renderEnding(state, endingKey, restartCb) {
       <div class="rp-stats">💰 ${state.stats.money} · 📈 ${state.stats.fame} · 🛡️ ${state.stats.safety}</div>
       <div class="rp-badges">${badges}</div>
       <h3>${esc(r.reviewHead)}</h3>
-      <div class="rv-list">${reviewList(state)}</div>
+      <div class="rv-list">${endReview(state)}</div>
       <p class="disclaimer">${esc(r.disclaimer)}</p>
       <a class="dogam-teaser" href="dogam.html">🧭 법은 여기까지 배웠어요. 그런데 AI 시대엔? → 쟁점 도감 열기</a>
       <button class="choice-btn primary" id="endRestart">🔄 처음부터 다시</button>
