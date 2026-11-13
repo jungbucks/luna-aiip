@@ -30,7 +30,7 @@ data/strings.js     인트로·브릿지·법정·엔딩·리포트·퀴즈 문�
 data/quiz.js        O/X 확인 퀴즈 12문항(EP마다 본 문제+하나 더, 교사 검수 대기)
 js/quiz.js          퀴즈 판정·기록(G.quiz)·다시 볼 개념 목록(DOM 없음, verify가 검산)
 data/issues.js      도감 ISSUES 12·STATUS_META(양측 대립·상태 배지·실제 사례·출처)
-test/verify.mjs     게임 검산 36건(퀴즈 8 포함) / verify-dogam.mjs 도감 10건
+test/verify.mjs     게임 검산 42건(퀴즈 8·이어 하기 6 포함) / verify-dogam.mjs 도감 10건
 test/probe.html     게임 E2E / probe-dogam.html 도감 E2E
 ```
 
@@ -40,11 +40,11 @@ test/probe.html     게임 E2E / probe-dogam.html 도감 E2E
 - **미결 사건을 확정처럼 쓰지 말 것** — dogam은 status(decided/ongoing/varies) 배지로 표시, verify-dogam이 단정 금칙어 차단. 사례 갱신 시 웹 재확인 후 issues.js의 realCase·status·sources·하단 기준일 함께 수정.
 - **ES 모듈이라 HTTP/Pages 전용** — `<script type="module">`은 file://(더블클릭)에서 CORS로 안 뜬다(코드 버그 아님). 게임·도감 모두 서버 서빙 필요.
 - engine.js는 규칙 단일 원천(수치 변경 금지). main.js는 계산 금지(engine 위임).
-- 이어하기 복원 = 현재 EP 시작 지점부터(채팅 중간 저장 안 함 — 의도된 단순화).
+- 이어하기 복원 = 현재 EP 시작 지점부터(채팅 중간 저장 안 함 — 의도된 단순화). **EP에 들어설 때 `G.epStart` 사본을 저장하고 이어 하기는 그 사본에서 다시**(`js/resume.js`, 2026-11-14) — 예전엔 선택·퀴즈·정산 중 새로 고치면 점수가 두 번 들어갔다. 사본 없는 옛 저장은 예전처럼.
 
 ## 검증 (수정 후 필수)
 
-1. 게임 `node test/verify.mjs`(36건) — 미달 시 배포 금지. 도감 `node test/verify-dogam.mjs`(10건).
+1. 게임 `node test/verify.mjs`(42건) — 미달 시 배포 금지. 도감 `node test/verify-dogam.mjs`(10건).
 2. E2E 프로브(구조·흐름 변경 시): **게임과 같은 오리진에서 서빙 필수** — file:// 프로브 + http iframe은 크로스오리진으로 조용히 죽는다(2026-07-15 실제 발생). 절차: `probe.html`을 루트에 복사 → Node 정적 서버(scratchpad) → `msedge --headless=new --user-data-dir=<임시> --virtual-time-budget=20000 --dump-dom http://localhost:PORT/...` → 수확 후 복사본 삭제. 채팅은 타이핑 인디케이터 때문에 메시지당 최대 2탭.
 
 ## 참고 문서

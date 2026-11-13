@@ -8,6 +8,7 @@ import { startChat, advance, showChoices, esc } from './ui/chat.js';
 import { showPopup, deltaLine } from './ui/popup.js';
 import { QUIZ } from '../data/quiz.js';
 import * as quiz from './quiz.js';
+import * as resume from './resume.js';
 import { renderCourt, renderEnding } from './ui/ending.js';
 import { IDOLS, idolSVG, setIdol, getIdol, T, setExpression, autoExpression } from './ui/character.js';
 
@@ -68,7 +69,7 @@ function boot() {
   $('selRow').querySelectorAll('.sel-card').forEach(btn => btn.onclick = () => pickIdol(btn.dataset.idol));
   const saved = store.load();
   $('btnContinue').style.display = saved ? '' : 'none';
-  $('btnContinue').onclick = () => { G = saved.game; applyIdol(G.idol); enterEp(); };
+  $('btnContinue').onclick = () => { G = resume.resumeState(saved.game); applyIdol(G.idol); enterEp(); };   // EP 시작 상태에서 다시(점수 두 번 방지)
   $('btnNew').onclick = () => { store.clear(); G = engine.newGame(); show('scr-select'); };
   $('btnReset').onclick = () => { store.clear(); location.reload(); };
   show('scr-title');
@@ -99,6 +100,7 @@ function intro(i) {
 let sceneIdx = 0;
 
 function enterEp() {
+  resume.markEpStart(G); store.save(G, 'ep');   // 이어 하기 시작점(2026-11-14 — 선택·퀴즈·정산 중 새로 고침해도 점수가 두 번 들어가지 않게)
   updateStatbar();
   autoExpression(G);
   $('epHead').textContent = T(`EP${G.ep} 「${ep().title}」 — ${ep().rightEmoji} ${ep().right}`);

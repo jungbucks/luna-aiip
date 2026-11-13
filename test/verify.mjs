@@ -6,6 +6,7 @@ import { STRINGS } from '../data/strings.js';
 import { T, idolSVG, setIdol } from '../js/ui/character.js';
 import { QUIZ } from '../data/quiz.js';
 import * as Q from '../js/quiz.js';
+import * as R from '../js/resume.js';
 
 let pass = 0, fail = 0;
 const t = (name, cond, extra = '') => {
@@ -132,6 +133,24 @@ console.log('[O/X 퀴즈] 문항·판정·기록 (2026-11-14, 스탯 무관)');
   t('missed-excludes-unplayed: 둘 다 틀린 EP만, 오름차순', JSON.stringify(Q.missedEps({ quiz: { 5: 'missed', 1: 'missed', 3: 'ok' } })) === '[1,5]');
   const old = {};
   t('missed-old-save: quiz 없는 옛 저장 → [] (상태를 바꾸지 않음)', JSON.stringify(Q.missedEps(old)) === '[]' && !('quiz' in old));
+}
+
+console.log('[이어 하기] 에피소드 시작 상태에서 다시 (2026-11-14 — 퀴즈·정산 중 새로 고침 시 점수 두 번 방지)');
+{
+  const st = E.newGame(); st.idol = 'sol';
+  R.markEpStart(st);
+  const startStats = JSON.stringify(st.stats);
+  E.chooseRight(st, st.ep, ep(1).choices.right.delta); Q.record(st, 1, 'ok');      // 정답 + 퀴즈까지 한 뒤 저장된 상태
+  const saved = JSON.parse(JSON.stringify(st));                                      // localStorage 왕복
+  const back = R.resumeState(saved);
+  t('resume: 에피소드 시작 수치로', JSON.stringify(back.stats) === startStats && back.ep === 1 && back.badges[0] === null, fmt(back));
+  t('resume: 그 EP의 퀴즈 기록도 시작 상태로(다시 풀면 덮어씀)', !back.quiz || back.quiz[1] === undefined);
+  t('resume: 캐릭터 그대로', back.idol === 'sol');
+  t('resume: 다시 시작해도 사본이 이어짐(겹치지 않음)', back.epStart && !back.epStart.epStart && JSON.stringify(back.epStart.stats) === startStats);
+  E.chooseRight(back, back.ep, ep(1).choices.right.delta); E.settle(back); E.nextEp(back); R.markEpStart(back);
+  t('resume: 다음 EP 시작 때 사본 갱신', back.epStart.ep === 2 && back.epStart.badges[0] === 'full');
+  const old = { ...E.newGame(), ep: 3 };
+  t('resume: 사본 없는 옛 저장은 그대로(지금 동작)', R.resumeState(old) === old);
 }
 
 console.log('─'.repeat(40));

@@ -134,6 +134,14 @@ async function run() {
     await clickWhenReady(() => pbtns()[0]);
     await until(() => popupShown() && ptitle().includes('정산'));
     log('quiz-after-accept: 맞음 → 정산, 기록 ok', ptitle().includes('정산') && W().LUNA.state.quiz && W().LUNA.state.quiz[1] === 'ok');
+    // 정산 팝업에서 새로 고침 → 이어 하기: EP1 시작 점수에서 다시(오답 벌점이 두 번 들어가지 않음, 2026-11-14)
+    const startStats = JSON.stringify(W().LUNA.engine.newGame().stats);
+    f.src = '/index.html?r=3';
+    await sleep(200);
+    await until(() => W().LUNA && D().getElementById('btnContinue') && D().getElementById('btnContinue').style.display !== 'none');
+    D().getElementById('btnContinue').click();
+    await until(() => active('scr-ep'));
+    log('resume-from-ep-start: 새로 고침 뒤 EP1 시작 점수·오답 기록 없음·루나', JSON.stringify(W().LUNA.state.stats) === startStats && W().LUNA.state.ep === 1 && W().LUNA.state.wrongs.length === 0 && W().LUNA.state.idol === 'luna', JSON.stringify(W().LUNA.state.stats));
 
     // 엔딩 '다시 볼 개념'(상태 주입 — 실제 플레이 아님): 선택은 다 맞혔고 퀴즈만 EP2를 놓친 경우 / 퀴즈도 다 맞힌 경우
     const st = W().LUNA.state;
