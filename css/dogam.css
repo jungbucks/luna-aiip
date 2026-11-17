@@ -24,8 +24,9 @@ a { color: var(--neon2); }
 .d-lead { color: var(--dim); margin: 1.25rem 0 0.75rem; }
 .filter-row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 0.9rem; }
 #filters { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-.fchip-ghost { background: transparent; border-style: dashed; color: var(--neon2); }
-.fchip-ghost[aria-pressed="true"] { border-style: solid; }
+/* .fchip보다 뒤에 오지 않아도 이기도록 두 클래스로(평가 v2 r3: 필터 칩과 똑같이 보였음) */
+.fchip.fchip-ghost { background: transparent; border-style: dashed; color: var(--neon2); }
+.fchip.fchip-ghost[data-open="true"] { border-style: solid; }
 .d-game { color: var(--neon2); text-decoration: none; }
 .d-game:hover { text-decoration: underline; }
 

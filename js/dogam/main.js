@@ -17,8 +17,9 @@ const visibleCards = () => [...document.querySelectorAll('.issue')].filter(c => 
 function syncToggleAll() {
   const btn = document.getElementById('toggle-all');
   const allOpen = visibleCards().every(c => c.querySelector('.issue-q').getAttribute('aria-expanded') === 'true');
+  // 이름만 바꾼다(aria-pressed와 함께 쓰면 화면 읽기에서 겹침 — 평가 v2 r3)
   btn.textContent = allOpen ? '모두 접기' : '모두 펼치기';
-  btn.setAttribute('aria-pressed', String(allOpen));
+  btn.dataset.open = String(allOpen);
 }
 
 function setFilter(right, chip) {
@@ -56,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (chip) setFilter(chip.dataset.right, chip);
   });
   document.getElementById('toggle-all').addEventListener('click', () => {
-    const open = document.getElementById('toggle-all').getAttribute('aria-pressed') !== 'true';
+    const open = document.getElementById('toggle-all').dataset.open !== 'true';
     visibleCards().forEach(c => setOpen(c.querySelector('.issue-q'), open));
     syncToggleAll();
   });

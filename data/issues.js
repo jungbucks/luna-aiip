@@ -85,7 +85,7 @@ export const ISSUES = [
     think: '칼을 만든 사람과 칼을 쓴 사람, 책임은 어떻게 나눌까?',
     status: 'ongoing',
     realCase: { name: 'NYT v. OpenAI / Cox v. Sony', date: '2023~진행 중', where: '미국 사례',
-      gist: '뉴욕타임스는 챗봇이 자사 기사를 거의 그대로 내놓는다며 2023년 OpenAI에 소송을 냈다. 2026년 3월 미국 대법원은 인터넷 회사 사건(Cox v. Sony)에서 기준을 정했다. 침해를 알기만 해서는 도운 책임을 지지 않고, 부추기거나 침해용 서비스를 만들어야 책임을 진다. 이후 뉴욕타임스는 도운 책임 주장을 접고, 직접 베꼈다는 주장에 집중한다.' },
+      gist: '뉴욕타임스는 챗봇이 자사 기사를 거의 그대로 내놓는다며 2023년 OpenAI에 소송을 냈다. 2026년 3월 미국 대법원은 인터넷 회사 사건(Cox v. Sony)에서 기준을 정했다. 침해를 알기만 하면 도운 책임이 없고, 부추기거나 침해용 서비스를 만들어야 책임을 진다. 이후 뉴욕타임스는 이용자를 도왔다는 주장은 접고, 직접 베꼈다는 주장에 집중한다.' },
     sources: [
       { label: 'Hunton(Cox v. Sony 대법원 판결)', url: 'https://www.hunton.com/insights/legal/knowledge-is-not-enough-supreme-court-limits-contributory-copyright-liability-for-isps' },
       { label: 'ChatGPT Is Eating the World(NYT 주장 정리, 2026-08)', url: 'https://chatgptiseatingtheworld.com/2026/08/07/judge-stein-denies-news-plaintiffs-leave-to-add-new-contributory-infringement-claim-v-microsoft-news-plaintiffs-ziff-davis-already-abandoned-contributory-infringement-claim-foreclosed-by-cox-commun/' },
@@ -265,7 +265,7 @@ export const ISSUES = [
     think: '"회사의 비밀"과 "개인의 경험"은 어디서 나뉠까?',
     status: 'ongoing',
     realCase: { name: 'Apple v. OpenAI / xAI v. OpenAI', date: '2025~2026', where: '미국 사례',
-      gist: 'Apple은 전직 직원들이 기밀 설계를 들고 OpenAI로 옮겼다며 2026년 7월 소송을 냈다. OpenAI는 어떤 비밀인지 밝히지 못했다며 맞서지만, 10월 재판 동안 문제의 정보를 쓰지 않기로 약속했다. xAI의 비슷한 소송은 1심에서 기각됐다. 면접에서 이전 일을 묻는 것만으로 유출을 부추겼다고 볼 수 없다는 이유였고, xAI는 항소했다.' },
+      gist: 'Apple은 전직 직원들이 기밀 설계를 들고 OpenAI로 옮겼다며 2026년 7월 소송을 냈다. OpenAI는 어떤 비밀인지 밝히지 못했다며 맞서지만, 10월에는 소송 중 문제의 정보를 쓰지 않기로 약속했다. xAI의 비슷한 소송은 1심에서 기각됐다. 면접에서 이전 일을 묻는 것만으로 유출을 부추겼다고 볼 수 없다는 이유였고, xAI는 항소했다.' },
     sources: [
       { label: 'TechCrunch(Apple v. OpenAI)', url: 'https://techcrunch.com/2026/07/13/the-wildest-allegations-in-apples-trade-secrets-lawsuit-against-openai/' },
       { label: 'MacRumors(OpenAI의 반박, 2026-08)', url: 'https://www.macrumors.com/2026/08/06/openai-asks-judge-to-dismiss-apple-lawsuit/' },
