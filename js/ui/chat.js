@@ -9,12 +9,16 @@ const TYPING_MS = 500, AUTO_GAP = 700;
 let msgs = [], idx = 0, onDone = null, logEl = null;
 let typingEl = null, typingTimer = null, autoTimer = null;
 
-/* 프로필 글자: 마지막 낱말의 첫 글자(개발자 준호 → 준). 어색한 것만 예외 표로 */
-const AVATAR = { '코스모 담당자': '코' };
-export function avatarOf(who) {
-  if (AVATAR[who]) return AVATAR[who];
-  const last = String(who).trim().split(/\s+/).pop() || '';
-  return [...last][0] || '?';
+/* 프로필: 얼굴 없는 사람 모양 + 사람마다 다른 바탕색(글자 대신 — 2026-11-17 교사 지시).
+   색 번호 0~5는 phone.css의 .ava[data-c]. 자주 나오는 사람은 번호를 고정하고, 처음 보는 이름은 이름으로 정한다(늘 같은 색).
+   색만으로 구분하지 않는다 — 말풍선 위 이름은 그대로 나온다. */
+export const AVATAR_TONES = 6;
+const TONE = { '개발자 준호': 0, '마케터 세아': 1, '변리사 한결': 2, '코스모 담당자': 3 };
+export function avatarTone(who) {
+  if (who in TONE) return TONE[who];
+  let h = 0;
+  for (const ch of String(who)) h = (h * 31 + ch.codePointAt(0)) % 9973;
+  return 4 + (h % 2);   // 고정 번호(0~3)와 겹치지 않게 4·5만
 }
 
 const nowLabel = () => {
@@ -55,7 +59,7 @@ export function advance() {
   const cont = idx > 0 && msgs[idx - 1].who === m.who;   // 같은 사람이 이어 말하면 이름·프로필 생략
   typingEl = document.createElement('div');
   typingEl.className = 'msg show typing' + (cont ? ' cont' : '');
-  typingEl.innerHTML = `<span class="ava" aria-hidden="true">${esc(avatarOf(m.who))}</span><div class="body">` +
+  typingEl.innerHTML = `<span class="ava" data-c="${avatarTone(m.who)}" aria-hidden="true"></span><div class="body">` +
     (cont ? '' : `<span class="who">${esc(m.who)}</span>`) +
     `<div class="row"><span class="bubble"><i class="dots"><s></s><s></s><s></s></i></span></div></div>`;
   logEl.appendChild(typingEl);

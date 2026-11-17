@@ -133,7 +133,10 @@ async function run() {
     const msgs = () => [...D().querySelectorAll('#chatLog .msg')];
     log('chat: 날짜 칩 + 같은 사람 이어 말하면 이름 생략', !!D().querySelector('#chatLog .daychip') && msgs()[1].classList.contains('cont') && !msgs()[1].querySelector('.who'));
     log('chat: 묶음 끝에만 시각', !!msgs()[2].querySelector('.tm') && !msgs()[0].querySelector('.tm'));
-    log('chat: 프로필 글자', msgs()[0].querySelector('.ava').textContent === '준');
+    { const a = msgs()[0].querySelector('.ava'), b = msgs().find(m => m.querySelector('.who') && m.querySelector('.who').textContent.includes('세아')).querySelector('.ava');
+      const cs = (el, p) => a.ownerDocument.defaultView.getComputedStyle(el, p), bx = a.getBoundingClientRect();
+      log('chat: 프로필 = 글자 없는 사람 모양, 사람마다 다른 색', a.textContent === '' && a.dataset.c === '0' && b.dataset.c === '1' && cs(a).backgroundImage !== cs(b).backgroundImage
+        && cs(a, '::before').content !== 'none' && Math.round(bx.width) === 30 && Math.round(bx.height) === 30); }
     log('composer: 입력창이 남아 있고 안내가 바뀜', E('chatTapHint').offsetParent !== null && E('chatTapHint').textContent.includes('답장을 골라'));
     log('stat: 메신저 알약 = 위젯 숫자', D().querySelector('.js-stat[data-k="money"]').textContent === txt('stMoney'));
     log('chat: 머리줄 프로필이 아이돌', E('chatAva').querySelector('img.idol-svg').dataset.idol === 'sol');

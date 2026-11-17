@@ -164,12 +164,13 @@ console.log('[모드] 다크/라이트 결정 (theme.js)');
   t('ui 문구에 이름 하드코딩 없음', !/루나|LUNA/.test(JSON.stringify(STRINGS.ui, (k, v) => typeof v === 'function' ? v(1) : v)));
 }
 
-console.log('[메신저] 프로필 글자 (chat.js avatarOf)');
+console.log('[메신저] 프로필 색 (chat.js avatarTone)');
 {
   const C = await import('../js/ui/chat.js');
-  t('avatar: 마지막 낱말 첫 글자', C.avatarOf('개발자 준호') === '준' && C.avatarOf('마케터 세아') === '세' && C.avatarOf('변리사 한결') === '한');
-  t('avatar: 예외 표', C.avatarOf('코스모 담당자') === '코');
-  t('avatar: 데이터의 모든 보낸이에 글자', EPISODES.every(e => e.messages.every(m => C.avatarOf(m.who).length === 1)));
+  const senders = [...new Set(EPISODES.flatMap(e => e.messages.map(m => m.who)))];
+  t('avatar: 데이터의 보낸이는 서로 다른 색', new Set(senders.map(C.avatarTone)).size === senders.length);
+  t('avatar: 색 번호는 0~' + (C.AVATAR_TONES - 1), [...senders, '처음 보는 사람', ''].every(w => Number.isInteger(C.avatarTone(w)) && C.avatarTone(w) >= 0 && C.avatarTone(w) < C.AVATAR_TONES));
+  t('avatar: 같은 이름은 늘 같은 색, 처음 보는 이름은 고정 번호와 안 겹침', C.avatarTone('팬 하늘') === C.avatarTone('팬 하늘') && C.avatarTone('팬 하늘') >= 4);
 }
 
 console.log('[수첩] 알게 된 것 적기 (notes.js — 점수와 무관)');

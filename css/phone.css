@@ -82,8 +82,23 @@
   background:var(--bub);border:1px solid var(--bub-line);font-variant-numeric:tabular-nums}
 #phoneWrap #chatLog{flex:1;min-height:80px;padding:10px 12px 6px;gap:6px}
 .daychip{align-self:center;flex-shrink:0;font-size:12.5px;color:var(--dim);background:var(--bub);border:1px solid var(--bub-line);border-radius:999px;padding:2px 12px;margin-bottom:4px}
-.msg .ava{width:30px;height:30px;border-radius:38%;flex-shrink:0;font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center;
-  background:var(--bub);border:1px solid var(--bub-line)}
+/* 프로필: 색 바탕 위 얼굴 없는 사람 모양(머리 ::before + 어깨 ::after). 입체감은 빛이 왼쪽 위에서 오는 그라데이션으로만. 색은 사람마다 --c */
+.msg .ava{position:relative;overflow:hidden;width:30px;height:30px;border-radius:38%;flex-shrink:0;--c:#7d8aa5;
+  background:var(--c);
+  background:radial-gradient(120% 120% at 28% 16%,color-mix(in srgb,var(--c) 68%,#fff),var(--c) 56%,color-mix(in srgb,var(--c) 70%,#000));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)}
+.msg .ava::before,.msg .ava::after{content:"";position:absolute;left:50%;background:#fff}
+.msg .ava::before{top:17%;width:37%;height:37%;margin-left:-18.5%;border-radius:50%;z-index:1;
+  background:radial-gradient(circle at 34% 28%,#fff 8%,color-mix(in srgb,var(--c) 20%,#fff) 58%,color-mix(in srgb,var(--c) 46%,#fff));
+  box-shadow:0 1.5px 2px rgba(0,0,0,.28)}
+.msg .ava::after{top:60%;width:76%;height:70%;margin-left:-38%;border-radius:50%;
+  background:radial-gradient(circle at 34% 10%,#fff 4%,color-mix(in srgb,var(--c) 22%,#fff) 46%,color-mix(in srgb,var(--c) 52%,#fff))}
+.ava[data-c="0"]{--c:#3f7df0}   /* 준호: 파랑 */
+.ava[data-c="1"]{--c:#f0714f}   /* 세아: 다홍 */
+.ava[data-c="2"]{--c:#22a37a}   /* 변리사: 초록 */
+.ava[data-c="3"]{--c:#e2a21c}   /* 광고주: 호박 */
+.ava[data-c="4"]{--c:#15a3b5}   /* 그 밖: 청록 */
+.ava[data-c="5"]{--c:#d2578f}   /* 그 밖: 자주 */
 .msg.cont .ava{visibility:hidden;height:0}
 .msg .body{min-width:0;max-width:calc(100% - 40px)}
 .msg .row{display:flex;align-items:flex-end;gap:5px}
