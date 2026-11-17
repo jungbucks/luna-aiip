@@ -192,6 +192,12 @@ console.log('[수첩] 알게 된 것 적기 (notes.js — 점수와 무관)');
     items: [{ emoji: '⚖️', right: '저작권', badge: '완전', hint: '힌트', note: '<b>내 글</b>' }, { emoji: '🛡️', right: '특허권', badge: '미획득', hint: '힌트2', note: '' }] });
   t('product-text: 권리·배지·내 글·빈칸 표시', txt.includes('나의 권리 수첩') && txt.includes('10101 홍길동') && txt.includes('⚖️ 저작권 (완전)') && txt.includes('<b>내 글</b>') && txt.includes('(아직 적지 않음)') && txt.includes('💰 1'));
   t('notes는 게임 저장 키를 쓰지 않음', N.NOTES_KEY !== 'luna_save_v1');
+  // 검토 반영(2026-11-17): 읽기는 되는데 쓰기만 실패하는 저장소(용량 초과 등) — 적은 글이 다음 읽기에서 사라지면 안 된다
+  const full = (() => { const m = { luna_notes_v1: JSON.stringify({ 1: '전에 적은 글' }) }; return { getItem: k => (k in m ? m[k] : null), setItem() { throw new Error('quota'); }, removeItem: k => { delete m[k]; } }; })();
+  t('notes-write-fails: 쓰기만 실패해도 그 판에서는 새 글이 보임', N.saveNote(2, '방금 적은 글 다섯 자', full) === false && N.getNote(2, full) === '방금 적은 글 다섯 자' && N.getNote(1, full) === '전에 적은 글');
+  t('notes-write-fails: 고친 글도 유지', N.saveNote(1, '고친 글 다섯 자 넘게', full) === false && N.getNote(1, full) === '고친 글 다섯 자 넘게');
+  N.clearNotes(mem());
+  t('notes-normalize: 빈 줄을 여러 번 넣어도 한 줄바꿈으로', N.normalize('가\n\n\n\n나') === '가\n나' && N.normalize('가 \n \n 나').split('\n').length === 2);
 }
 
 console.log('─'.repeat(40));

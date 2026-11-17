@@ -43,7 +43,8 @@ export function clearNotify() {
 
 /* ── 앱 층 ── stack의 맨 뒤가 맨 위에 열린 앱 */
 const stack = [];
-let armed = false, locked = false;
+let armed = false, locked = false, held = false;
+let sheetCloser = null;
 
 export const topApp = () => stack[stack.length - 1] || null;
 export const isOpen = name => stack.includes(name);
@@ -52,7 +53,10 @@ export const isOpen = name => stack.includes(name);
 function sync() {
   const top = topApp();
   $('homeScreen').inert = homeState() === 'story' || stack.length > 0;
-  Object.keys(LAYER).forEach(n => { $(LAYER[n]).inert = isOpen(n) && n !== top; });
+  Object.keys(LAYER).forEach(n => {
+    $(LAYER[n]).inert = isOpen(n) && n !== top;
+    $(LAYER[n]).style.zIndex = isOpen(n) ? String(10 + stack.indexOf(n)) : '';   // 나중에 연 앱이 위(문서 순서와 무관하게)
+  });
   $('scr-ep').dataset.msgopen = isOpen('messenger') ? '1' : '';
 }
 
@@ -76,6 +80,10 @@ export function closeApp(name, restoreFocus = true) {
   if (restoreFocus && !stack.length) $(DOCK[n]).focus({ preventScroll: true });
 }
 
+/* 잠깐 붙잡기(답장을 보낸 뒤 결과가 오기까지): 뒤로 버튼·뒤로 가기를 무시하되 화면은 그대로 둔다 */
+export function holdApps(on) { held = on; }
+export function onSheetBack(fn) { sheetCloser = fn; }
+
 /* 적기 단계처럼 "끝내야 나갈 수 있는" 동안: 뒤로 버튼을 숨기고 뒤로 가기를 무시 */
 export function lockApps(on) {
   locked = on;
@@ -87,6 +95,7 @@ export function lockApps(on) {
 export function armBack() { arm(); }
 function arm() {
   if (armed) return;
+  if (history.state && history.state.lunaApp) { armed = true; return; }   // 새로 고침 뒤에도 그 칸이 남아 있다 — 또 쌓지 않는다
   try { history.pushState({ lunaApp: 1 }, ''); armed = true; } catch (e) { /* 일부 환경에서 막혀도 게임은 계속 */ }
 }
 
@@ -94,8 +103,8 @@ function onPopState() {
   armed = false;                                   // 방금 그 한 칸을 썼다
   const popup = $('popup').classList.contains('show');
   const sheet = $('productSheet');                 // 산출물 층(앱 스택 밖 — 엔딩 화면에서도 열린다)
-  if (locked || popup) { if (stack.length || sheet.classList.contains('on')) arm(); return; }   // 무시하고 한 칸 되채움
-  if (sheet.classList.contains('on')) { sheet.classList.remove('on'); if (stack.length) arm(); return; }
+  if (locked || held || popup) { if (stack.length || sheet.classList.contains('on')) arm(); return; }   // 무시하고 한 칸 되채움
+  if (sheet.classList.contains('on')) { if (sheetCloser) sheetCloser(); else sheet.classList.remove('on'); if (stack.length) arm(); return; }
   if (stack.length) { closeApp(); if (stack.length) arm(); }
 }
 
@@ -110,13 +119,13 @@ export function initPhone({ onMessenger, onNotes, onSettings }) {
   });
   document.querySelectorAll('.app-back').forEach(b => b.setAttribute('aria-label', STRINGS.ui.back));
 
-  const guarded = fn => () => { if (homeState() !== 'story') fn(); };
+  const guarded = fn => () => { if (homeState() !== 'story' && !held) fn(); };
   $('notifBanner').onclick = guarded(onMessenger);
   $('dockMsg').onclick = guarded(onMessenger);
   $('dockNotes').onclick = guarded(onNotes || (() => openApp('notes')));
   $('dockSettings').onclick = guarded(onSettings || (() => openApp('settings')));
 
-  document.querySelectorAll('.app-back').forEach(b => { b.onclick = () => { if (!locked) closeApp(); }; });
+  document.querySelectorAll('.app-back').forEach(b => { b.onclick = () => { if (!locked && !held) closeApp(); }; });
   document.querySelectorAll('.app-decor').forEach(a => {     // 장식 앱: 살짝 흔들리고 끝
     a.onclick = () => { a.classList.remove('nope'); void a.offsetWidth; a.classList.add('nope'); };
   });

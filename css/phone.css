@@ -163,7 +163,13 @@
   #app > :not(#productSheet){display:none!important}
   #productSheet{position:static;display:block;transform:none;opacity:1;visibility:visible;background:#fff;padding:0;border-radius:0;overflow:visible}
   #productSheet .app-head,.prod-actions{display:none}
-  .prod-paper{overflow:visible;padding:0;font-size:11pt}
+  .prod-paper{overflow:visible;padding:0}
+  .prod-paper,.prod-paper *{font-size:10pt!important;line-height:1.4!important}
+  .prod-title{font-size:15pt!important;margin:0 0 6pt}
+  .prod-name,.prod-meta,.prod-result{margin-bottom:4pt}
+  .prod-result,.prod-note{padding:5pt 8pt;margin-bottom:4pt;border-radius:6pt}
+  .prod-mine{margin-top:3pt;padding-top:3pt}
+  .disclaimer{margin-top:4pt}
   .prod-paper,.prod-paper *{color:#000!important}
   .prod-result,.prod-note{background:none;border:1px solid #888;break-inside:avoid}
   #prodName{border:none;border-bottom:1px solid #000;border-radius:0;background:none}
@@ -172,3 +178,9 @@
 /* 배경화면 위에 바로 얹히는 글자(앱 이름·안내 한 줄·잠금화면 날짜): 다크 배경화면의 밝은 얼룩 위에서도 읽히게 */
 [data-theme="dark"] .app-grid .app,[data-theme="dark"] #homeHint,[data-theme="dark"] .lk-date,[data-theme="dark"] .lk-clock{text-shadow:0 1px 4px rgba(0,0,0,.6)}
 .ico-cal{text-shadow:none}
+
+/* 낮은 화면(가로로 든 폰 등): 머리줄+선택지+입력창만으로 화면을 넘는다 — 메신저 전체를 스크롤되게 해 끝까지 닿게 한다 */
+@media (max-height:599px){
+  #phoneWrap{overflow-y:auto}
+  #phoneWrap #chatLog{min-height:110px}
+}

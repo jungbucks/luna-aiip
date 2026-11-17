@@ -140,6 +140,12 @@ async function run() {
     const fits = el => { const r = el.getBoundingClientRect(), a = E('app').getBoundingClientRect(); return r.top >= a.top - 1 && r.bottom <= a.bottom + 1; };
     f.height = 600; await sleep(200);
     log('low-height: 600px에서 선택지 3개와 입력창이 화면 안', [...D().querySelectorAll('#chatChoices .choice-btn')].every(fits) && fits(E('chatTapHint')) && E('chatLog').clientHeight >= 80, 'log=' + E('chatLog').clientHeight);
+    f.width = 1366; f.height = 600; await sleep(200);
+    log('low-height(기기 틀 모드 600px): 선택지 3개와 입력창이 폰 화면 안', E('statusBar').offsetParent !== null && [...D().querySelectorAll('#chatChoices .choice-btn')].every(fits) && fits(E('chatTapHint')) && E('chatLog').clientHeight >= 80, 'log=' + E('chatLog').clientHeight);
+    f.width = 844; f.height = 390; await sleep(200);
+    const reach = el => { el.scrollIntoView({ block: 'nearest' }); const r = el.getBoundingClientRect(); return r.top >= -1 && r.bottom <= 391; };
+    log('landscape: 가로로 든 폰(844×390)에서도 선택지 3개와 입력창에 스크롤로 닿음', [...D().querySelectorAll('#chatChoices .choice-btn')].every(reach) && reach(E('composer')) && (pw => pw.scrollHeight <= pw.clientHeight + 1 || ['auto', 'scroll'].includes(W().getComputedStyle(pw).overflowY))(E('phoneWrap')), E('phoneWrap').scrollHeight + '/' + E('phoneWrap').clientHeight);
+    f.width = 480; await sleep(100);
     f.height = 800; await sleep(100);
     E('chatChoices').querySelectorAll('.choice-btn')[2].click();   // C: 개념 카드
     await until(popupShown);
@@ -151,6 +157,8 @@ async function run() {
 
     const bBtn = D().querySelectorAll('#chatChoices .choice-btn')[1];   // B 정답
     bBtn.click(); bBtn.click();                                      // pick-double: 연타
+    E('msgBack').click();                                            // 결과를 기다리는 동안 뒤로 — 무시돼야 한다
+    log('pick-wait: 답장 뒤 결과를 기다리는 동안에는 메신저를 못 나감', E('phoneWrap').classList.contains('on'));
     log('me-bubble: 누르자마자 선택지가 사라지고 규칙은 아직', !D().querySelector('#chatChoices .choice-btn') && W().LUNA.state.stats.money === money0);
     await until(popupShown);
     log('정답 팝업(배지 획득)', D().querySelector('.pop-title').textContent.includes('배지 획득'));
@@ -158,6 +166,7 @@ async function run() {
     const d = W().LUNA.state, exp = W().LUNA.engine.newGame().stats;   // EP1 정답 한 번의 변화량과 정확히 같은지
     log('pick-double: 연타해도 한 번만 적용', d.stats.money === exp.money - 15 && d.stats.fame === exp.fame + 20 && d.stats.safety === exp.safety + 15, JSON.stringify(d.stats));
     log('pop-face: 정답 알림창에 지금 표정의 아이돌', D().querySelector('.pop-face img.idol-svg').dataset.expr === 'happy');
+    log('pick-wait: 결과가 뜨면 잠금은 풀려 있음', !E('app').hasAttribute('data-locked'));
     log('상태 idol=sol', W().LUNA.state.idol === 'sol');
     W().history.back(); await sleep(150);
     log('back-during-popup: 팝업 중 뒤로 가기는 무시', popupShown() && E('phoneWrap').classList.contains('on'));
@@ -215,12 +224,24 @@ async function run() {
     await until(() => !E('noteInput'));
     log('note: 고친 글로 바뀜', cards()[0].querySelector('.note-mine').textContent.includes('저작권은 표현을 보호한다'));
     E('notesBack').click(); await until(() => !E('appNotes').classList.contains('on'));
+    E('dockSettings').click(); await until(() => E('appSettings').classList.contains('on'));
+    let noteDone = 0; W().LUNA.notebook.askNote(2, () => { noteDone++; });
+    await until(() => E('appNotes').classList.contains('on') && !!E('noteInput'));
+    const topLayer = () => { const a = E('app').getBoundingClientRect(); const el = D().elementFromPoint(a.left + a.width / 2, a.top + a.height / 2); return el && el.closest('.applayer') ? el.closest('.applayer').id : ''; };
+    log('layer-order: 나중에 연 수첩이 설정 위에 보임', topLayer() === 'appNotes', topLayer());
+    log('note-must: 필수 적기 중에는 다른 카드의 [고치기]·산출물 버튼이 없음', D().querySelectorAll('#notesList .note-edit').length === 0 && !E('notesProduct'));
+    await writeNote('특허는 공개하기 전에 먼저 출원');
+    await until(() => noteDone === 1);
+    log('note-must: 적으면 잠금이 풀리고 다음으로 한 번만 넘어감', noteDone === 1 && !E('appNotes').classList.contains('on') && !E('app').hasAttribute('data-locked'));
+    E('setBack').click(); await until(() => !E('appSettings').classList.contains('on'));
+    E('dockNotes').click(); await until(() => E('appNotes').classList.contains('on'));
+    E('notesBack').click(); await until(() => !E('appNotes').classList.contains('on'));
     const save = JSON.parse(W().localStorage.getItem('luna_save_v1'));
     log('저장에 idol=sol', save && save.game.idol === 'sol');
     log('콘솔 오류 0(솔 경로 EP1 완주까지)', (W().__errs || []).length === 0, (W().__errs || []).join(' | '));
 
     // 이어하기 복원
-    f.src = '/index.html?r=1';
+    W().location.reload();                 // 주소 이동이 아니라 새로 고침 — 방문 기록의 "앱 열림" 칸이 그대로 남는 경우
     await sleep(200);
     await until(() => W().LUNA && D().getElementById('btnContinue') && D().getElementById('btnContinue').style.display !== 'none');
     log('theme: 새로 고쳐도 유지', D().documentElement.dataset.theme === W().localStorage.getItem('luna_theme'));
@@ -229,6 +250,11 @@ async function run() {
     const epImg = D().querySelector('#epChar img.idol-svg');
     log('이어하기: 솔 캐릭터+EP2 복원', !!epImg && epImg.dataset.idol === 'sol' && txt('epHead').includes('EP2'));
     log('note: 새로 고쳐도 글이 남음', savedNotes()[1] === '저작권은 표현을 보호한다');
+    await throughStory();
+    const hl = W().history.length;
+    E('dockNotes').click(); await until(() => E('appNotes').classList.contains('on'));
+    log('history: 새로 고침 뒤 앱을 열어도 방문 기록이 쌓이지 않음', W().history.length === hl, hl + '→' + W().history.length);
+    E('notesBack').click(); await until(() => !E('appNotes').classList.contains('on'));
 
     // 루나 경로
     W().localStorage.removeItem('luna_save_v1'); W().localStorage.removeItem('luna_notes_v1');
@@ -285,6 +311,7 @@ async function run() {
     log('ending-clean-vs-quiz(주입): 다 맞힌 경우 기존 문구만', endTxt().includes('틀린 개념이 없습니다') && !endTxt().includes('두 번 다 놓친 개념'));
     // 산출물 "나의 권리 수첩"
     E('endProduct').click(); await until(() => E('productSheet').classList.contains('on'));
+    log('product-modal: 산출물이 떠 있는 동안 뒤 화면은 inert', E('scr-end').hasAttribute('inert') && !E('productSheet').hasAttribute('inert'));
     log('product: 6칸 + 내 글 + 못 간 EP는 빈칸', D().querySelectorAll('.prod-note').length === 6 && D().querySelector('.prod-note[data-ep="1"]').textContent.includes('테스트용으로') && D().querySelector('.prod-note[data-ep="4"]').textContent.includes('(아직 적지 않음)'));
     log('product: 아직 안 간 EP의 개념 힌트는 산출물에도 안 보임', D().querySelector('.prod-note[data-ep="4"]').textContent.includes('EP4에서 만나요') && !D().querySelector('.prod-note[data-ep="4"] .prod-badge').textContent.includes('미획득'));
     E('prodName').value = '10101 테스트';
@@ -295,6 +322,7 @@ async function run() {
     let printed = 0; W().print = () => { printed++; }; E('btnPrint').click();
     log('product: 인쇄 호출', printed === 1);
     E('prodBack').click(); await until(() => !E('productSheet').classList.contains('on'));
+    log('product-modal: 닫으면 잠금이 풀리고 누른 버튼으로 초점', !E('scr-end').hasAttribute('inert') && D().activeElement === E('endProduct'));
     E('endRestart').click(); await until(popupShown);
     log('restart: 다시 하기 전에 한 번 물음', txt('popup').includes('산출물을 먼저 저장'));
     [...D().querySelectorAll('#popup .pop-btn')].find(b => b.textContent.includes('돌아가기')).click();

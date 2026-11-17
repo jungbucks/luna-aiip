@@ -7,13 +7,14 @@ import { EPISODES } from '../../data/episodes.js';
 import { STRINGS } from '../../data/strings.js';
 import { esc } from './chat.js';
 import { T } from './character.js';
-import { openApp, closeApp, lockApps, armBack } from './phone.js';
+import { openApp, closeApp, lockApps, armBack, onSheetBack } from './phone.js';
 import { getNote, saveNote, isValid, MIN_LEN, MAX_LEN, buildProductText } from '../notes.js';
 
 const $ = id => document.getElementById(id);
 let getState = () => null;
 let writing = null;         // { epId, done } — done이 있으면 "적어야 다음으로"(퀴즈 뒤), 없으면 고치기
 let productResult = null;   // 산출물에 적을 결과 이름(엔딩에서 열면 엔딩 이름)
+let productOpener = null;   // 산출물을 연 버튼 — 닫으면 여기로 초점을 돌려준다
 
 /* 학생이 적은 글 전용 이스케이프 — esc()와 달리 이름 토큰({n})을 바꾸지 않는다(적은 글자 그대로) */
 function escPlain(s) {
@@ -28,6 +29,7 @@ export function initNotebook(opts) {
   $('btnPrint').textContent = STRINGS.ui.product.print;
   $('btnCopy').textContent = STRINGS.ui.product.copy;
   $('prodBack').onclick = closeProduct;      // 산출물 층은 앱 스택 밖(엔딩 화면에서도 열린다)
+  onSheetBack(closeProduct);                 // 폰의 뒤로 가기로 닫힐 때도 같은 길로(잠금 해제·초점 복원)
   $('btnPrint').onclick = () => window.print();
   $('btnCopy').onclick = copyProduct;
 }
@@ -49,11 +51,12 @@ function cardHTML(e, i, state) {
       <b class="note-h">${e.rightEmoji} ${esc(e.right)}</b><p class="note-lock">${esc(S.locked(e.id))}</p></div>`;
   }
   const note = getNote(e.id);
+  const mustWrite = !!(writing && writing.done);   // 필수 적기 중에는 다른 카드를 고칠 수 없다 — 고치기가 필수 진행을 덮어 갇히던 것(2026-11-17 검토)
   return `<div class="note-card" data-ep="${e.id}" data-state="open">
     <b class="note-h">${e.rightEmoji} ${esc(e.right)} <span class="note-badge b-${badge}">${esc(badgeLabel(badge))}</span></b>
     <p class="note-hint">${esc(e.hint)}</p>
     ${note ? `<div class="note-mine"><span class="note-mine-l">${esc(S.mine)}</span><p>${escPlain(note)}</p></div>` : ''}
-    <button type="button" class="note-edit" data-ep="${e.id}">${esc(note ? S.edit : S.save)}</button>
+    ${mustWrite ? '' : `<button type="button" class="note-edit" data-ep="${e.id}">${esc(note ? S.edit : S.save)}</button>`}
   </div>`;
 }
 
@@ -65,7 +68,7 @@ export function renderNotebook() {
     (mustWrite ? '' : `<button type="button" class="choice-btn" id="notesProduct">${esc(S.product)}</button>`);
   $('notesList').querySelectorAll('.note-edit').forEach(b => { b.onclick = () => startWriting(Number(b.dataset.ep), null); });
   const p = $('notesProduct');
-  if (p) p.onclick = () => openProduct();
+  if (p) p.onclick = () => openProduct(null, p);
   if (writing) bindWriteCard();
 }
 
@@ -131,7 +134,7 @@ function productData() {
   };
 }
 
-export function openProduct(endingName) {
+export function openProduct(endingName, opener) {
   const P = STRINGS.ui.product;
   productResult = endingName || null;
   const data = productData();
@@ -147,13 +150,25 @@ export function openProduct(endingName) {
     </div>`).join('')}
     <p class="disclaimer">${esc(STRINGS.report.disclaimer)}</p>`;
   $('prodStatus').textContent = '';
+  productOpener = opener || document.activeElement;
+  setBackInert(true);
   $('productSheet').classList.add('on');
   armBack();                                  // 폰의 뒤로 가기로 이 층만 닫히게
   $('prodBack').focus({ preventScroll: true });
 }
 
 export function closeProduct() {
+  if (!$('productSheet').classList.contains('on')) return;
   $('productSheet').classList.remove('on');
+  setBackInert(false);
+  if (productOpener && productOpener.isConnected) productOpener.focus({ preventScroll: true });
+  productOpener = null;
+}
+
+/* 산출물이 떠 있는 동안 뒤 화면(#app의 다른 자식)은 키보드·읽어 주기에 닿지 않게 — 팝업과 같은 방식.
+   산출물 위에서는 팝업이 뜨지 않으므로 팝업의 잠금과 겹치지 않는다. */
+function setBackInert(on) {
+  [...$('app').children].forEach(el => { if (el.id !== 'productSheet' && el.id !== 'popup') el.toggleAttribute('inert', on); });
 }
 
 async function copyProduct() {

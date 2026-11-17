@@ -14,6 +14,7 @@ import { IDOLS, idolSVG, setIdol, getIdol, T, setExpression, autoExpression } fr
 import { applyTheme, toggleTheme, watchSystemTheme } from './ui/theme.js';
 import * as phone from './ui/phone.js';
 import { initSettings, openSettings } from './ui/settings.js';
+import * as notebook from './ui/notebook.js';
 import { initNotebook, openNotebook, askNote, openProduct } from './ui/notebook.js';
 import { clearNotes } from './notes.js';
 
@@ -169,7 +170,8 @@ function sayThen(label, next) {
   $('chatChoices').innerHTML = '';                   // 버튼을 먼저 없앤다
   setComposer('idle');
   sendMine(label);
-  setTimeout(next, REDUCED ? 0 : MINE_DELAY_MS);
+  phone.holdApps(true);                              // 기다리는 동안 메신저를 나가 다른 앱을 열지 못하게(2026-11-17 검토)
+  setTimeout(() => { phone.holdApps(false); next(); }, REDUCED ? 0 : MINE_DELAY_MS);
 }
 
 function choicesPhase() {
@@ -306,7 +308,7 @@ function endingScene(key) {
       html: `<p>${esc(U.restartAsk)}</p>`,
       buttons: [{ label: U.restartNo, cls: 'ghost' }, { label: U.restartYes, cls: 'danger', cb: resetAll }],
     }),
-    () => openProduct(STRINGS.endings[key].name));
+    () => openProduct(STRINGS.endings[key].name, $('endProduct')));
   show('scr-end');
 }
 
@@ -314,5 +316,5 @@ function endingScene(key) {
 document.getElementById('chatLog').addEventListener('click', advance);
 document.getElementById('composer').addEventListener('click', advance);
 document.getElementById('storyStage').addEventListener('click', () => { if ($('storyStage').classList.contains('on')) { sceneIdx++; renderScene(); } });
-window.LUNA = { get state() { return G; }, engine, phone, showEnding: key => endingScene(key) };   // 프로브·디버그용(showEnding = 상태 주입 뒤 엔딩 화면 바로 그리기)
+window.LUNA = { get state() { return G; }, engine, phone, notebook, showEnding: key => endingScene(key) };   // 프로브·디버그용(showEnding = 상태 주입 뒤 엔딩 화면 바로 그리기)
 boot();

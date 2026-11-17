@@ -21,7 +21,12 @@ const nowLabel = () => {
   const d = new Date(), h = d.getHours();
   return (h < 12 ? '오전 ' : '오후 ') + ((h + 11) % 12 + 1) + ':' + String(d.getMinutes()).padStart(2, '0');
 };
-const toBottom = () => { if (logEl) logEl.scrollTop = logEl.scrollHeight; };
+const toBottom = () => {
+  if (!logEl) return;
+  logEl.scrollTop = logEl.scrollHeight;
+  const wrap = logEl.closest('.applayer');           // 낮은 화면에서는 메신저 전체가 스크롤된다 — 선택지·입력창까지 내려 준다
+  if (wrap) wrap.scrollTop = wrap.scrollHeight;
+};
 
 /* 입력창(항상 남는다 — 맨 아래 말풍선이 화면 끝에 가려지지 않게). 글자를 치는 곳이 아니라 상태 한 줄 */
 export function setComposer(state) {
