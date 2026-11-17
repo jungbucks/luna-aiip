@@ -32,7 +32,7 @@ a { color: var(--neon2); }
 .issue { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
 /* 머리줄: 넓은 화면은 한 줄(권리·제목·배지·화살표), 좁은 화면은 권리·배지 줄 + 제목 줄 */
 .issue-q { display: grid; grid-template-columns: auto 1fr auto auto; grid-template-areas: "right title status chev"; align-items: center; gap: 0.6rem; width: 100%; border: 0; background: none; color: var(--text); padding: 1rem; font: inherit; text-align: left; cursor: pointer; }
-.issue-right { grid-area: right; font-size: 0.82rem; font-weight: 700; color: var(--neon); white-space: nowrap; }
+.issue-right { grid-area: right; font-size: 0.875rem; font-weight: 700; color: var(--neon); white-space: nowrap; }
 .issue-title { grid-area: title; font-weight: 800; font-size: 1.05rem; }
 .issue-q .status { grid-area: status; }
 .issue-q .chev { grid-area: chev; }
@@ -41,7 +41,7 @@ a { color: var(--neon2); }
 }
 .issue-q[aria-expanded="true"] .chev { transform: rotate(180deg); }
 .chev { color: var(--dim); transition: transform 0.15s; }
-.status { font-size: 0.78rem; font-weight: 700; border-radius: 6px; padding: 0.15rem 0.5rem; white-space: nowrap; }
+.status { font-size: 0.875rem; font-weight: 700; border-radius: 6px; padding: 0.15rem 0.5rem; white-space: nowrap; }
 .s-decided { background: rgba(250, 204, 21, 0.16); color: var(--gold); }
 .s-ongoing { background: rgba(248, 113, 113, 0.16); color: var(--bad); }
 .s-varies { background: rgba(34, 211, 238, 0.16); color: var(--neon2); }
@@ -70,7 +70,7 @@ a { color: var(--neon2); }
 .more-btn:hover { border-color: var(--neon2); }
 .more { margin-top: 0.7rem; background: var(--panel2); border: 1px dashed var(--line); border-radius: 10px; padding: 0.9rem; }
 .case-name { font-weight: 800; }
-.case-date { color: var(--dim); font-weight: 600; font-size: 0.88rem; }
+.case-date { color: var(--dim); font-weight: 600; font-size: 0.88rem; white-space: nowrap; }
 .case-gist { color: var(--text); margin: 0.5rem 0 0.7rem; }
 .sources { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; font-size: 0.9rem; }
 
