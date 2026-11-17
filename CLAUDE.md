@@ -39,7 +39,7 @@ data/strings.js     인트로·브릿지·법정·엔딩·리포트·퀴즈 문�
 data/quiz.js        O/X 확인 퀴즈 12문항(EP마다 본 문제+하나 더, 교사 검수 대기)
 js/quiz.js          퀴즈 판정·기록(G.quiz)·다시 볼 개념 목록(DOM 없음, verify가 검산)
 data/issues.js      도감 ISSUES 12·STATUS_META(양측 대립·상태 배지·실제 사례·출처)
-test/verify.mjs     게임 검산 60건(퀴즈 8·이어 하기 6·모드 6·프로필 3·수첩 9 포함) / verify-dogam.mjs 도감 10건
+test/verify.mjs     게임 검산 63건(퀴즈 8·이어 하기 6·모드 6·프로필 3·수첩 12 포함) / verify-dogam.mjs 도감 10건
 test/probe.html     게임 E2E / probe-dogam.html 도감 E2E
 test/run-probe.mjs  프로브 실행기(서버 + 헤드리스 Edge + 수확) — `node test/run-probe.mjs`
 test/probe-shots.html  캡처용 프로브(원하는 장면까지 자동 진행)
@@ -63,7 +63,7 @@ test/probe-shots.html  캡처용 프로브(원하는 장면까지 자동 진행)
 
 ## 검증 (수정 후 필수)
 
-1. 게임 `node test/verify.mjs`(60건) — 미달 시 배포 금지. 도감 `node test/verify-dogam.mjs`(10건).
+1. 게임 `node test/verify.mjs`(63건) — 미달 시 배포 금지. 도감 `node test/verify-dogam.mjs`(10건).
 2. E2E 프로브(구조·흐름 변경 시): **`node test/run-probe.mjs`** 한 줄(종료 코드 0 = 전부 PASS). 캡처는 `node test/run-probe.mjs test/probe-shots.html --shot=<png> --url="/__probe.html?scene=home&theme=light&w=1366&h=700" --size=1366,700`. 아래는 실행기가 대신 해 주는 옛 수동 절차(원리 참고용): **게임과 같은 오리진에서 서빙 필수** — file:// 프로브 + http iframe은 크로스오리진으로 조용히 죽는다(2026-07-15 실제 발생). 절차: `probe.html`을 루트에 복사 → Node 정적 서버(scratchpad) → `msedge --headless=new --user-data-dir=<임시> --virtual-time-budget=20000 --dump-dom http://localhost:PORT/...` → 수확 후 복사본 삭제. 채팅은 타이핑 인디케이터 때문에 메시지당 최대 2탭.
 
 ## 참고 문서
