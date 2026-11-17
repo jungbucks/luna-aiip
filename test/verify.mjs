@@ -133,6 +133,15 @@ console.log('[말투] 캐릭터 톡 — 사람이 하는 말 (2026-11-17, docs/s
     EPISODES.filter(e => Math.abs(len(e.choices.wrong.label) - len(e.choices.right.label)) > 8 ||
       [e.choices.wrong.label, e.choices.right.label].some(s => s.split('. ').length !== 2))
       .map(e => ({ ep: e.id, who: '선택지', text: e.choices.wrong.label + ' ↔ ' + e.choices.right.label })));
+  // 결과 알림·개념 카드: 훈계조("~한 셈입니다", "~는 필수!")와 경보 이모지 없이, 일어난 일 → 비유 → 배운 것
+  const pops = EPISODES.flatMap(e => [
+    ['오답 제목', e.choices.wrong.popup.title], ['비유', e.choices.wrong.popup.analogy], ['배운 것', e.choices.wrong.popup.lesson],
+    ['정답 제목', e.choices.right.popup.title], ['정답 본문', e.choices.right.popup.body], ['개념 카드', e.hint],
+  ].map(([who, text]) => ({ ep: e.id, who, text })));
+  none('알림: 느낌표·경보 이모지(🚨✨)·"셈입니다/격입니다"·유행어 없음', pops.filter(m => /[!🚨✨]|셈입니다|격입니다/u.test(m.text) || SLANG.some(s => m.text.includes(s))));
+  none('알림: 비유는 "~와 같아요."로, 배운 것·정답 본문은 "~다."로, 개념 카드는 "~요."로 끝남', pops.filter(m =>
+    (m.who === '비유' && !m.text.endsWith('같아요.')) || (['배운 것', '정답 본문'].includes(m.who) && !m.text.endsWith('다.')) || (m.who === '개념 카드' && !m.text.endsWith('요.'))));
+  t('알림: 정답 제목 = "(권리) 배지를 얻었다 (배지 그림)"', EPISODES.every(e => e.choices.right.popup.title === `${e.right === '퍼블리시티권' ? '퍼블리시티' : e.right} 배지를 얻었다 ${e.rightEmoji}`));
   const C = await import('../js/ui/chat.js');
   t('선택지 순서: 오답·정답 자리가 섞이고 확인은 늘 맨 끝', C.choiceOrder(0.1).join() === 'wrong,right,info' && C.choiceOrder(0.9).join() === 'right,wrong,info');
 }

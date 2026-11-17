@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- probe-shots.html — 캡처용 프로브. 게임을 iframe에 띄워 원하는 장면까지 자동으로 진행한 뒤 멈춘다.
      실행: node test/run-probe.mjs test/probe-shots.html --shot=<png> --url="/__probe.html?scene=home&theme=light&w=1366&h=700" --size=1366,740
-     scene = lock | select | story | home | chat | popup | note | notes | product | end     theme = dark | light     w,h = iframe 크기 -->
+     scene = lock | select | story | home | chat | wrong | hint | popup | note | notes | product | end     theme = dark | light     w,h = iframe 크기 -->
 <meta charset="utf-8">
 <style>html,body{margin:0;background:#888}iframe{border:0;display:block}</style>
 <iframe id="f"></iframe>
@@ -38,6 +38,10 @@ async function run() {
   for (let i = 0; i < 40 && !D().querySelector('#chatChoices .choice-btn'); i++) { E('chatLog').click(); await sleep(70); }
   await until(() => D().querySelector('#chatChoices .choice-btn')); await sleep(600);
   if (scene === 'chat') return;
+  if (scene === 'wrong' || scene === 'hint') {                           // 오답 알림 / 개념 카드
+    D().querySelector(`#chatChoices .choice-btn[data-k="${scene === 'hint' ? 'info' : 'wrong'}"]`).click();
+    await until(popup); await sleep(400); return;
+  }
   D().querySelector('#chatChoices .choice-btn[data-k="right"]').click();   // 정답(자리는 편마다 다름)
   await until(popup); await sleep(400);
   if (scene === 'popup') return;

@@ -168,7 +168,7 @@ async function run() {
     log('pick-wait: 답장 뒤 결과를 기다리는 동안에는 메신저를 못 나감', E('phoneWrap').classList.contains('on'));
     log('me-bubble: 누르자마자 선택지가 사라지고 규칙은 아직', !D().querySelector('#chatChoices .choice-btn') && W().LUNA.state.stats.money === money0);
     await until(popupShown);
-    log('정답 팝업(배지 획득)', D().querySelector('.pop-title').textContent.includes('배지 획득'));
+    log('정답 팝업(배지를 얻었다)', D().querySelector('.pop-title').textContent.includes('저작권 배지를 얻었다'));
     log('me-bubble: 내 말풍선 1개(앞의 "B. " 없이)', D().querySelectorAll('#chatLog .msg.me').length === 1 && D().querySelector('#chatLog .msg.me').textContent.includes('허락받은 음원을 구해 보자') && !/[ABC]. /.test(D().querySelector('#chatLog .msg.me').textContent));
     const d = W().LUNA.state, exp = W().LUNA.engine.newGame().stats;   // EP1 정답 한 번의 변화량과 정확히 같은지
     log('pick-double: 연타해도 한 번만 적용', d.stats.money === exp.money - 15 && d.stats.fame === exp.fame + 20 && d.stats.safety === exp.safety + 15, JSON.stringify(d.stats));
@@ -311,7 +311,7 @@ async function run() {
     W().LUNA.showEnding('unicorn');
     await until(() => active('scr-end'));
     const endTxt = () => txt('scr-end');
-    log('ending-clean-vs-quiz(주입): 놓친 EP2의 개념 요약이 보이고 "틀린 개념이 없습니다"는 없음', endTxt().includes('두 번 다 놓친 개념') && endTxt().includes('출원 전에 스스로 공개') && !endTxt().includes('틀린 개념이 없습니다'));
+    log('ending-clean-vs-quiz(주입): 놓친 EP2의 개념 요약이 보이고 "틀린 개념이 없습니다"는 없음', endTxt().includes('두 번 다 놓친 개념') && endTxt().includes((await import('/data/episodes.js')).EPISODES[1].hint.slice(0, 24)) && !endTxt().includes('틀린 개념이 없습니다'));
     st.quiz = { 1: 'ok', 2: 'more-ok' };
     W().LUNA.showEnding('unicorn');
     await sleep(100);
