@@ -124,6 +124,17 @@ console.log('[말투] 캐릭터 톡 — 사람이 하는 말 (2026-11-17, docs/s
   none('세아는 온점(또는 물음표·말줄임표·ㅋㅋ·이모지)으로 끝맺고, 준호는 온점을 찍지 않음',
     all.filter(m => (m.who === SEA && !/(?:[.?…]|ㅋㅋ|\p{Extended_Pictographic}️?)$/u.test(m.text)) || (m.who === JUNHO && m.text.endsWith('.'))));
   t('마지막 줄(결정 넘기기)은 6편이 서로 다름', new Set(EPISODES.map(e => e.messages[e.messages.length - 1].text)).size === EPISODES.length);
+
+  // 선택지 = 대표가 단톡에 보내는 답장. 말투·길이로 정답이 드러나지 않게(2026-11-17 교사: "너무 노골적이라 답이 정해져 있음")
+  const labels = EPISODES.flatMap(e => ['wrong', 'right', 'info'].map(k => ({ ep: e.id, who: '선택지 ' + k, text: e.choices[k].label })));
+  none('선택지: 45자 이하, 유행어·괄호·기호(+ / or) 없음, 온점으로 끝남',
+    labels.filter(m => len(m.text) > 45 || SLANG.some(s => m.text.includes(s)) || words(m.text).some(isGak) || /[()+/]|\bor\b|뭐 어때|겠지$/.test(m.text) || !m.text.endsWith('.')));
+  none('선택지: 오답과 정답의 길이 차 8자 이하(둘 다 결정 + 이유 두 문장)',
+    EPISODES.filter(e => Math.abs(len(e.choices.wrong.label) - len(e.choices.right.label)) > 8 ||
+      [e.choices.wrong.label, e.choices.right.label].some(s => s.split('. ').length !== 2))
+      .map(e => ({ ep: e.id, who: '선택지', text: e.choices.wrong.label + ' ↔ ' + e.choices.right.label })));
+  const C = await import('../js/ui/chat.js');
+  t('선택지 순서: 오답·정답 자리가 섞이고 확인은 늘 맨 끝', C.choiceOrder(0.1).join() === 'wrong,right,info' && C.choiceOrder(0.9).join() === 'right,wrong,info');
 }
 
 console.log('[토큰 치환] 캐릭터 이름·조사 (character.js T)');

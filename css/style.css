@@ -165,7 +165,6 @@ button{font-family:inherit;cursor:pointer;color:inherit}
   background:var(--btn);border:1px solid var(--edge);color:var(--ink);transition:border-color .15s,transform .1s}
 .choice-btn:hover{border-color:var(--accent)}
 .choice-btn:active{transform:scale(.985)}
-.choice-btn.risky:hover{border-color:var(--bad)}
 .choice-btn.info{border-style:dashed;color:var(--dim)}
 .choice-btn.dead{opacity:.4;text-decoration:line-through;cursor:not-allowed}
 .choice-btn.primary{background:var(--cta);color:var(--cta-ink);text-align:center;border:none;font-weight:800}

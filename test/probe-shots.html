@@ -38,7 +38,7 @@ async function run() {
   for (let i = 0; i < 40 && !D().querySelector('#chatChoices .choice-btn'); i++) { E('chatLog').click(); await sleep(70); }
   await until(() => D().querySelector('#chatChoices .choice-btn')); await sleep(600);
   if (scene === 'chat') return;
-  D().querySelectorAll('#chatChoices .choice-btn')[1].click();          // B 정답
+  D().querySelector('#chatChoices .choice-btn[data-k="right"]').click();   // 정답(자리는 편마다 다름)
   await until(popup); await sleep(400);
   if (scene === 'popup') return;
   await clickPop('계속');                                                // → 퀴즈

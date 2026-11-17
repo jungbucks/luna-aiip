@@ -4,7 +4,7 @@ import * as engine from './engine.js';
 import * as store from './state.js';
 import { EPISODES } from '../data/episodes.js';
 import { STRINGS } from '../data/strings.js';
-import { startChat, advance, showChoices, esc, setComposer, sendMine } from './ui/chat.js';
+import { startChat, advance, showChoices, choiceOrder, esc, setComposer, sendMine } from './ui/chat.js';
 import { showPopup, deltaLine } from './ui/popup.js';
 import { QUIZ } from '../data/quiz.js';
 import * as quiz from './quiz.js';
@@ -121,6 +121,7 @@ function intro(i) {
 /* ── 에피소드 (v0.6: 홈 화면 위 스토리 씬 → 알림 대기 → 알림·메신저를 누르면 채팅 자동 재생) ── */
 let sceneIdx = 0;
 let chatStarted = false;   // 이 EP의 채팅을 이미 시작했는가(알림 연타·다시 열기에 두 번 시작하지 않게)
+let choiceKeys = ['wrong', 'right', 'info'];   // 이 EP의 선택지 순서(enterEp에서 섞는다)
 
 function enterEp() {
   resume.markEpStart(G); store.save(G, 'ep');   // 이어 하기 시작점(2026-11-14 — 선택·퀴즈·정산 중 새로 고침해도 점수가 두 번 들어가지 않게)
@@ -130,6 +131,7 @@ function enterEp() {
   show('scr-ep');
   sceneIdx = 0;
   chatStarted = false;
+  choiceKeys = choiceOrder((window.__rand || Math.random)());   // window.__rand = 프로브가 순서를 정해 두는 자리
   while (phone.topApp()) phone.closeApp(null, false);   // 열려 있던 앱은 닫고 홈에서 시작
   phone.clearNotify();
   phone.setHome('story');
@@ -177,11 +179,13 @@ function sayThen(label, next) {
 function choicesPhase() {
   const c = ep().choices;
   pickLocked = false;
-  showChoices('어떻게 할까?', [
-    { label: 'A. ' + c.wrong.label, cls: 'risky', disabled: G.retryUsed, cb: () => sayThen(c.wrong.label, showWrongPopup) },
-    { label: 'B. ' + c.right.label, cb: () => sayThen(c.right.label, rightFlow) },
-    { label: 'C. ' + c.info.label, cls: 'info', cb: showHint },
-  ]);
+  const byKey = {
+    wrong: { text: c.wrong.label, disabled: G.retryUsed, cb: () => sayThen(c.wrong.label, showWrongPopup) },
+    right: { text: c.right.label, cb: () => sayThen(c.right.label, rightFlow) },
+    info: { text: c.info.label, cls: 'info', cb: showHint },
+  };
+  // 오답·정답은 겉모습이 같고 자리만 편마다 다르다(순서는 EP에 들어설 때 한 번 정해 다시 선택 때도 그대로)
+  showChoices('어떻게 할까?', choiceKeys.map((k, i) => ({ ...byKey[k], key: k, label: 'ABC'[i] + '. ' + byKey[k].text })));
 }
 
 function showHint() {

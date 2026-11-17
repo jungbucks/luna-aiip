@@ -151,7 +151,7 @@ async function run() {
     log('landscape: 가로로 든 폰(844×390)에서도 선택지 3개와 입력창에 스크롤로 닿음', [...D().querySelectorAll('#chatChoices .choice-btn')].every(reach) && reach(E('composer')) && (pw => pw.scrollHeight <= pw.clientHeight + 1 || ['auto', 'scroll'].includes(W().getComputedStyle(pw).overflowY))(E('phoneWrap')), E('phoneWrap').scrollHeight + '/' + E('phoneWrap').clientHeight);
     f.width = 480; await sleep(100);
     f.height = 800; await sleep(100);
-    E('chatChoices').querySelectorAll('.choice-btn')[2].click();   // C: 개념 카드
+    E('chatChoices').querySelector('.choice-btn[data-k="info"]').click();   // 확인: 개념 카드
     await until(popupShown);
     log('me-bubble: C는 내 말풍선을 만들지 않음', D().querySelectorAll('#chatLog .msg.me').length === 0 && !D().querySelector('.pop-face img'));
     D().querySelector('.pop-btn').click(); await sleep(100);
@@ -159,14 +159,17 @@ async function run() {
     log('조사 자동 치환(솔이 직접 곡을)', txt('chatLog').includes('솔이 직접 곡을 쓸 수 있어요'));
     log('화면에 토큰 잔여 없음', !/\{[nN]/.test(D().body.textContent));
 
-    const bBtn = D().querySelectorAll('#chatChoices .choice-btn')[1];   // B 정답
+    { const bs = [...D().querySelectorAll('#chatChoices .choice-btn')], cs = b => W().getComputedStyle(b), look = b => [cs(b).borderTopColor, cs(b).backgroundColor, cs(b).color, cs(b).borderTopStyle].join('|');
+      const w = bs.find(b => b.dataset.k === 'wrong'), r = bs.find(b => b.dataset.k === 'right');
+      log('choices: 글자 A·B·C는 자리 순서, 확인은 맨 끝, 오답과 정답은 겉모습이 같음', bs.length === 3 && bs.every((b, i) => b.textContent.startsWith('ABC'[i] + '. ')) && bs[2].dataset.k === 'info' && !!w && !!r && look(w) === look(r) && w.className === r.className, bs.map(b => b.dataset.k).join()); }
+    const bBtn = D().querySelector('#chatChoices .choice-btn[data-k="right"]');   // 정답(자리는 편마다 다름)
     bBtn.click(); bBtn.click();                                      // pick-double: 연타
     E('msgBack').click();                                            // 결과를 기다리는 동안 뒤로 — 무시돼야 한다
     log('pick-wait: 답장 뒤 결과를 기다리는 동안에는 메신저를 못 나감', E('phoneWrap').classList.contains('on'));
     log('me-bubble: 누르자마자 선택지가 사라지고 규칙은 아직', !D().querySelector('#chatChoices .choice-btn') && W().LUNA.state.stats.money === money0);
     await until(popupShown);
     log('정답 팝업(배지 획득)', D().querySelector('.pop-title').textContent.includes('배지 획득'));
-    log('me-bubble: 내 말풍선 1개(앞의 "B. " 없이)', D().querySelectorAll('#chatLog .msg.me').length === 1 && D().querySelector('#chatLog .msg.me').textContent.includes('라이선스 있는 데이터만 쓰자') && !D().querySelector('#chatLog .msg.me').textContent.includes('B.'));
+    log('me-bubble: 내 말풍선 1개(앞의 "B. " 없이)', D().querySelectorAll('#chatLog .msg.me').length === 1 && D().querySelector('#chatLog .msg.me').textContent.includes('허락받은 음원을 구해 보자') && !/[ABC]. /.test(D().querySelector('#chatLog .msg.me').textContent));
     const d = W().LUNA.state, exp = W().LUNA.engine.newGame().stats;   // EP1 정답 한 번의 변화량과 정확히 같은지
     log('pick-double: 연타해도 한 번만 적용', d.stats.money === exp.money - 15 && d.stats.fame === exp.fame + 20 && d.stats.safety === exp.safety + 15, JSON.stringify(d.stats));
     log('pop-face: 정답 알림창에 지금 표정의 아이돌', D().querySelector('.pop-face img.idol-svg').dataset.expr === 'happy');
@@ -280,7 +283,7 @@ async function run() {
     await until(() => E('phoneWrap').classList.contains('on'));
     for (let i = 0; i < 40 && !D().querySelector('#chatChoices .choice-btn'); i++) { D().getElementById('chatLog').click(); await sleep(70); }
     await until(() => D().querySelector('#chatChoices .choice-btn'));
-    D().querySelectorAll('#chatChoices .choice-btn')[0].click();   // A 오답
+    D().querySelector('#chatChoices .choice-btn[data-k="wrong"]').click();   // 오답(자리는 편마다 다름)
     await until(() => popupShown() && pbtns().some(b => b.textContent.includes('대가를 치르고')));
     pbtns().find(b => b.textContent.includes('대가를 치르고')).click();
     await until(() => popupShown() && (ptitle().includes('개념 확인 O/X') || ptitle().includes('정산')) || active('scr-court'));

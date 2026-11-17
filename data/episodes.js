@@ -1,7 +1,7 @@
 /* [데이터] EP1~6 시나리오 — 엔진·UI는 이 데이터만 읽는다 (SPEC §8).
    스키마: {id,title,right,rightEmoji,roomName,intro,scenes[{emoji,text}],messages[{who,text}],hint,
    scenes(v0.4): 채팅 전에 탭으로 넘기는 스토리 씬 2~3장 — 마지막 씬은 "단톡방이 울린다"류로 폰 등장을 예고.
-           choices:{wrong:{label,delta,popup:{title,analogy,lesson}},
+           choices:{wrong:{label,delta,popup:{title,analogy,lesson}},   ← label은 '대표가 단톡에 보내는 답장'(결정 + 이유, 온점). 화면 순서는 편마다 섞인다
                     right:{label,delta,popup:{title,body}},
                     info:{label}}}
    ⚠️ delta 수치는 SPEC §6.2 확정값 — 임의 변경 금지.
@@ -40,7 +40,7 @@ export const EPISODES = [
     hint: '저작권은 창작물의 \'표현\'을 보호해요. 남의 저작물을 허락 없이 대량 복제하면, 목적이 학습이어도 침해 위험이 있습니다.',
     choices: {
       wrong: {
-        label: 'ㄱㄱ 학습용인데 뭐 어때',
+        label: '그 3천 곡으로 가자. 87만 원으로는 다른 방법이 없어.',
         delta: { money: -30, safety: -25, fame: +5 },
         popup: {
           title: '🚨 3개월 후… 한국음악저작권협회에서 내용증명 도착!',
@@ -49,14 +49,14 @@ export const EPISODES = [
         },
       },
       right: {
-        label: '라이선스 있는 데이터만 쓰자 (비용 발생)',
+        label: '그 곡들은 빼자. 돈이 더 들어도 허락받은 음원을 구해 보자.',
         delta: { money: -15, safety: +15, fame: +20 },
         popup: {
           title: '✨ 저작권 배지 획득! ⚖️',
           body: '라이선스 데이터로 학습한 {n}의 데뷔곡, \'출처 깨끗한 노래\'로 언론에 오히려 화제!',
         },
       },
-      info: { label: '잠깐, 저작권 확인부터' },
+      info: { label: '잠깐, 저작권부터 확인해 보자.' },
     },
   },
   {
@@ -90,7 +90,7 @@ export const EPISODES = [
     hint: '특허는 \'새로운\' 발명에만 주어져요. 출원 전에 스스로 공개해 버리면 신규성을 잃어 특허를 못 받을 수 있습니다.',
     choices: {
       wrong: {
-        label: '기술력 과시! 상세 원리까지 다 공개',
+        label: '올리자. 지금 관심이 뜨거울 때 기술력을 보여 줘야지.',
         delta: { money: -20, safety: -20, fame: +10 },
         popup: {
           title: '🚨 6개월 후… 경쟁사가 같은 기술을 먼저 출원!',
@@ -99,14 +99,14 @@ export const EPISODES = [
         },
       },
       right: {
-        label: '특허 출원 먼저, 공개는 그 다음',
+        label: '글은 미루자. 서류가 번거로워도 특허 출원부터 하자.',
         delta: { money: -10, safety: +15, fame: +10 },
         popup: {
           title: '✨ 특허권 배지 획득! 🛡️',
           body: '출원을 마친 뒤 공개한 립싱크 기술 — 이제 누구도 함부로 베낄 수 없는 {n}의 핵심 무기!',
         },
       },
-      info: { label: '잠깐, 특허 확인부터' },
+      info: { label: '잠깐, 특허부터 확인해 보자.' },
     },
   },
   {
@@ -142,7 +142,7 @@ export const EPISODES = [
     hint: '상표권은 \'등록\'해야 생기는 권리예요. 먼저 만들었다는 사실만으로는 보호받기 어렵습니다.',
     choices: {
       wrong: {
-        label: '우리가 먼저 만들었으니 자동으로 보호되겠지',
+        label: '바로 신고부터 하자. 우리가 먼저 쓴 이름이니 보호받을 거야.',
         delta: { money: -25, safety: -25, fame: 0 },
         popup: {
           title: '🚨 짝퉁 \'{N}-AI\'에 법적 대응 불가…',
@@ -151,14 +151,14 @@ export const EPISODES = [
         },
       },
       right: {
-        label: '상표 출원부터, 침해 대응은 등록 후',
+        label: '신고는 잠깐 미루자. 시간이 걸려도 상표 출원부터 하자.',
         delta: { money: -10, safety: +10, fame: +15 },
         popup: {
           title: '✨ 상표권 배지 획득! 📋',
           body: '{N} 상표 등록 완료 — 이제 짝퉁에게 정식으로 경고장을 보낼 수 있다!',
         },
       },
-      info: { label: '잠깐, 상표 확인부터' },
+      info: { label: '잠깐, 상표부터 확인해 보자.' },
     },
   },
   {
@@ -194,7 +194,7 @@ export const EPISODES = [
     hint: '영업비밀로 보호받으려면 회사가 그 정보를 \'비밀로 관리\'하고 있었어야 해요(NDA, 접근 제한 등).',
     choices: {
       wrong: {
-        label: '어차피 걔 머릿속 지식인데 뭐 어때',
+        label: '그냥 두자. 선배 머릿속에 있는 걸 막을 방법은 없잖아.',
         delta: { money: -30, safety: -30, fame: 0 },
         popup: {
           title: '🚨 우리 핵심 노하우가 경쟁사 신제품에…!',
@@ -203,14 +203,14 @@ export const EPISODES = [
         },
       },
       right: {
-        label: '비밀유지계약(NDA) + 접근권한 관리 체계 구축',
+        label: '문서부터 잠그자. 번거로워도 비밀 유지 계약을 맺자.',
         delta: { money: -10, safety: +15, fame: +5 },
         popup: {
           title: '✨ 영업비밀 배지 획득! 🔐',
           body: 'NDA와 접근권한 체계 구축 완료 — 회사의 두뇌에 자물쇠를 달았다.',
         },
       },
-      info: { label: '잠깐, 영업비밀 확인부터' },
+      info: { label: '잠깐, 영업비밀부터 확인해 보자.' },
     },
   },
   {
@@ -243,7 +243,7 @@ export const EPISODES = [
     hint: '초상권: 내 얼굴을 함부로 촬영·공개당하지 않을 권리. 공개된 장소라도 얼굴이 식별되면 동의가 필요해요.',
     choices: {
       wrong: {
-        label: '공개 행사였으니 문제없지',
+        label: '올리자. 공개 행사였고, 표정이 좋을 때 써야 홍보가 되지.',
         delta: { money: -20, safety: -25, fame: +10 },
         popup: {
           title: '🚨 사진 속 팬에게서 항의가… "제 얼굴 내려주세요"',
@@ -252,14 +252,14 @@ export const EPISODES = [
         },
       },
       right: {
-        label: '얼굴 식별되는 관객은 동의받거나 블러 처리',
+        label: '홍보가 늦어져도 먼저 동의를 구하자. 안 되면 얼굴을 가리고.',
         delta: { money: -5, safety: +10, fame: +10 },
         popup: {
           title: '✨ 초상권 배지 획득! 🙅',
           body: '동의·블러 원칙을 공지하자 팬들의 신뢰가 오히려 상승 — "팬을 존중하는 회사"로 입소문!',
         },
       },
-      info: { label: '잠깐, 초상권 확인부터' },
+      info: { label: '잠깐, 초상권부터 확인해 보자.' },
     },
   },
   {
@@ -294,7 +294,7 @@ export const EPISODES = [
     hint: '유명인의 얼굴·이름이 가진 고객 흡인력은 법으로 보호받는 재산적 이익이에요. \'닮은꼴\' 상업 이용도 위험합니다.',
     choices: {
       wrong: {
-        label: '닮은 것뿐인데? 이름도 안 쓰는데 뭐',
+        label: '하겠다고 전해 줘. 닮게 그릴 뿐이고 이름은 안 쓰니까.',
         delta: { money: -25, safety: -25, fame: +15 },
         popup: {
           title: '🚨 배우 K 소속사에서 경고장 도착!',
@@ -303,14 +303,14 @@ export const EPISODES = [
         },
       },
       right: {
-        label: 'K 소속사와 정식 라이선스 계약 or 독자 디자인 유지',
+        label: 'K 씨 쪽 허락 없이는 못 한다고 전해 줘. 계약을 놓치더라도.',
         delta: { money: -15, safety: +15, fame: +15 },
         popup: {
           title: '✨ 퍼블리시티 배지 획득! 💰',
           body: '독자 디자인 유지 결정 — {n는} 누구의 닮은꼴도 아닌, {n} 그 자체로 승부한다!',
         },
       },
-      info: { label: '잠깐, 이번엔 뭐가 다른지 확인부터' },
+      info: { label: '잠깐, 이번엔 뭐가 다른지부터 확인해 보자.' },
     },
   },
 ];

@@ -84,7 +84,12 @@ function finalizeMsg() {
   }
 }
 
-/* choices: [{label, cls, disabled, cb}] — 입력창 바로 위에 올라오는 판 */
+/* 선택지 순서: 오답·정답 자리를 편마다 섞는다(늘 "B가 정답"이면 읽지 않고 고른다). 확인(개념 카드)은 늘 맨 끝. r = 0~1 난수 */
+export function choiceOrder(r) {
+  return r < 0.5 ? ['wrong', 'right', 'info'] : ['right', 'wrong', 'info'];
+}
+
+/* choices: [{label, cls, disabled, cb, key}] — 입력창 바로 위에 올라오는 판. key는 data-k로만 남긴다(겉모습은 같게 — 프로브용) */
 export function showChoices(title, choices) {
   const box = document.getElementById('chatChoices');
   box.innerHTML = `<div class="choice-title">${esc(title)}</div>`;
@@ -92,6 +97,7 @@ export function showChoices(title, choices) {
     const b = document.createElement('button');
     b.className = 'choice-btn ' + (c.cls || '');
     b.textContent = T(c.label);
+    if (c.key) b.dataset.k = c.key;
     if (c.disabled) { b.disabled = true; b.classList.add('dead'); }
     else b.onclick = c.cb;
     box.appendChild(b);
