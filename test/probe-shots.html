@@ -51,7 +51,8 @@ async function run() {
   const i = E('noteInput'); i.value = '학습용이라도 남의 노래를 허락 없이 대량으로 쓰면 안 된다는 걸 알았다.'; i.dispatchEvent(new (W().Event)('input', { bubbles: true }));
   await sleep(60); E('noteSave').click(); await until(popup); await sleep(200);
   if (scene === 'end' || scene === 'product') {
-    W().LUNA.showEnding('survive' in (await W().eval('import("./data/strings.js")')).STRINGS.endings ? 'survive' : 'unicorn');
+    await clickPop('시작');                                             // 정산 팝업 닫기(EP2로) — 그 뒤 엔딩을 바로 그린다
+    W().LUNA.showEnding('unicorn');
     await until(() => E('scr-end').classList.contains('active')); await sleep(300);
     if (scene === 'end') return;
     E('endProduct').click(); await sleep(700);

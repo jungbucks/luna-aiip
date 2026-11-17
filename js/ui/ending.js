@@ -39,7 +39,7 @@ function endReview(state) {
   return parts.join('');
 }
 
-export function renderEnding(state, endingKey, restartCb) {
+export function renderEnding(state, endingKey, restartCb, productCb) {
   const e = STRINGS.endings[endingKey];
   const r = STRINGS.report;
   const badges = EPISODES.map((ep, i) => {
@@ -60,7 +60,9 @@ export function renderEnding(state, endingKey, restartCb) {
       <div class="rv-list">${endReview(state)}</div>
       <p class="disclaimer">${esc(r.disclaimer)}</p>
       <a class="dogam-teaser" href="dogam.html">🧭 법은 여기까지 배웠어요. 그런데 AI 시대엔? → 쟁점 도감 열기</a>
+      <button class="choice-btn" id="endProduct">${esc(STRINGS.ui.notes.product)}</button>
       <button class="choice-btn primary" id="endRestart">🔄 처음부터 다시</button>
     </div>`;
   document.getElementById('endRestart').onclick = restartCb;
+  document.getElementById('endProduct').onclick = productCb;
 }

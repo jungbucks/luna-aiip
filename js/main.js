@@ -14,7 +14,8 @@ import { IDOLS, idolSVG, setIdol, getIdol, T, setExpression, autoExpression } fr
 import { applyTheme, toggleTheme, watchSystemTheme } from './ui/theme.js';
 import * as phone from './ui/phone.js';
 import { initSettings, openSettings } from './ui/settings.js';
-import { initNotebook, openNotebook } from './ui/notebook.js';
+import { initNotebook, openNotebook, askNote, openProduct } from './ui/notebook.js';
+import { clearNotes } from './notes.js';
 
 let G = null;
 const $ = id => document.getElementById(id);
@@ -81,14 +82,15 @@ function boot() {
   const saved = store.load();
   $('btnContinue').style.display = saved ? '' : 'none';
   $('btnContinue').onclick = () => { G = resume.resumeState(saved.game); applyIdol(G.idol); enterEp(); };   // EP 시작 상태에서 다시(점수 두 번 방지)
-  $('btnNew').onclick = () => { store.clear(); G = engine.newGame(); show('scr-select'); };
+  $('btnNew').onclick = () => { store.clear(); clearNotes(); G = engine.newGame(); show('scr-select'); };
   $('btnReset').onclick = resetAll;
   show('scr-title');
 }
 
-/* 기록 초기화(타이틀·설정 공통). 화면 모드(luna_theme)는 지우지 않는다 */
+/* 기록 초기화(타이틀·설정·엔딩 공통): 게임 기록 + 수첩에 적은 글. 화면 모드(luna_theme)는 지우지 않는다 */
 function resetAll() {
   store.clear();
+  clearNotes();
   location.reload();
 }
 
@@ -215,8 +217,8 @@ function acceptFlow() {
   const ev = engine.chooseWrongAccept(G, G.ep, ep().choices.wrong.delta);
   store.save(G, 'ep');
   updateStatbar(); autoExpression(G);
-  if (ev) return courtScene(ev === 'court', () => quizThen(bridge));   // 최종 법정이면 엔딩으로 가서 퀴즈 없음
-  quizThen(bridge);
+  if (ev) return courtScene(ev === 'court', () => quizThen(noteStep));   // 최종 법정이면 엔딩으로 가서 퀴즈 없음
+  quizThen(noteStep);
 }
 
 function rightFlow() {
@@ -229,9 +231,12 @@ function rightFlow() {
   showPopup({
     title: r.popup.title + (isRetry ? ' (반쪽 배지)' : ''),
     html: `<p>${esc(r.popup.body)}</p><p class="delta good">${deltaLine(r.delta)}</p>`,
-    buttons: [{ label: '계속 →', cb: () => quizThen(bridge) }], face: true,
+    buttons: [{ label: '계속 →', cb: () => quizThen(noteStep) }], face: true,
   });
 }
+
+/* ── 알게 된 것 적기(v0.6, 스탯 무관) — 퀴즈 뒤·정산 앞. 권리 수첩이 열려 적어야 정산으로 넘어간다 ── */
+const noteStep = () => askNote(G.ep, bridge);
 
 /* ── O/X 확인 퀴즈(2026-11-14, 스탯 무관) — 정산(bridge) 직전. 틀리면 하나 더, 결과는 G.quiz에(js/quiz.js) ── */
 const QUIZ_GUARD_MS = 300;   // 팝업이 뜬 직후 연타가 다음 팝업 버튼을 누르지 않게
@@ -294,7 +299,14 @@ function courtScene(isFinal, contCb) {
 
 function endingScene(key) {
   if (key === 'unicorn') setExpression('happy');
-  renderEnding(G, key, () => { store.clear(); location.reload(); });
+  const U = STRINGS.ui;
+  renderEnding(G, key,
+    () => showPopup({                                  // 다시 하기 전에 한 번 묻는다 — 적은 글도 지워지므로
+      title: U.restartTitle,
+      html: `<p>${esc(U.restartAsk)}</p>`,
+      buttons: [{ label: U.restartNo, cls: 'ghost' }, { label: U.restartYes, cls: 'danger', cb: resetAll }],
+    }),
+    () => openProduct(STRINGS.endings[key].name));
   show('scr-end');
 }
 

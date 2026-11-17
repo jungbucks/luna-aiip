@@ -172,6 +172,28 @@ console.log('[메신저] 프로필 글자 (chat.js avatarOf)');
   t('avatar: 데이터의 모든 보낸이에 글자', EPISODES.every(e => e.messages.every(m => C.avatarOf(m.who).length === 1)));
 }
 
+console.log('[수첩] 알게 된 것 적기 (notes.js — 점수와 무관)');
+{
+  const N = await import('../js/notes.js');
+  const mem = () => { const m = {}; return { getItem: k => (k in m ? m[k] : null), setItem: (k, v) => { m[k] = String(v); }, removeItem: k => { delete m[k]; } }; };
+  const boom = { getItem() { throw new Error('x'); }, setItem() { throw new Error('x'); }, removeItem() { throw new Error('x'); } };
+  t('notes-valid: 5자부터', !N.isValid('1234') && N.isValid('12345') && !N.isValid('   \n  ') && !N.isValid(' 1 2 3 4 ') && N.isValid('가 나 다 라 마'));
+  t('notes-normalize: 200자로 자르고 앞뒤 공백 제거', N.normalize('  ' + '가'.repeat(250) + '  ').length === 200 && N.normalize('  abc  ') === 'abc');
+  const s = mem();
+  t('notes-save/load', N.saveNote(2, '  특허는 먼저 출원  ', s) === true && N.getNote(2, s) === '특허는 먼저 출원' && JSON.parse(s.getItem('luna_notes_v1'))[2] === '특허는 먼저 출원');
+  t('notes-empty', N.getNote(5, s) === '' && Object.keys(N.loadNotes(mem())).length === 0);
+  s.setItem('luna_notes_v1', '{깨짐');
+  t('notes-broken→빈 수첩', Object.keys(N.loadNotes(s)).length === 0);
+  N.clearNotes(s);
+  t('notes-clear', s.getItem('luna_notes_v1') === null && N.getNote(2, s) === '');
+  t('notes-storage-throws: 저장 실패해도 그 판에서는 보임', N.saveNote(1, '저작권은 표현을 보호', boom) === false && N.getNote(1, boom) === '저작권은 표현을 보호');
+  N.clearNotes(mem());
+  const txt = N.buildProductText({ title: '나의 권리 수첩', name: '10101 홍길동', date: '2026-11-17', idol: 'X', result: '유니콘', stats: { money: 1, fame: 2, safety: 3 },
+    items: [{ emoji: '⚖️', right: '저작권', badge: '완전', hint: '힌트', note: '<b>내 글</b>' }, { emoji: '🛡️', right: '특허권', badge: '미획득', hint: '힌트2', note: '' }] });
+  t('product-text: 권리·배지·내 글·빈칸 표시', txt.includes('나의 권리 수첩') && txt.includes('10101 홍길동') && txt.includes('⚖️ 저작권 (완전)') && txt.includes('<b>내 글</b>') && txt.includes('(아직 적지 않음)') && txt.includes('💰 1'));
+  t('notes는 게임 저장 키를 쓰지 않음', N.NOTES_KEY !== 'luna_save_v1');
+}
+
 console.log('─'.repeat(40));
 if (fail) { console.log(`❌ ${fail}건 실패 / ${pass}건 통과 — 배포 금지`); process.exit(1); }
 console.log(`✅ ${pass}건 전부 통과 — 엔진 검산 완료`);

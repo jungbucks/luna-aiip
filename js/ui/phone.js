@@ -84,6 +84,7 @@ export function lockApps(on) {
 
 /* ── 뒤로 가기 ── 방문 기록을 한 칸만 쓴다. 프로그램이 history.back()을 부르지 않는다(경합 방지).
    앱이 닫힌 뒤 한 칸이 남아 있으면 홈에서의 첫 뒤로 가기가 한 번 헛돌 수 있다 — 감수한다. */
+export function armBack() { arm(); }
 function arm() {
   if (armed) return;
   try { history.pushState({ lunaApp: 1 }, ''); armed = true; } catch (e) { /* 일부 환경에서 막혀도 게임은 계속 */ }
@@ -92,7 +93,9 @@ function arm() {
 function onPopState() {
   armed = false;                                   // 방금 그 한 칸을 썼다
   const popup = $('popup').classList.contains('show');
-  if (locked || popup) { if (stack.length) arm(); return; }   // 무시하고 한 칸 되채움
+  const sheet = $('productSheet');                 // 산출물 층(앱 스택 밖 — 엔딩 화면에서도 열린다)
+  if (locked || popup) { if (stack.length || sheet.classList.contains('on')) arm(); return; }   // 무시하고 한 칸 되채움
+  if (sheet.classList.contains('on')) { sheet.classList.remove('on'); if (stack.length) arm(); return; }
   if (stack.length) { closeApp(); if (stack.length) arm(); }
 }
 

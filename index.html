@@ -24,6 +24,7 @@ window.__errs=[];addEventListener('error',function(e){__errs.push(e.message)});a
 <link rel="modulepreload" href="js/ui/phone.js">
 <link rel="modulepreload" href="js/ui/settings.js">
 <link rel="modulepreload" href="js/ui/notebook.js">
+<link rel="modulepreload" href="js/notes.js">
 <link rel="modulepreload" href="data/episodes.js">
 <link rel="modulepreload" href="data/strings.js">
 </head>
@@ -136,6 +137,17 @@ window.__errs=[];addEventListener('error',function(e){__errs.push(e.message)});a
   <!-- 법정 / 엔딩 -->
   <section class="scr" id="scr-court"></section>
   <section class="scr" id="scr-end"></section>
+
+  <!-- 산출물 "나의 권리 수첩" — 엔딩·권리 수첩 앱에서 연다. 인쇄하면 이 층의 종이만 나온다 -->
+  <section id="productSheet" class="applayer">
+    <div class="app-head"><button type="button" class="app-back" id="prodBack">‹</button><span class="app-title" id="prodTitle"></span></div>
+    <div class="app-body prod-paper" id="prodPaper"></div>
+    <div class="prod-actions">
+      <button type="button" class="choice-btn primary" id="btnPrint"></button>
+      <button type="button" class="choice-btn" id="btnCopy"></button>
+      <div id="prodStatus" role="status"></div>
+    </div>
+  </section>
 
   <!-- 팝업 오버레이 -->
   <div id="popup"><div class="pop-card glass2">

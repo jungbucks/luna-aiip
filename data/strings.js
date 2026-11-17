@@ -83,6 +83,7 @@ export const STRINGS = {
       reset: '기록 초기화', resetAsk: '게임 기록과 수첩에 적은 글이 모두 지워집니다. 지울까요?',
       resetYes: '지우기', resetNo: '그만두기', version: '버전 0.6',
     },
+    restartTitle: '🔄 처음부터 다시',
     restartAsk: '처음부터 다시 하면 수첩에 적은 글도 지워집니다. 산출물을 먼저 저장했나요?',
     restartYes: '지우고 다시 하기', restartNo: '돌아가기',
   },
