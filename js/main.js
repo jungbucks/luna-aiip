@@ -13,6 +13,8 @@ import { renderCourt, renderEnding } from './ui/ending.js';
 import { IDOLS, idolSVG, setIdol, getIdol, T, setExpression, autoExpression } from './ui/character.js';
 import { applyTheme, toggleTheme, watchSystemTheme } from './ui/theme.js';
 import * as phone from './ui/phone.js';
+import { initSettings, openSettings } from './ui/settings.js';
+import { initNotebook, openNotebook } from './ui/notebook.js';
 
 let G = null;
 const $ = id => document.getElementById(id);
@@ -66,7 +68,9 @@ function updateStatbar() {
 /* ── 타이틀 / 캐릭터 선택 / 인트로 ── */
 function boot() {
   applyTheme(); watchSystemTheme();
-  phone.initPhone({ onMessenger: openMessenger }); phone.startClock();
+  phone.initPhone({ onMessenger: openMessenger, onNotes: openNotebook, onSettings: openSettings }); phone.startClock();
+  initSettings({ onReset: resetAll });
+  initNotebook({ getState: () => G });
   $('btnTheme').onclick = toggleTheme;
   $('lockApp').textContent = STRINGS.ui.lockApp; $('lockNow').textContent = STRINGS.ui.lockNow;
   $('titleChars').innerHTML = idolSVG('sol') + idolSVG('luna');
@@ -78,8 +82,14 @@ function boot() {
   $('btnContinue').style.display = saved ? '' : 'none';
   $('btnContinue').onclick = () => { G = resume.resumeState(saved.game); applyIdol(G.idol); enterEp(); };   // EP 시작 상태에서 다시(점수 두 번 방지)
   $('btnNew').onclick = () => { store.clear(); G = engine.newGame(); show('scr-select'); };
-  $('btnReset').onclick = () => { store.clear(); location.reload(); };
+  $('btnReset').onclick = resetAll;
   show('scr-title');
+}
+
+/* 기록 초기화(타이틀·설정 공통). 화면 모드(luna_theme)는 지우지 않는다 */
+function resetAll() {
+  store.clear();
+  location.reload();
 }
 
 function applyIdol(key) {

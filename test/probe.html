@@ -66,6 +66,24 @@ async function run() {
     for (const id of ['appCity', 'appCal', 'dockCall']) E(id).click();
     log('decor: 장식 앱 3개는 아무 층도 열지 않음', !D().querySelector('.applayer.on') && E('appCity').getAttribute('aria-label').includes('(장식)'));
     log('decor: 달력에 오늘 날짜', E('calDay').textContent === String(new Date().getDate()));
+    E('dockNotes').click();
+    await until(() => E('appNotes').classList.contains('on'));
+    const cards = () => [...D().querySelectorAll('#notesList .note-card')];
+    log('notes: 6칸, EP1 선택 전에는 모두 잠김', cards().length === 6 && cards().every(c => c.dataset.state === 'locked') && cards()[2].textContent.includes('EP3에서 만나요'));
+    log('notes: 진행 중인 EP의 개념 힌트는 안 보임', !E('appNotes').textContent.includes('표현'));
+    E('notesBack').click(); await until(() => !E('appNotes').classList.contains('on'));
+    E('dockSettings').click();
+    await until(() => E('appSettings').classList.contains('on'));
+    D().querySelector('[data-theme-pref="light"]').click();
+    log('settings: 라이트 고르기', D().documentElement.dataset.theme === 'light' && D().querySelector('[data-theme-pref="light"]').getAttribute('aria-pressed') === 'true');
+    D().querySelector('[data-theme-pref="system"]').click();
+    log('settings: 기기 설정 따름 = 저장 지움', W().localStorage.getItem('luna_theme') === null);
+    D().querySelector('[data-theme-pref="dark"]').click();
+    E('setReset').click(); await until(popupShown);
+    log('settings: 초기화는 한 번 더 물음', txt('popup').includes('지울까요') && D().querySelectorAll('#popup .pop-btn').length === 2);
+    [...D().querySelectorAll('#popup .pop-btn')].find(b => b.textContent.includes('그만두기')).click();
+    log('settings: 그만두면 그대로', !!W().localStorage.getItem('luna_save_v1') && E('appSettings').classList.contains('on'));
+    E('setBack').click(); await until(() => !E('appSettings').classList.contains('on'));
     E('notifBanner').click(); E('notifBanner').click(); E('dockMsg').click();     // notify-double: 연타
     await until(() => E('phoneWrap').classList.contains('on'));
     log('폰 프레임 등장', E('phoneWrap').classList.contains('on'));
@@ -155,6 +173,10 @@ async function run() {
     log('EP2 진입', txt('epHead').includes('EP2'));
     log('ep-next: 다음 EP는 메신저가 닫힌 홈에서 스토리로', !E('phoneWrap').classList.contains('on') && home() === 'story');
     log('popup-inert: 팝업이 닫히면 inert 해제', !D().querySelector('#app > [inert]'));
+    await throughStory();
+    E('dockNotes').click(); await until(() => E('appNotes').classList.contains('on'));
+    log('notes: EP1을 마치면 1칸 열림 + 배지 문구는 엔딩과 같은 말', cards()[0].dataset.state === 'open' && cards()[0].textContent.includes('저작권') && cards()[0].textContent.includes('완전') && cards()[0].textContent.includes('표현') && cards()[1].dataset.state === 'locked');
+    E('notesBack').click(); await until(() => !E('appNotes').classList.contains('on'));
     const save = JSON.parse(W().localStorage.getItem('luna_save_v1'));
     log('저장에 idol=sol', save && save.game.idol === 'sol');
 
@@ -219,6 +241,15 @@ async function run() {
     W().LUNA.showEnding('unicorn');
     await sleep(100);
     log('ending-clean-vs-quiz(주입): 다 맞힌 경우 기존 문구만', endTxt().includes('틀린 개념이 없습니다') && !endTxt().includes('두 번 다 놓친 개념'));
+    // 설정의 기록 초기화(실제로 지우기) — 게임 기록은 지워지고 모드는 남는다
+    f.src = '/index.html?r=9'; await sleep(200);
+    await until(() => W().LUNA && E('btnContinue') && E('btnContinue').style.display !== 'none');
+    E('btnContinue').click(); await until(() => active('scr-ep')); await throughStory();
+    E('dockSettings').click(); await until(() => E('appSettings').classList.contains('on'));
+    E('setReset').click(); await until(popupShown);
+    [...D().querySelectorAll('#popup .pop-btn')].find(b => b.textContent.includes('지우기')).click();
+    await sleep(400); await until(() => W().LUNA && E('btnNew') && active('scr-title'));
+    log('settings: 초기화 — 게임 기록은 지워지고 모드는 남음', W().localStorage.getItem('luna_save_v1') === null && W().localStorage.getItem('luna_theme') === 'dark' && active('scr-title'));
   } catch (e) { log('예외 발생', false, e.message); }
   out.textContent += 'PROBE-DONE\n';
   document.title = 'PROBE-DONE';
