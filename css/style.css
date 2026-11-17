@@ -149,17 +149,16 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 
 /* ── 채팅 말풍선·선택지(메신저 앱의 틀은 css/phone.css) ── */
 #chatLog{flex:1;overflow-y:auto;padding:8px 14px 4px;display:flex;flex-direction:column;gap:8px;min-height:80px;cursor:pointer}
-.msg{opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s}
+.msg{display:flex;gap:7px;align-items:flex-start;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s}
 .msg.show{opacity:1;transform:none}
 .msg .who{display:block;font-size:12.5px;color:var(--dim);margin-bottom:2px}
-.msg .bubble{display:inline-block;background:var(--bub);border:1px solid var(--bub-line);border-radius:16px;padding:8px 12px;font-size:15.5px;line-height:1.45;max-width:88%}
+.msg .bubble{display:block;background:var(--bub);border:1px solid var(--bub-line);border-radius:16px;padding:8px 12px;font-size:15.5px;line-height:1.45;min-width:0}
 .msg .dots{display:inline-flex;gap:4px;padding:5px 2px}
 .msg .dots s{width:6px;height:6px;border-radius:50%;background:var(--dim);text-decoration:none;animation:dotBounce 1s infinite}
 .msg .dots s:nth-child(2){animation-delay:.15s}
 .msg .dots s:nth-child(3){animation-delay:.3s}
 @keyframes dotBounce{0%,60%,100%{opacity:.35;transform:none}30%{opacity:1;transform:translateY(-3px)}}
-#chatTapHint{text-align:center;color:var(--dim);font-size:13.5px;padding:8px;cursor:pointer;flex-shrink:0}
-#chatChoices{padding:8px 12px 14px;display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+#chatChoices{display:flex;flex-direction:column;gap:8px;flex-shrink:0}
 #chatChoices:empty{display:none}
 .choice-title{font-weight:800;color:var(--accent);font-size:14.5px;margin:0 4px}
 .choice-btn{width:100%;text-align:left;padding:12px 14px;border-radius:16px;font-size:15.5px;font-weight:600;line-height:1.45;
@@ -177,6 +176,8 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 #popup.show{display:flex}
 .pop-card{border-radius:30px;padding:20px 16px 14px;max-width:420px;width:100%;max-height:86%;overflow-y:auto;animation:popIn .26s cubic-bezier(.2,.9,.25,1.2) both}
 @keyframes popIn{from{opacity:0;transform:scale(.92)}}
+.pop-face:empty{display:none}
+.pop-face .idol-svg{display:block;width:92px;margin:-4px auto 4px;animation:none}
 .pop-title{font-size:18px;font-weight:800;line-height:1.45;margin-bottom:10px;text-align:center}
 .pop-body p{margin-bottom:10px;font-size:15.5px}
 .pop-body .analogy{background:var(--chip);border:1px solid var(--edge);padding:10px 13px;border-radius:14px;color:var(--dim)}

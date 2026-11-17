@@ -112,10 +112,11 @@ window.__errs=[];addEventListener('error',function(e){__errs.push(e.message)});a
     </div>
     <!-- 메신저 앱 -->
     <div id="phoneWrap" class="applayer">
-      <div class="app-head"><button type="button" class="app-back" id="msgBack">‹</button><span id="chatRoom"></span></div>
+      <div class="app-head"><button type="button" class="app-back" id="msgBack">‹</button><div class="chat-ava" id="chatAva"></div><span id="chatRoom"></span></div>
+      <div class="stat-pill">💰 <span class="js-stat" data-k="money"></span> · 📈 <span class="js-stat" data-k="fame"></span> · 🛡️ <span class="js-stat" data-k="safety"></span></div>
       <div id="chatLog"></div>
       <div id="chatChoices"></div>
-      <div id="chatTapHint">탭하면 빨리 감기</div>
+      <div class="composer" id="composer"><span id="chatTapHint"></span><span class="send" aria-hidden="true">↑</span></div>
     </div>
     <!-- 권리 수첩 앱 -->
     <div id="appNotes" class="applayer">
@@ -135,6 +136,7 @@ window.__errs=[];addEventListener('error',function(e){__errs.push(e.message)});a
 
   <!-- 팝업 오버레이 -->
   <div id="popup"><div class="pop-card glass2">
+    <div class="pop-face"></div>
     <div class="pop-title"></div>
     <div class="pop-body"></div>
     <div class="pop-btns"></div>

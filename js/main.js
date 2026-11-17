@@ -4,7 +4,7 @@ import * as engine from './engine.js';
 import * as store from './state.js';
 import { EPISODES } from '../data/episodes.js';
 import { STRINGS } from '../data/strings.js';
-import { startChat, advance, showChoices, esc } from './ui/chat.js';
+import { startChat, advance, showChoices, esc, setComposer, sendMine } from './ui/chat.js';
 import { showPopup, deltaLine } from './ui/popup.js';
 import { QUIZ } from '../data/quiz.js';
 import * as quiz from './quiz.js';
@@ -46,6 +46,7 @@ function updateStatbar() {
     animateStat($(id), shownStats[k], G.stats[k]);
     shownStats[k] = G.stats[k];
   });
+  document.querySelectorAll('.js-stat').forEach(el => { el.textContent = G.stats[el.dataset.k]; });   // 메신저 안 점수 알약(끝 값만)
   // v0.3.1 최적화: 배지 행은 배지가 실제로 바뀐 때만 재구축 (스탯만 바뀌는 대부분의 갱신에서 DOM 재생성 0)
   const prev = shownBadges;
   const changed = prev.length !== G.badges.length || G.badges.some((b, i) => b !== prev[i]);
@@ -85,6 +86,7 @@ function applyIdol(key) {
   setIdol(key);
   $('epChar').innerHTML = idolSVG(getIdol());
   $('introChar').innerHTML = idolSVG(getIdol());
+  $('chatAva').innerHTML = idolSVG(getIdol());
 }
 
 function pickIdol(key) {
@@ -145,11 +147,25 @@ function openMessenger() {
   if (!chatStarted) { chatStarted = true; startChat(ep(), choicesPhase); }
 }
 
+/* 내 답장 말풍선: A·B를 고르면 그 문구가 먼저 나가고, 잠깐 뒤에 결과가 온다.
+   기다리는 동안 규칙은 아직 적용 전 — 이때 새로 고쳐도 점수가 어긋나지 않는다. */
+const MINE_DELAY_MS = 600;
+let pickLocked = false;
+function sayThen(label, next) {
+  if (pickLocked) return;                            // 연타 방지
+  pickLocked = true;
+  $('chatChoices').innerHTML = '';                   // 버튼을 먼저 없앤다
+  setComposer('idle');
+  sendMine(label);
+  setTimeout(next, REDUCED ? 0 : MINE_DELAY_MS);
+}
+
 function choicesPhase() {
   const c = ep().choices;
+  pickLocked = false;
   showChoices('어떻게 할까?', [
-    { label: 'A. ' + c.wrong.label, cls: 'risky', disabled: G.retryUsed, cb: showWrongPopup },
-    { label: 'B. ' + c.right.label, cb: rightFlow },
+    { label: 'A. ' + c.wrong.label, cls: 'risky', disabled: G.retryUsed, cb: () => sayThen(c.wrong.label, showWrongPopup) },
+    { label: 'B. ' + c.right.label, cb: () => sayThen(c.right.label, rightFlow) },
     { label: 'C. ' + c.info.label, cls: 'info', cb: showHint },
   ]);
 }
@@ -173,7 +189,7 @@ function showWrongPopup() {
     html: `<p class="analogy">${esc(w.popup.analogy)}</p>
       <p class="delta bad">${deltaLine(w.delta)}</p>
       <p class="lesson">📚 배운 것: ${esc(w.popup.lesson)}</p>`,
-    buttons,
+    buttons, face: true,
   });
 }
 
@@ -203,7 +219,7 @@ function rightFlow() {
   showPopup({
     title: r.popup.title + (isRetry ? ' (반쪽 배지)' : ''),
     html: `<p>${esc(r.popup.body)}</p><p class="delta good">${deltaLine(r.delta)}</p>`,
-    buttons: [{ label: '계속 →', cb: () => quizThen(bridge) }],
+    buttons: [{ label: '계속 →', cb: () => quizThen(bridge) }], face: true,
   });
 }
 
@@ -274,7 +290,7 @@ function endingScene(key) {
 
 /* ── 부트 ── */
 document.getElementById('chatLog').addEventListener('click', advance);
-document.getElementById('chatTapHint').addEventListener('click', advance);
+document.getElementById('composer').addEventListener('click', advance);
 document.getElementById('storyStage').addEventListener('click', () => { if ($('storyStage').classList.contains('on')) { sceneIdx++; renderScene(); } });
 window.LUNA = { get state() { return G; }, engine, phone, showEnding: key => endingScene(key) };   // 프로브·디버그용(showEnding = 상태 주입 뒤 엔딩 화면 바로 그리기)
 boot();

@@ -9,9 +9,11 @@ export const IDOLS = {
 
 const EXPRESSIONS = new Set(['neutral', 'happy', 'panic', 'shock']);
 let current = 'luna';
+let currentExpr = 'neutral';   // 마지막으로 정한 표정(새로 그리는 얼굴도 이 표정으로 — 결과 알림창)
 
 export function setIdol(key) { if (IDOLS[key]) current = key; }
 export function getIdol() { return current; }
+export function getExpression() { return currentExpr; }
 
 /* 받침 유무에 따른 조사 선택: 루나가/솔이, 루나를/솔을 … */
 const JOSA = { '가': '이', '는': '은', '를': '을', '랑': '이랑', '와': '과' };
@@ -28,15 +30,17 @@ function assetPath(idol, expr) {
   return `assets/characters/${idol}-${expr}.png`;
 }
 
-export function idolSVG(key) {
+export function idolSVG(key, expr = 'neutral') {
   const k = IDOLS[key] ? key : current;
-  return `<img class="idol-svg" data-idol="${k}" data-expr="neutral"
-    src="${assetPath(k, 'neutral')}" alt="${IDOLS[k].name}" width="512" height="512" decoding="async">`;
+  const e = EXPRESSIONS.has(expr) ? expr : 'neutral';
+  return `<img class="idol-svg" data-idol="${k}" data-expr="${e}"
+    src="${assetPath(k, e)}" alt="${IDOLS[k].name}" width="512" height="512" decoding="async">`;
 }
 
 /* 정답·배지 = happy / 오답 = shock / 법정·안전도<30 = panic / 그 외 neutral */
 export function setExpression(expr) {
   const next = EXPRESSIONS.has(expr) ? expr : 'neutral';
+  currentExpr = next;
   document.querySelectorAll('.idol-svg').forEach(img => {
     img.dataset.expr = next;
     img.src = assetPath(img.dataset.idol, next);

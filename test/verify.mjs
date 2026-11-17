@@ -164,6 +164,14 @@ console.log('[모드] 다크/라이트 결정 (theme.js)');
   t('ui 문구에 이름 하드코딩 없음', !/루나|LUNA/.test(JSON.stringify(STRINGS.ui, (k, v) => typeof v === 'function' ? v(1) : v)));
 }
 
+console.log('[메신저] 프로필 글자 (chat.js avatarOf)');
+{
+  const C = await import('../js/ui/chat.js');
+  t('avatar: 마지막 낱말 첫 글자', C.avatarOf('개발자 준호') === '준' && C.avatarOf('마케터 세아') === '세' && C.avatarOf('변리사 한결') === '한');
+  t('avatar: 예외 표', C.avatarOf('코스모 담당자') === '코');
+  t('avatar: 데이터의 모든 보낸이에 글자', EPISODES.every(e => e.messages.every(m => C.avatarOf(m.who).length === 1)));
+}
+
 console.log('─'.repeat(40));
 if (fail) { console.log(`❌ ${fail}건 실패 / ${pass}건 통과 — 배포 금지`); process.exit(1); }
 console.log(`✅ ${pass}건 전부 통과 — 엔진 검산 완료`);

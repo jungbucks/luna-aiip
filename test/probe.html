@@ -92,12 +92,34 @@ async function run() {
     for (let i = 0; i < 40 && !D().querySelector('#chatChoices .choice-btn'); i++) { D().getElementById('chatLog').click(); await sleep(70); }
     await until(() => D().querySelector('#chatChoices .choice-btn'));
     log('빨리 감기로 완주', true);
+    const msgs = () => [...D().querySelectorAll('#chatLog .msg')];
+    log('chat: 날짜 칩 + 같은 사람 이어 말하면 이름 생략', !!D().querySelector('#chatLog .daychip') && msgs()[1].classList.contains('cont') && !msgs()[1].querySelector('.who'));
+    log('chat: 묶음 끝에만 시각', !!msgs()[2].querySelector('.tm') && !msgs()[0].querySelector('.tm'));
+    log('chat: 프로필 글자', msgs()[0].querySelector('.ava').textContent === '준');
+    log('composer: 입력창이 남아 있고 안내가 바뀜', E('chatTapHint').offsetParent !== null && E('chatTapHint').textContent.includes('답장을 골라'));
+    log('stat: 메신저 알약 = 위젯 숫자', D().querySelector('.js-stat[data-k="money"]').textContent === txt('stMoney'));
+    log('chat: 머리줄 프로필이 아이돌', E('chatAva').querySelector('img.idol-svg').dataset.idol === 'sol');
+    const fits = el => { const r = el.getBoundingClientRect(), a = E('app').getBoundingClientRect(); return r.top >= a.top - 1 && r.bottom <= a.bottom + 1; };
+    f.height = 600; await sleep(200);
+    log('low-height: 600px에서 선택지 3개와 입력창이 화면 안', [...D().querySelectorAll('#chatChoices .choice-btn')].every(fits) && fits(E('chatTapHint')) && E('chatLog').clientHeight >= 80, 'log=' + E('chatLog').clientHeight);
+    f.height = 800; await sleep(100);
+    E('chatChoices').querySelectorAll('.choice-btn')[2].click();   // C: 개념 카드
+    await until(popupShown);
+    log('me-bubble: C는 내 말풍선을 만들지 않음', D().querySelectorAll('#chatLog .msg.me').length === 0 && !D().querySelector('.pop-face img'));
+    D().querySelector('.pop-btn').click(); await sleep(100);
+    const money0 = W().LUNA.state.stats.money;
     log('조사 자동 치환(솔이 직접 작곡함)', txt('chatLog').includes('솔이 직접 작곡함'));
     log('화면에 토큰 잔여 없음', !/\{[nN]/.test(D().body.textContent));
 
-    D().querySelectorAll('#chatChoices .choice-btn')[1].click();   // B 정답
+    const bBtn = D().querySelectorAll('#chatChoices .choice-btn')[1];   // B 정답
+    bBtn.click(); bBtn.click();                                      // pick-double: 연타
+    log('me-bubble: 누르자마자 선택지가 사라지고 규칙은 아직', !D().querySelector('#chatChoices .choice-btn') && W().LUNA.state.stats.money === money0);
     await until(popupShown);
     log('정답 팝업(배지 획득)', D().querySelector('.pop-title').textContent.includes('배지 획득'));
+    log('me-bubble: 내 말풍선 1개(앞의 "B. " 없이)', D().querySelectorAll('#chatLog .msg.me').length === 1 && D().querySelector('#chatLog .msg.me').textContent.includes('라이선스 있는 데이터만 쓰자') && !D().querySelector('#chatLog .msg.me').textContent.includes('B.'));
+    const d = W().LUNA.state, exp = W().LUNA.engine.newGame().stats;   // EP1 정답 한 번의 변화량과 정확히 같은지
+    log('pick-double: 연타해도 한 번만 적용', d.stats.money === exp.money - 15 && d.stats.fame === exp.fame + 20 && d.stats.safety === exp.safety + 15, JSON.stringify(d.stats));
+    log('pop-face: 정답 알림창에 지금 표정의 아이돌', D().querySelector('.pop-face img.idol-svg').dataset.expr === 'happy');
     log('상태 idol=sol', W().LUNA.state.idol === 'sol');
     W().history.back(); await sleep(150);
     log('back-during-popup: 팝업 중 뒤로 가기는 무시', popupShown() && E('phoneWrap').classList.contains('on'));
@@ -108,9 +130,10 @@ async function run() {
     const clickWhenReady = async (pick) => { await until(() => pbtns().length && !pick().disabled); pick().click(); };
     D().querySelector('.pop-btn').click();                          // 계속 → 퀴즈
     await until(() => popupShown() && ptitle().includes('개념 확인 O/X'));
+    log('pop-face: 퀴즈에는 얼굴 없음', !D().querySelector('.pop-face img'));
     log('quiz-after-right: 정답 뒤 퀴즈(문장·버튼 2개)', ptitle().includes('개념 확인 O/X') && txt('popup').includes('출처만 밝히면') && pbtns().length === 2);
     // 최종 검토(2026-11-14): 팝업이 떠 있는 동안 뒤 화면(선택지)에 Tab·클릭이 닿지 않음 + 버튼이 풀리면 첫 버튼에 초점
-    log('popup-inert: 팝업 동안 뒤 화면 선택지가 inert', !!D().querySelector('#chatChoices .choice-btn') && !!D().querySelector('#chatChoices .choice-btn').closest('[inert]') && !D().getElementById('popup').closest('[inert]'));
+    log('popup-inert: 팝업 동안 뒤 화면(메신저 입력창·뒤로 버튼)이 inert', !!E('composer').closest('[inert]') && !!E('msgBack').closest('[inert]') && !D().getElementById('popup').closest('[inert]'));
     await until(() => !pbtns()[0].disabled);
     log('popup-focus: 잠금이 풀리면 첫 버튼에 초점', D().activeElement === pbtns()[0]);
     await clickWhenReady(() => pbtns()[0]);                        // ⭕ (틀림)

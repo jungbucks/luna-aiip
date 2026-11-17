@@ -3,6 +3,8 @@
    사용법:
      node test/run-probe.mjs [test/probe.html] [--budget=60000]
      node test/run-probe.mjs [프로브] --shot=<png> [--url=/index.html] [--size=W,H]   (캡처)
+   헤드리스에서는 CSS 전환·애니메이션이 프레임 없이 멈춰 있어(층이 scale(.1)·opacity 0인 채) 배치 검사가 거짓이 된다.
+   그래서 기본으로 "움직임 줄이기"를 강제해 끝 상태를 바로 그린다. 움직임 경로를 보려면 --motion.
    종료 코드 0 = PROBE-DONE이 있고 FAIL이 없다. */
 import http from 'node:http';
 import fs from 'node:fs';
@@ -29,7 +31,7 @@ const server = http.createServer((req, res) => {
 });
 
 const edge = (flags, url, profile) => new Promise(resolve => {
-  execFile(EDGE, [...flags, '--disable-gpu', '--no-first-run', '--user-data-dir=' + profile, '--virtual-time-budget=' + budget, url],
+  execFile(EDGE, [...flags, '--disable-gpu', '--no-first-run', ...(args.includes('--motion') ? [] : ['--force-prefers-reduced-motion']), '--user-data-dir=' + profile, '--virtual-time-budget=' + budget, url],
     { maxBuffer: 64 * 1024 * 1024, timeout: 180000 }, (err, stdout) => resolve(stdout || ''));
 });
 const unesc = s => s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');

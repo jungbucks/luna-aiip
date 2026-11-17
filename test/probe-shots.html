@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<!-- probe-shots.html — 캡처용 프로브. 게임을 iframe에 띄워 원하는 장면까지 자동으로 진행한 뒤 멈춘다.
+     실행: node test/run-probe.mjs test/probe-shots.html --shot=<png> --url="/__probe.html?scene=home&theme=light&w=1366&h=700" --size=1366,740
+     scene = lock | select | story | home | chat | popup | note | notes | product | end     theme = dark | light     w,h = iframe 크기 -->
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#888}iframe{border:0;display:block}</style>
+<iframe id="f"></iframe>
+<script>
+const q = new URLSearchParams(location.search);
+const scene = q.get('scene') || 'lock', theme = q.get('theme') || 'dark';
+const f = document.getElementById('f');
+f.width = q.get('w') || 390; f.height = q.get('h') || 700;
+localStorage.removeItem('luna_save_v1'); localStorage.removeItem('luna_notes_v1'); localStorage.setItem('luna_theme', theme);
+const D = () => f.contentDocument, W = () => f.contentWindow, E = id => D().getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function until(fn, ms = 8000) { const t0 = Date.now(); while (Date.now() - t0 < ms) { try { if (fn()) return true; } catch (e) {} await sleep(50); } return false; }
+const popup = () => E('popup').classList.contains('show');
+const pbtn = t => [...D().querySelectorAll('#popup .pop-btn')].find(b => !t || b.textContent.includes(t));
+const clickPop = async t => { await until(() => popup() && pbtn(t) && !pbtn(t).disabled); pbtn(t).click(); await sleep(120); };
+
+async function run() {
+  f.src = '/index.html';
+  await until(() => W().LUNA && E('btnNew'));
+  if (scene === 'lock') return;
+  E('btnNew').click(); await until(() => E('scr-select').classList.contains('active'));
+  if (scene === 'select') return;
+  D().querySelector('.sel-card[data-idol="luna"]').click();
+  await until(() => E('scr-intro').classList.contains('active'));
+  if (scene === 'intro') return;
+  for (let i = 0; i < 4; i++) { E('introCard').click(); await sleep(80); }
+  await until(() => E('scr-ep').classList.contains('active'));
+  if (scene === 'story') return;
+  for (let i = 0; i < 8 && E('scr-ep').dataset.home !== 'notify'; i++) { E('storyStage').click(); await sleep(80); }
+  await until(() => E('notifBanner').classList.contains('in')); await sleep(700);
+  if (scene === 'home') return;
+  if (scene === 'notes') { E('dockNotes').click(); await sleep(700); return; }
+  E('notifBanner').click(); await until(() => E('phoneWrap').classList.contains('on'));
+  for (let i = 0; i < 40 && !D().querySelector('#chatChoices .choice-btn'); i++) { E('chatLog').click(); await sleep(70); }
+  await until(() => D().querySelector('#chatChoices .choice-btn')); await sleep(600);
+  if (scene === 'chat') return;
+  D().querySelectorAll('#chatChoices .choice-btn')[1].click();          // B 정답
+  await until(popup); await sleep(400);
+  if (scene === 'popup') return;
+  await clickPop('계속');                                                // → 퀴즈
+  await until(() => popup() && D().querySelector('.pop-title').textContent.includes('O/X'));
+  await until(() => D().querySelectorAll('#popup .pop-btn').length === 2 && !D().querySelectorAll('#popup .pop-btn')[1].disabled);
+  D().querySelectorAll('#popup .pop-btn')[1].click(); await sleep(150);  // ❌ (EP1 본 문제 정답 X)
+  await clickPop('계속');                                                // → 적기
+  await until(() => E('appNotes').classList.contains('on') && E('noteInput')); await sleep(600);
+  if (scene === 'note') return;
+  const i = E('noteInput'); i.value = '학습용이라도 남의 노래를 허락 없이 대량으로 쓰면 안 된다는 걸 알았다.'; i.dispatchEvent(new (W().Event)('input', { bubbles: true }));
+  await sleep(60); E('noteSave').click(); await until(popup); await sleep(200);
+  if (scene === 'end' || scene === 'product') {
+    W().LUNA.showEnding('survive' in (await W().eval('import("./data/strings.js")')).STRINGS.endings ? 'survive' : 'unicorn');
+    await until(() => E('scr-end').classList.contains('active')); await sleep(300);
+    if (scene === 'end') return;
+    E('endProduct').click(); await sleep(700);
+  }
+}
+run().catch(e => { document.body.insertAdjacentHTML('afterbegin', '<pre>' + e.message + '</pre>'); }).then(() => { document.title = 'SHOT-READY'; });
+</script>
