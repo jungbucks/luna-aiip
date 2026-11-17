@@ -142,6 +142,11 @@ console.log('[말투] 캐릭터 톡 — 사람이 하는 말 (2026-11-17, docs/s
   none('알림: 비유는 "~와 같아요."로, 배운 것·정답 본문은 "~다."로, 개념 카드는 "~요."로 끝남', pops.filter(m =>
     (m.who === '비유' && !m.text.endsWith('같아요.')) || (['배운 것', '정답 본문'].includes(m.who) && !m.text.endsWith('다.')) || (m.who === '개념 카드' && !m.text.endsWith('요.'))));
   t('알림: 정답 제목 = "(권리) 배지를 얻었다 (배지 그림)"', EPISODES.every(e => e.choices.right.popup.title === `${e.right === '퍼블리시티권' ? '퍼블리시티' : e.right} 배지를 얻었다 ${e.rightEmoji}`));
+  // 스토리 장면·편 소개·인트로·엔딩: 명언풍·느낌표 없이 있었던 일을 담담하게. 장면은 세 줄까지
+  const story = EPISODES.flatMap(e => [...e.scenes.map(s => ({ ep: e.id, who: '장면', text: s.text })), { ep: e.id, who: '편 소개', text: e.intro }])
+    .concat(STRINGS.intro.map(c => ({ ep: 0, who: '인트로', text: c.text })), Object.values(STRINGS.endings).map(c => ({ ep: 0, who: '엔딩', text: c.body })));
+  none('장면·소개·인트로·엔딩: 느낌표 없음, 장면·인트로는 세 줄까지, 한 줄 30자 이하',
+    story.filter(m => m.text.includes('!') || (['장면', '인트로'].includes(m.who) && (m.text.split('\n').length > 3 || m.text.split('\n').some(l => len(l) > 30)))));
   const C = await import('../js/ui/chat.js');
   t('선택지 순서: 오답·정답 자리가 섞이고 확인은 늘 맨 끝', C.choiceOrder(0.1).join() === 'wrong,right,info' && C.choiceOrder(0.9).join() === 'right,wrong,info');
 }
