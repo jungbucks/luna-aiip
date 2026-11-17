@@ -80,8 +80,9 @@ async function run() {
     log('씬 텍스트 토큰 치환', txt('storyText').includes('솔') || !txt('storyText').includes('{n'));
     log('home: 스토리 동안 홈이 깔려 있고 앱은 안 눌림', home() === 'story' && !!E('homeScreen') && (E('dockNotes').click(), !E('appNotes').classList.contains('on')));
     await throughStory();
+    const FIRST = (await import('/data/episodes.js')).EPISODES[0].messages[0];   // EP1 첫 메시지(이름 토큰 없음) — 글자를 박아 두지 않고 데이터에서 읽는다
     log('notify: 알림 대기 — 메신저는 아직 닫힘', home() === 'notify' && !E('phoneWrap').classList.contains('on'));
-    log('notify: 미리보기 = 첫 메시지, 이름 토큰 풀림', E('notifBanner').textContent.includes('솔 프로젝트') && E('notifBanner').textContent.includes('개발자 준호: 대표님 큰일남') && !/\{[nN]/.test(E('notifBanner').textContent));
+    log('notify: 미리보기 = 첫 메시지, 이름 토큰 풀림', E('notifBanner').textContent.includes('솔 프로젝트') && E('notifBanner').textContent.includes(FIRST.who + ': ' + FIRST.text) && !/\{[nN]/.test(E('notifBanner').textContent));
     log('notify: 메신저 아이콘에 숫자', E('msgBadge').offsetParent !== null);
     for (const id of ['appCity', 'appCal', 'dockCall']) E(id).click();
     log('decor: 장식 앱 3개는 아무 층도 열지 않음', !D().querySelector('.applayer.on') && E('appCity').getAttribute('aria-label').includes('(장식)'));
@@ -108,7 +109,7 @@ async function run() {
     await until(() => E('phoneWrap').classList.contains('on'));
     log('폰 프레임 등장', E('phoneWrap').classList.contains('on'));
     await sleep(900);
-    log('notify-double: 연타해도 첫 메시지는 하나', [...D().querySelectorAll('#chatLog .msg')].filter(m => m.textContent.includes('대표님 큰일남')).length === 1);
+    log('notify-double: 연타해도 첫 메시지는 하나', [...D().querySelectorAll('#chatLog .msg')].filter(m => m.textContent.includes(FIRST.text)).length === 1);
     E('msgBack').click();
     await until(() => !E('phoneWrap').classList.contains('on'));
     const kept = D().querySelectorAll('#chatLog .msg').length;
@@ -132,7 +133,7 @@ async function run() {
     log('빨리 감기로 완주', true);
     const msgs = () => [...D().querySelectorAll('#chatLog .msg')];
     log('chat: 날짜 칩 + 같은 사람 이어 말하면 이름 생략', !!D().querySelector('#chatLog .daychip') && msgs()[1].classList.contains('cont') && !msgs()[1].querySelector('.who'));
-    log('chat: 묶음 끝에만 시각', !!msgs()[2].querySelector('.tm') && !msgs()[0].querySelector('.tm'));
+    log('chat: 묶음 끝에만 시각', msgs().every((m, i, a) => !!m.querySelector('.tm') === (i === a.length - 1 || !a[i + 1].classList.contains('cont'))));   // 대사 줄 수와 무관하게: 다음 줄이 같은 사람의 이어 말하기면 시각 없음
     { const a = msgs()[0].querySelector('.ava'), b = msgs().find(m => m.querySelector('.who') && m.querySelector('.who').textContent.includes('세아')).querySelector('.ava');
       const cs = (el, p) => a.ownerDocument.defaultView.getComputedStyle(el, p), bx = a.getBoundingClientRect();
       log('chat: 프로필 = 글자 없는 사람 모양, 사람마다 다른 색', a.textContent === '' && a.dataset.c === '0' && b.dataset.c === '1' && cs(a).backgroundImage !== cs(b).backgroundImage
@@ -155,7 +156,7 @@ async function run() {
     log('me-bubble: C는 내 말풍선을 만들지 않음', D().querySelectorAll('#chatLog .msg.me').length === 0 && !D().querySelector('.pop-face img'));
     D().querySelector('.pop-btn').click(); await sleep(100);
     const money0 = W().LUNA.state.stats.money;
-    log('조사 자동 치환(솔이 직접 작곡함)', txt('chatLog').includes('솔이 직접 작곡함'));
+    log('조사 자동 치환(솔이 직접 곡을)', txt('chatLog').includes('솔이 직접 곡을 쓸 수 있어요'));
     log('화면에 토큰 잔여 없음', !/\{[nN]/.test(D().body.textContent));
 
     const bBtn = D().querySelectorAll('#chatChoices .choice-btn')[1];   // B 정답

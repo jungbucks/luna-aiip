@@ -97,6 +97,35 @@ console.log('[데이터 정합] episodes.js');
     ]));
 }
 
+console.log('[말투] 캐릭터 톡 — 사람이 하는 말 (2026-11-17, docs/superpowers/specs/2026-11-17-chat-dialogue-design.md)');
+{
+  const all = EPISODES.flatMap(e => e.messages.map(m => ({ ep: e.id, ...m })));
+  const none = (name, list) => {   // 걸린 줄을 보여 주고 판정
+    if (list.length) console.log('    ↳ ' + list.slice(0, 5).map(m => `EP${m.ep} ${m.who}: ${m.text}`).join(' / '));
+    t(name, list.length === 0);
+  };
+  const len = s => [...s].length;
+  const EMOJI = /\p{Extended_Pictographic}/u;
+  const words = s => s.split(/\s+/).map(w => w.replace(/^["'(]+|(?:[.?!…~,"')ㅋㅎ]|\p{Extended_Pictographic}|️)+$/gu, '')).filter(Boolean);
+  const SLANG = ['개이득', '승천', 'ㄱㄱ', 'ㅇㅇ', 'ㄷㄷ', '콜?'];
+  const GAK_OK = new Set(['제각각']);                                   // '~각' 유행어(파산각·고소각) — 세 글자 이상만 본다(생각·착각은 두 글자)
+  const isGak = w => { const m = w.match(/^(.+각)(?:인데|이지|이네|임|이야)?$/); return !!m && len(m[1]) >= 3 && !GAK_OK.has(m[1]); };
+  const NOUN = new Set(['다음', '처음', '마음', '모임', '게임', '책임', '웃음', '믿음', '도움', '소음', '얼음', '걸음', '만남', '봄', '돌봄', '타임', '프레임']);
+  const isEumseum = t0 => { const w = words(t0).pop() || ''; return /[임음함됨남봄]$/.test(w) && !NOUN.has(w); };   // "~임/~음/~함" 끝맺음
+  const SEA = '마케터 세아', JUNHO = '개발자 준호';
+
+  t('한 편 10~16줄', EPISODES.every(e => e.messages.length >= 10 && e.messages.length <= 16));
+  none('말풍선 45자 이하 + 첫 줄(알림 미리보기) 30자 이하', all.filter(m => len(m.text) > 45).concat(EPISODES.map(e => ({ ep: e.id, ...e.messages[0] })).filter(m => len(m.text) > 30)));
+  none('유행어 없음(개이득·~각·ㄱㄱ·ㅇㅇ·ㄷㄷ·콜?)', all.filter(m => SLANG.some(s => m.text.includes(s)) || words(m.text).some(isGak)));
+  none('"~임/~음" 끝맺음 없음', all.filter(m => isEumseum(m.text)));
+  none('느낌표·물음표 연달아 쓰지 않음', all.filter(m => /[!?]{2,}/.test(m.text)));
+  t('ㅋㅋ는 한 편에 두 번까지, 이모지는 하나까지', EPISODES.every(e =>
+    e.messages.filter(m => m.text.includes('ㅋㅋ')).length <= 2 && e.messages.filter(m => EMOJI.test(m.text)).length <= 1));
+  none('세아는 온점(또는 물음표·말줄임표·ㅋㅋ·이모지)으로 끝맺고, 준호는 온점을 찍지 않음',
+    all.filter(m => (m.who === SEA && !/(?:[.?…]|ㅋㅋ|\p{Extended_Pictographic}️?)$/u.test(m.text)) || (m.who === JUNHO && m.text.endsWith('.'))));
+  t('마지막 줄(결정 넘기기)은 6편이 서로 다름', new Set(EPISODES.map(e => e.messages[e.messages.length - 1].text)).size === EPISODES.length);
+}
+
 console.log('[토큰 치환] 캐릭터 이름·조사 (character.js T)');
 {
   const raw = JSON.stringify(EPISODES) + JSON.stringify(STRINGS) + STRINGS.bridgeNext(EPISODES[2]);
