@@ -23,6 +23,11 @@ check('단정 금칙어 없음', !/(정답은|무조건|반드시 승소|반드�
 // 진행 중·나라마다 다름 카드가 결론 난 것처럼 쓰지 않기 (2026-11-17 검증: Gemini 사건을 '구글 승소·판결'로 잘못 적었던 일)
 const VERDICT = /(손을 들어줬다|승소했다|확정됐다|확정되었다|최종 판결이 나왔다)/;
 check('미결 카드 요지에 결론 단정 없음', ISSUES.filter(i => i.status !== 'decided').every(i => !VERDICT.test(i.realCase.gist)));
+// 사례 칸 길이 (2026-11-17 평가 2회차: 사실을 보강하다 평균 135→242자로 늘어 고교생이 읽기 어려워졌던 일)
+const sentences = g => g.split(/(?<=[.다])\s+/);
+check('사례 칸 200자 이하', ISSUES.every(i => i.realCase.gist.length <= 200));
+check('사례 문장 80자 이하', ISSUES.every(i => sentences(i.realCase.gist).every(s => s.length <= 80)));
+check('사례 칸 괄호 1개 이하', ISSUES.every(i => (i.realCase.gist.match(/\(/g) || []).length <= 1));
 check('미결 카드 출처 이름에 "승소" 없음', ISSUES.filter(i => i.status !== 'decided').every(i => i.sources.every(s => !/승소/.test(s.label))));
 
 console.log(fail === 0 ? '== 전체 PASS ==' : `== FAIL ${fail}건 ==`);
