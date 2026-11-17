@@ -3,7 +3,7 @@
 
 export const STRINGS = {
   title: '런칭! 나의 첫 AI 아이돌',
-  subtitle: '지식재산권 6종을 지켜라 — 스타트업 생존 스토리',
+  subtitle: '통장 87만 원으로 시작한 AI 아이돌 회사. 여섯 가지 권리를 지켜야 한다.',
 
   intro: [
     { emoji: '🎓', text: '대학 동아리 \'코드팩토리\'.\n심심해서 AI 버추얼 아이돌을 하나 만들었다.\n이름은 {n}({N}).' },
@@ -23,7 +23,7 @@ export const STRINGS = {
     finalTitle: '⚖️ 법정 엔딩 — 판결 선고',
     finalJudge: '피고 회사는 권리 침해를 되풀이해 더는 신뢰를 회복하기 어렵게 되었습니다. 아래 기록을 다시 살펴보십시오.',
     reviewHead: '📜 판사가 짚어 주는 침해 기록',
-    retryBtn: '🔄 처음부터 재도전',
+    retryBtn: '🔄 처음부터 다시 하기',
   },
 
   endings: {
@@ -45,7 +45,7 @@ export const STRINGS = {
   quiz: {
     title: '개념 확인 O/X',
     o: '⭕ 맞아요', x: '❌ 아니에요',
-    right: '맞았어요!', wrong: '아쉬워요',
+    right: '맞았어요', wrong: '아쉬워요',
     answer: a => '정답: ' + (a ? 'O' : 'X'),
     more: '비슷한 문제 하나 더 →', cont: '계속 →',
     reviewHead: '개념 확인 O/X에서 두 번 다 놓친 개념',

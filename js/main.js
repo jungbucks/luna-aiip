@@ -185,7 +185,7 @@ function choicesPhase() {
     info: { text: c.info.label, cls: 'info', cb: showHint },
   };
   // 오답·정답은 겉모습이 같고 자리만 편마다 다르다(순서는 EP에 들어설 때 한 번 정해 다시 선택 때도 그대로)
-  showChoices('어떻게 할까?', choiceKeys.map((k, i) => ({ ...byKey[k], key: k, label: 'ABC'[i] + '. ' + byKey[k].text })));
+  showChoices('뭐라고 답할까?', choiceKeys.map((k, i) => ({ ...byKey[k], key: k, label: 'ABC'[i] + '. ' + byKey[k].text })));
 }
 
 function showHint() {
