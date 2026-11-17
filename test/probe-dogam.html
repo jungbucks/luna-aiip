@@ -8,7 +8,7 @@ const out = document.getElementById('out');
 const log = (name, ok) => { out.textContent += `${ok ? 'PASS' : 'FAIL'} ${name}\n`; };
 let loaded = 0;
 ['f', 'w'].forEach(id => document.getElementById(id).addEventListener('load', () => { if (++loaded === 2) setTimeout(run, 600); }));
-function run() {
+async function run() {
   try {
     const d = document.getElementById('f').contentDocument;
     const W = document.getElementById('w').contentDocument;
@@ -16,7 +16,7 @@ function run() {
     const cs = (el, p) => getComputedStyle(el)[p];
     log('훅 헤드라인', d.body.textContent.includes('누구 것이죠') && d.body.textContent.includes('12개의 논쟁'));
     log('쟁점 카드 12장', $$('.issue').length === 12);
-    log('필터 칩 5개(전체+4권리)', $$('.fchip').length === 5);
+    log('필터 칩 5개(전체+4권리)', $$('#filters .fchip').length === 5);
     log('상태 배지 4종 존재', !!($('#issues .s-partial') && $('#issues .s-ongoing') && $('#issues .s-varies') && $('#issues .s-strategy')));
     const cr = $$('.fchip').find(c => c.dataset.right === '저작권'); cr.click();
     log('저작권 필터 → 4장', $$('.issue:not([hidden])').length === 4);
@@ -55,17 +55,37 @@ function run() {
     log('Gemini 사건 = 논쟁 진행 중 배지', !!tm.querySelector('.s-ongoing') && !tm.querySelector('.s-partial'));
 
     // ── 2026-11-17 평가 v2 기준점 반영 ──
-    log('배지 읽는 법: 범례 4줄(뜻 포함)', $$('#legend li').length === 4 && $$('#legend .legend-desc').every(e => e.textContent.trim().length > 5));
+    log('배지 줄 4개 + 뜻 4개(접이식 안)', $$('#legend li').length === 4 && $$('#legend-full dd').length === 4 && $$('#legend-full dd').every(e => e.textContent.trim().length > 5));
     const guide = $('.guide');
     log('읽는 법이 카드보다 위(필터 바로 아래)', !!guide && (guide.compareDocumentPosition($('#issues')) & 4) !== 0 && (guide.compareDocumentPosition($('#filters')) & 2) !== 0);
-    log('고지 한 줄이 위에도(법률 자문 아님·마지막 확인일)', /법률 자문이 아닙니다/.test($('.guide-note').textContent) && /11월 17일/.test($('.guide-note').textContent));
-    log('카드 읽는 순서·수업에 쓰기 접이식 2개', $$('.guide details').length === 2);
-    log('나라 꼬리표: 사례가 있는 카드 11장', $$('#issues .issue-where').length === 11 && /미국·한국 사례/.test($('#issue-train .issue-where').textContent));
-    log('낱말 풀이: train에 공정이용', /공정이용/.test($('#body-train .terms').textContent));
+    log('고지 한 줄이 위에도(법률 자문 아님·확인일)', /법률 자문이 아닌/.test($('.guide-note').textContent) && /11월 17일/.test($('.guide-note').textContent));
+    log('배지 뜻·읽는 순서·수업에 쓰기는 접이식 하나', $$('.guide details').length === 1 && /수업에 쓰기/.test($('.guide details').textContent));
+    log('나라 꼬리표 12장 모두(전략 카드는 성격 꼬리표)', $$('#issues .issue-where').length === 12 && /미국·한국 사례/.test($('#issue-train .issue-where').textContent));
+    log('낱말 풀이: 화면 순서대로(train 첫 낱말 = 공정이용)', $('#body-train .terms dt').textContent === '공정이용');
     log('권리 이모지 = 게임(⚖️ 저작권)', $('#issue-train .issue-right').textContent.includes('⚖️') && !/⚖️/.test($$('#legend li').map(e => e.textContent).join('')));
     log('히어로 그라데이션 글자 없음', !/text/.test(cs($('.d-hl'), 'backgroundClip') + cs($('.d-hl'), 'webkitBackgroundClip')));
     log('히어로·안내·필터 왼쪽 정렬', ['.d-hero', '.d-lead'].every(s => /left|start/.test(cs($(s), 'textAlign'))) && /normal|flex-start|start/.test(cs($('#filters'), 'justifyContent')));
     log('본문 17px·행간 1.7 이상', parseFloat(cs(d.body, 'fontSize')) >= 17 && parseFloat(cs(d.body, 'lineHeight')) / parseFloat(cs(d.body, 'fontSize')) >= 1.7);
+
+    // ── 평가 v2 r2 반영: 첫 화면·탐색·접근성 ──
+    const topOf = (doc) => doc.querySelector('.issue').getBoundingClientRect().top + doc.defaultView.scrollY;
+    log(`접힘선: 폰 폭 첫 카드 위쪽 ≤ 700px (${Math.round(topOf(d))})`, topOf(d) <= 700);
+    log(`접힘선: 넓은 화면 첫 카드 위쪽 ≤ 600px (${Math.round(topOf(W))})`, topOf(W) <= 600);
+    log('카드 제목 = 제목 태그(h2) 12개', $$('#issues h2.issue-h').length === 12);
+    log('필터 칩 aria-pressed(전체만 true)', $$('#filters .fchip').filter(c => c.getAttribute('aria-pressed') === 'true').map(c => c.dataset.right).join() === 'all');
+    log('필터 결과 알림(aria-live)', $('#count').getAttribute('aria-live') === 'polite' && /12장/.test($('#count').textContent));
+    log('사례 버튼 문구가 열림에 따라 바뀜', /접기/.test($('#body-train .more-btn').textContent));
+    log('이 카드 링크 12개(#issue-id)', $$('.card-link').length === 12 && $('#issue-oss .card-link').getAttribute('href') === '#issue-oss');
+    log('파일로 열었을 때 안내 문구(스크립트가 덮어씀)', !$('#issues .no-js'));
+    const ta = W.getElementById('toggle-all');
+    ta.click();
+    const openN = [...W.querySelectorAll('.issue-q')].filter(q => q.getAttribute('aria-expanded') === 'true').length;
+    log(`모두 펼치기 → 12장 펼침 (${openN})`, openN === 12 && ta.textContent === '모두 접기');
+    ta.click();
+    log('모두 접기 → 0장', [...W.querySelectorAll('.issue-q')].every(q => q.getAttribute('aria-expanded') === 'false'));
+    W.defaultView.location.hash = '#issue-tsleak';
+    await new Promise(r => setTimeout(r, 300));
+    log('주소 #issue-tsleak → 그 카드 펼침', W.querySelector('#issue-tsleak .issue-q').getAttribute('aria-expanded') === 'true');
     log('Gemini 사건에 "구글 승소" 문구 없음', !/구글 승소|손을 들어줬다/.test(tm.textContent));
     log('GitHub 사건 = 2026년 9월 항소심 반영', $('#more-oss').textContent.includes('2026년 9월'));
   } catch (e) { log('예외: ' + e.message, false); }

@@ -15,19 +15,19 @@ export const STATUS_META = {
 
 // 낱말 풀이 — 카드 글(훅·양측·질문·사례)에 나오는 낱말만 그 카드 아래에 보여 준다. 풀이는 80자 이하.
 export const GLOSSARY = [
-  { term: '공정이용', def: '허락을 받지 않아도 남의 저작물을 쓸 수 있는 예외. 쓰는 목적과 양, 원작 시장에 주는 영향을 따진다.' },
-  { term: '1심', def: '사건을 처음 맡아 판단하는 법원. 결과에 불복하면 위 법원에 다시 판단을 청할 수 있다.' },
-  { term: '항소', def: '1심 판결에 불복해 위 법원(항소법원)에 다시 판단을 청하는 것.' },
-  { term: '상고', def: '항소법원 판결에 불복해 대법원에 판단을 청하는 것. 미국 대법원은 맡을 사건을 골라 받는다.' },
-  { term: '기각', def: '법원이 청구를 받아들이지 않는 것.' },
+  { term: '공정이용', def: '허락 없이도 남의 저작물을 쓸 수 있는 예외. 쓰는 목적, 원작의 종류, 쓴 부분의 양과 중요도, 원작 시장에 주는 영향을 따진다.' },
+  { term: '1심', def: '사건을 처음 맡아 판단하는 법원. 판결을 받아들일 수 없는 쪽은 위 법원에 다시 판단해 달라고 할 수 있다.' },
+  { term: '항소', def: '1심 판결을 받아들일 수 없을 때 위 법원(항소법원)에 다시 판단해 달라고 하는 것.' },
+  { term: '상고', def: '항소법원 판결을 받아들일 수 없을 때 대법원에 판단해 달라고 하는 것. 미국 대법원은 맡을 사건을 골라 받는다.' },
+  { term: '기각', def: '법원이 청구나 신청을 받아들이지 않는 것.' },
   { term: '심리', def: '법원이 증거와 주장을 살펴 판단해 가는 과정.' },
-  { term: '도운 책임', def: '직접 베끼지 않았어도 남의 침해를 부추기거나 거든 쪽이 지는 책임. 미국에서는 기여 책임이라고 한다.' },
-  { term: '라이선스', def: '저작자가 정해 둔 사용 조건. 조건을 지키면 따로 묻지 않고 쓸 수 있다.' },
+  { term: '도운 책임', def: '직접 베끼지 않았어도 남의 침해를 부추기거나 거든 쪽이 지는 책임. 미국 법의 기여 책임을 쉽게 옮긴 말이다.' },
+  { term: '라이선스', def: '권리자가 남에게 쓰도록 허락하는 것, 또는 그 조건. 오픈소스는 조건을 지키면 따로 묻지 않고 쓸 수 있다.' },
   { term: '출원', def: '특허나 상표를 등록해 달라고 신청하는 것.' },
   { term: '특허상표청', def: '미국에서 특허와 상표를 심사하는 정부 기관.' },
   { term: '식별력', def: '그 표시를 보고 어느 회사 상품인지 구별할 수 있게 하는 힘.' },
   { term: '희석', def: '유명 상표를 흉내 내서 그 이름값이 흐려지는 것. 소비자가 헷갈리지 않아도 생길 수 있다.' },
-  { term: '감독기관', def: '법이 잘 지켜지는지 살피는 정부 기관. 유럽에서는 개인정보 보호 기관이 맡는다.' },
+  { term: '감독기관', def: '법이 잘 지켜지는지 살피는 공공 기관. 유럽의 개인정보 감독기관은 정부에서 독립해 일한다.' },
 ];
 
 export const ISSUES = [
@@ -44,7 +44,7 @@ export const ISSUES = [
     ],
     think: '"보고 배우는 것"과 "복제하는 것"의 경계는 어디일까?',
     status: 'ongoing',
-    realCase: { name: 'Bartz v. Anthropic / 지상파 3사 v. 네이버', date: '2025~2026', where: '미국·한국',
+    realCase: { name: 'Bartz v. Anthropic / 지상파 3사 v. 네이버', date: '2025~2026', where: '미국·한국 사례',
       gist: '미국의 한 1심 법원은 산 책으로 AI를 학습시킨 것은 공정이용이라고 보았다. 하지만 해적판 책을 내려받아 쌓아 둔 것은 공정이용이 아니라고 했고, Anthropic은 약 15억 달러를 물어주기로 합의했다. 한국에서는 지상파 3사가 뉴스 학습을 두고 네이버와 소송 중이다.' },
     sources: [
       { label: '작가조합(Anthropic 합의 최종 승인)', url: 'https://authorsguild.org/news/court-grants-final-approval-anthropic-copyright-settlement/' },
@@ -64,7 +64,7 @@ export const ISSUES = [
     ],
     think: '"어느 정도" 사람이 개입해야 사람의 창작이라 할 수 있을까?',
     status: 'partial',
-    realCase: { name: 'Thaler v. Perlmutter', date: '2026-03', where: '미국·한국',
+    realCase: { name: 'Thaler v. Perlmutter', date: '2026-03', where: '미국·한국 사례',
       gist: 'AI가 혼자 만든 그림의 저작권 등록을 두고 다툰 사건이다. 미국 항소법원은 "저작물은 사람이 만들어야 한다"고 판결했다. 2026년 3월 대법원이 상고를 받지 않아 이 판결이 확정됐다. 한국 정부 안내서(2025-06)도 사람이 창작적으로 기여한 부분만 등록할 수 있다고 안내한다. 사람이 얼마나 관여해야 보호받는지는 아직 다퉈지고 있다.' },
     sources: [
       { label: 'Morgan Lewis(대법원 상고기각)', url: 'https://www.morganlewis.com/pubs/2026/03/us-supreme-court-declines-to-consider-whether-ai-alone-can-create-copyrighted-works' },
@@ -84,8 +84,8 @@ export const ISSUES = [
     ],
     think: '칼을 만든 사람과 칼을 쓴 사람, 책임은 어떻게 나눌까?',
     status: 'ongoing',
-    realCase: { name: 'NYT v. OpenAI / Cox v. Sony', date: '2023~진행 중', where: '미국',
-      gist: '뉴욕타임스는 챗봇이 자사 기사를 거의 그대로 내놓는다며 2023년 OpenAI에 소송을 냈다. 2026년 3월 미국 대법원은 인터넷 회사 사건(Cox v. Sony)에서 기준을 정했다. 침해를 알기만 한 회사는 도운 책임이 없고, 부추기거나 침해용 서비스를 만들어야 진다. 이후 뉴욕타임스는 "이용자를 도왔다"는 주장을 접고 직접 베꼈다는 주장에 집중한다.' },
+    realCase: { name: 'NYT v. OpenAI / Cox v. Sony', date: '2023~진행 중', where: '미국 사례',
+      gist: '뉴욕타임스는 챗봇이 자사 기사를 거의 그대로 내놓는다며 2023년 OpenAI에 소송을 냈다. 2026년 3월 미국 대법원은 인터넷 회사 사건(Cox v. Sony)에서 기준을 정했다. 침해를 알기만 해서는 도운 책임을 지지 않고, 부추기거나 침해용 서비스를 만들어야 책임을 진다. 이후 뉴욕타임스는 도운 책임 주장을 접고, 직접 베꼈다는 주장에 집중한다.' },
     sources: [
       { label: 'Hunton(Cox v. Sony 대법원 판결)', url: 'https://www.hunton.com/insights/legal/knowledge-is-not-enough-supreme-court-limits-contributory-copyright-liability-for-isps' },
       { label: 'ChatGPT Is Eating the World(NYT 주장 정리, 2026-08)', url: 'https://chatgptiseatingtheworld.com/2026/08/07/judge-stein-denies-news-plaintiffs-leave-to-add-new-contributory-infringement-claim-v-microsoft-news-plaintiffs-ziff-davis-already-abandoned-contributory-infringement-claim-foreclosed-by-cox-commun/' },
@@ -104,7 +104,7 @@ export const ISSUES = [
     ],
     think: '"자유롭게 쓰세요"라는 말에는 어떤 조건까지 담겨 있을까?',
     status: 'ongoing',
-    realCase: { name: 'Doe v. GitHub Copilot', date: '2022~진행 중', where: '미국',
+    realCase: { name: 'Doe v. GitHub Copilot', date: '2022~진행 중', where: '미국 사례',
       gist: '개발자들은 코드 생성 AI가 오픈소스 코드를 내놓으며 저작자 표시를 떼어 냈다고 소송을 냈다. 2026년 9월 미국 항소법원은 AI가 새로 만든 코드에 표시가 없다고 해서 "표시를 제거했다"고 볼 수는 없다고 했다. 다만 라이선스(계약)를 어겼다는 주장은 1심에서 계속 다퉈지고 있다.' },
     sources: [
       { label: 'Gibson Dunn(제9항소법원 판결)', url: 'https://www.gibsondunn.com/ninth-circuit-clarifies-limits-of-dmca-liability-for-ai-generated-code/' },
@@ -125,8 +125,8 @@ export const ISSUES = [
     ],
     think: '"새로운 계산 방법"과 "새로운 기계"는 어디서 갈릴까?',
     status: 'varies',
-    realCase: { name: 'Alice v. CLS Bank / 한국 AI 특허출원 안내서', date: '2014~2026', where: '미국·한국',
-      gist: '미국 대법원은 2014년, 추상적인 아이디어를 컴퓨터로 돌리기만 한 것은 특허를 받을 수 없다고 했다. 한국 지식재산처 안내서도 AI 발명은 하드웨어와 결합해 정보를 처리하는 형태여야 한다고 본다. 어디까지가 구체적인 기술인지는 사건마다 다퉈진다.' },
+    realCase: { name: 'Alice v. CLS Bank / 한국 AI 특허출원 안내서', date: '2014~2026', where: '미국·한국 사례',
+      gist: '미국 대법원은 2014년, 추상적인 아이디어를 컴퓨터로 돌리기만 한 것은 특허를 받을 수 없다고 했다. 한국 지식재산처 안내서는 AI 기술 자체의 발명이라면 하드웨어와 결합해 정보를 처리해야 한다고 본다. 따지는 기준은 나라마다 달라, 어디까지가 구체적인 기술인지 사건마다 다퉈진다.' },
     sources: [
       { label: '코넬 법률정보원(Alice 판결문)', url: 'https://www.law.cornell.edu/supremecourt/text/13-298' },
       { label: '헤럴드경제(지식재산처 AI 특허출원 안내서, 2026-06)', url: 'https://www.heraldk.com/article/2026060818200872635' },
@@ -144,7 +144,7 @@ export const ISSUES = [
     ],
     think: '"누가 발명했는가"와 "누구 이름으로 권리를 갖는가"는 같은 질문일까?',
     status: 'varies',
-    realCase: { name: 'DABUS (Thaler) 국제 소송', date: '2021~2026', where: '여러 나라',
+    realCase: { name: 'DABUS (Thaler) 국제 소송', date: '2021~2026', where: '여러 나라 사례',
       gist: '발명 AI "DABUS"를 발명자로 적은 특허 출원이 여러 나라에서 다퉈졌다. 일본·미국·영국 법원은 발명자는 사람이어야 한다며 받아들이지 않았다. 독일 법원은 사람을 발명자로 적으면 AI를 도구로 쓴 발명도 특허를 받을 수 있다고 봤다. 한국도 1·2심이 "AI는 발명자가 될 수 없다"고 했고, 대법원 선고 소식은 아직 없다.' },
     sources: [
       { label: '법무법인 세종(한국 DABUS 소송)', url: 'https://www.shinkim.com/kor/media/lawinfo/373' },
@@ -165,7 +165,7 @@ export const ISSUES = [
     ],
     think: '로고 만들기가 쉬워진 지금, 상표 등록 문턱을 높여야 할까?',
     status: 'ongoing',
-    realCase: { name: 'AI 생성 로고의 상표·저작권 보호', date: '현행법', where: '한국',
+    realCase: { name: 'AI 생성 로고의 상표·저작권 보호', date: '현행법', where: '한국 법',
       gist: '한국 상표법은 "사람이 만들었는가"를 등록 요건으로 두지 않는다. 그래서 AI가 만든 로고도 식별력이 있고 먼저 등록된 상표와 비슷하지 않으면 등록될 수 있다. 또 상표는 실제로 쓰거나 쓰려는 사람만 등록받을 수 있다. 로고 그림 자체는 사람의 창작 기여가 없으면 저작권 보호를 받지 못할 수 있다.' },
     sources: [
       { label: '국가법령정보센터(상표법 제33조 — 등록 요건)', url: 'https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EC%83%81%ED%91%9C%EB%B2%95/%EC%A0%9C33%EC%A1%B0' },
@@ -184,8 +184,8 @@ export const ISSUES = [
         points: ['우연히 비슷해진 것과 베낀 것을 가르기 어렵다', '나라마다 희석 인정 기준이 다르다'] },
     ],
     think: '"비슷하다"는 느낌만으로 침해라 할 수 있을까?',
-    status: 'varies',
-    realCase: { name: 'Getty Images v. Stability AI', date: '2025~2026', where: '영국·미국',
+    status: 'ongoing',
+    realCase: { name: 'Getty Images v. Stability AI', date: '2025~2026', where: '영국·미국 사례',
       gist: 'AI가 만든 이미지에 일그러진 Getty 워터마크가 찍혀 나온 사건이다. 영국 법원은 2025년 11월, 초기 모델이 만든 일부 이미지만 상표 침해로 보았다. 유명 상표의 가치를 흐린다는 "희석" 주장은 받아들이지 않았다. 미국 법원은 2026년 4월 상표 청구를 본격 심리로 넘겼을 뿐, 결론은 아직 나지 않았다.' },
     sources: [
       { label: 'Legal 500(미국 판단)', url: 'https://www.legal500.com/intelligence/united-states/intellectual-property/trademark-law-meets-generative-ai-key-takeaways-from-the-getty-v-stability-ai-ruling' },
@@ -194,7 +194,7 @@ export const ISSUES = [
   },
   {
     id: 'tmname', right: '상표권', rightEmoji: '📋',
-    title: '"먼저 쓴 이름"을 대기업이 가져가면?',
+    title: '같은 이름을 먼저 쓴 회사와 나중에 쓴 큰 회사, 누가 쓸까?',
     hook: '작은 회사가 먼저 쓰던 이름을, 거대 AI가 같은 이름으로 서비스를 냈다. 누가 쓸 수 있을까?',
     sides: [
       { label: '먼저 쓴 쪽 보호', stance: '먼저 등록·사용한 상표를 보호해야 한다.',
@@ -204,7 +204,7 @@ export const ISSUES = [
     ],
     think: '같은 이름이라도 "헷갈리지 않으면" 함께 써도 될까?',
     status: 'ongoing',
-    realCase: { name: 'Gemini Data v. Google / P2B v. Google', date: '2024~진행 중', where: '미국',
+    realCase: { name: 'Gemini Data v. Google / P2B v. Google', date: '2024~진행 중', where: '미국 사례',
       gist: '"Gemini"라는 이름을 먼저 등록해 쓰던 미국의 작은 AI 회사가 2024년 구글에 상표 소송을 냈다. 미국 특허상표청은 같은 해 구글의 GEMINI 상표 출원에 "헷갈릴 수 있다"며 거절 의견을 냈다. 같은 이름의 스피커 회사(P2B)는 재판 도중 구글의 사용부터 막아 달라고 했지만 받아들여지지 않았다. 두 소송 모두 최종 판결은 아직이다.' },
     sources: [
       { label: 'National Law Review(Gemini Data 소송·특허상표청 거절)', url: 'https://natlawreview.com/article/gemini-spells-double-trouble-googles-ai-gemini-data-inc-sues-trademark-infringement' },
@@ -227,7 +227,7 @@ export const ISSUES = [
     ],
     think: '무엇을 얻는 대신 무엇을 포기해야 할까?',
     status: 'strategy',
-    realCase: { name: '보호 전략의 3지선다', date: '판례 없음', where: '',
+    realCase: { name: '보호 전략의 3지선다', date: '판례 없음', where: '판례 없음 · 회사 전략 문제',
       gist: '판례로 정해지는 문제가 아니라 회사가 고르는 전략 문제다. 제품을 뜯어보면 알 수 있는 기술은 특허가, 안에 감출 수 있는 기술은 영업비밀이 유리하다는 견해가 많다. 실제 기업은 기술마다 다른 조합을 쓰기도 한다.' },
     sources: [
       { label: 'Lexology(AI 보호 전략)', url: 'https://www.lexology.com/library/detail.aspx?g=15568a55-2a68-436e-8ebd-22240712987d' },
@@ -236,7 +236,7 @@ export const ISSUES = [
   {
     id: 'explain', right: '영업비밀', rightEmoji: '🔐',
     title: 'AI가 나를 거절한 이유, 알 권리가 있을까?',
-    hook: 'AI가 내 휴대전화 계약을 거절했다. "왜죠?"라고 물을 권리 vs "그건 회사 비밀"이라는 방패.',
+    hook: 'AI가 내 휴대전화 계약을 거절했다. "왜죠?"라고 물을 권리와 "그건 회사 비밀"이라는 방패가 맞선다.',
     sides: [
       { label: '설명 요구권', stance: '나에 대한 자동 결정은 이유를 설명받을 권리가 있다.',
         points: ['영향을 받는 사람은 근거를 알아야 다툴 수 있다', '"비밀"이라는 말로 모든 설명을 막을 순 없다'] },
@@ -244,8 +244,8 @@ export const ISSUES = [
         points: ['공개하면 악용·모방 위험이 크다', '전부 밝히지 않고도 설명할 방법이 있다'] },
     ],
     think: '"이유를 아는 것"과 "알고리즘을 통째로 보는 것"은 같은 요구일까?',
-    status: 'varies',
-    realCase: { name: '유럽사법재판소(CJEU) Dun & Bradstreet 판결', date: '2025-02', where: '유럽·한국',
+    status: 'partial',
+    realCase: { name: '유럽사법재판소(CJEU) Dun & Bradstreet 판결', date: '2025-02', where: '유럽·한국 사례',
       gist: '신용평가 점수로 휴대전화 계약이 자동 거절된 사람이 이유를 물은 사건이다. 유럽 최고법원은 "영업비밀"이라는 말만으로 설명을 거부할 수 없다고 했다. 다만 알고리즘 공식까지 공개할 필요는 없고, 비밀이 걸린 부분은 감독기관이나 법원이 따져 보게 했다. 한국도 2024년 3월부터 완전히 자동화된 결정에 설명을 요구할 권리가 생겼다.' },
     sources: [
       { label: 'Stibbe(설명 요구권)', url: 'https://www.stibbe.com/publications-and-insights/cjeu-confirms-right-of-explanation-in-battle-between-trade-secrets-and' },
@@ -264,7 +264,7 @@ export const ISSUES = [
     ],
     think: '"회사의 비밀"과 "개인의 경험"은 어디서 나뉠까?',
     status: 'ongoing',
-    realCase: { name: 'Apple v. OpenAI / xAI v. OpenAI', date: '2025~2026', where: '미국',
+    realCase: { name: 'Apple v. OpenAI / xAI v. OpenAI', date: '2025~2026', where: '미국 사례',
       gist: 'Apple은 전직 직원들이 기밀 설계를 들고 OpenAI로 옮겼다며 2026년 7월 소송을 냈다. OpenAI는 어떤 비밀인지 밝히지 못했다며 맞서지만, 10월 재판 동안 문제의 정보를 쓰지 않기로 약속했다. xAI의 비슷한 소송은 1심에서 기각됐다. 면접에서 이전 일을 묻는 것만으로 유출을 부추겼다고 볼 수 없다는 이유였고, xAI는 항소했다.' },
     sources: [
       { label: 'TechCrunch(Apple v. OpenAI)', url: 'https://techcrunch.com/2026/07/13/the-wildest-allegations-in-apples-trade-secrets-lawsuit-against-openai/' },

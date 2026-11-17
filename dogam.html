@@ -14,46 +14,52 @@
 <body>
 <header class="d-hero">
   <div class="d-wrap">
-    <p class="d-eyebrow">AI 시대의 지식재산 쟁점 도감</p>
+    <p class="d-eyebrow"><a class="d-game" href="index.html">← 루나 게임</a><span aria-hidden="true"> · </span>AI 시대의 지식재산 쟁점 도감</p>
     <h1>AI가 만들었습니다.<br><span class="d-hl">그럼 누구 것이죠?</span></h1>
     <p class="d-sub">그림·발명·로고·알고리즘 — AI 시대가 던진 <b>12개의 논쟁</b>.<br>대부분은 아직 법도 답을 정하지 못했습니다. 직접 판단해 보세요.</p>
   </div>
 </header>
 
 <main class="d-wrap">
-  <p class="d-lead">권리를 골라 좁혀 보거나, 카드를 눌러 양쪽 주장을 펼쳐 보세요.</p>
-  <div id="filters" role="group" aria-label="권리 필터"></div>
+  <p class="d-lead">카드를 눌러 양쪽 주장을 펼쳐 보세요.</p>
+  <div class="filter-row">
+    <div id="filters" role="group" aria-label="권리 필터"></div>
+    <button id="toggle-all" class="fchip fchip-ghost" type="button" aria-pressed="false">모두 펼치기</button>
+  </div>
+  <p id="count" class="sr-only" aria-live="polite"></p>
 
+  <!-- 읽는 법: 첫 화면에서 카드를 밀어내지 않게 배지 한 줄 + 고지 한 줄만 보이고, 나머지는 접어 둔다(평가 v2 r2 N1) -->
   <section class="guide" aria-labelledby="guide-title">
-    <h2 class="guide-title" id="guide-title">배지 읽는 법</h2>
-    <ul class="legend" id="legend"></ul>
-    <p class="guide-note">교육용 토론 자료이며 법률 자문이 아닙니다. 사례는 2026년 11월 17일에 마지막으로 확인했습니다. 대부분 외국 사례라 한국 법과 다를 수 있습니다.</p>
+    <h2 class="sr-only" id="guide-title">배지와 읽는 법</h2>
+    <ul class="legend" id="legend" aria-label="배지 종류"></ul>
+    <p class="guide-note">법률 자문이 아닌 토론 자료 · 11월 17일 확인</p>
     <details class="guide-more">
-      <summary>카드 읽는 순서</summary>
+      <summary>배지 뜻 · 읽는 순서 · 수업에 쓰기</summary>
+      <dl class="legend-full" id="legend-full"></dl>
+      <p class="guide-sub">카드 읽는 순서</p>
       <ol>
         <li>카드를 누르면 질문과 양쪽 주장이 열린다.</li>
         <li><span aria-hidden="true">💭</span> 질문을 보고 내 생각을 먼저 정해 본다.</li>
         <li>낱말 풀이에서 모르는 말을 확인한다.</li>
         <li><span aria-hidden="true">📂</span> 실제 사례에서 법원이나 정부가 어떻게 봤는지 확인한다.</li>
       </ol>
-    </details>
-    <details class="guide-more">
-      <summary>수업에 쓰기 (교사용)</summary>
+      <p class="guide-sub">수업에 쓰기 (교사용)</p>
       <ul>
         <li>카드 한 장에 10~15분: 질문 읽기 → 모둠을 두 편으로 나눠 주장 맡기 → 💭 질문으로 토론 → 📂 실제 사례 확인.</li>
-        <li>게임을 마친 뒤라면 엔딩의 '다시 볼 개념'과 같은 권리 카드부터 고르면 이어진다.</li>
-        <li>진행 중인 사건은 결과가 바뀔 수 있다. 수업 전에 📂 출처에서 새 소식을 확인한다.</li>
-        <li>외국 판결이 많다. 한국 법은 어떻게 다를지 함께 짚어 본다.</li>
+        <li>카드 안의 <span aria-hidden="true">🔗</span> 링크를 나눠 주면 그 카드가 펼쳐진 채로 열린다.</li>
+        <li>게임을 마친 뒤라면 엔딩의 '다시 볼 개념'과 같은 권리 카드부터 고르면 이어진다. 게임의 초상권·퍼블리시티권 편은 도감에 없다. 도감은 저작권·특허·상표·영업비밀 네 권리의 AI 쟁점만 모았다.</li>
+        <li>진행 중인 사건은 결과가 바뀔 수 있다. 수업 전에 📂 출처에서 새 소식을 확인한다(마지막 확인 2026년 11월 17일).</li>
+        <li>외국 사례가 많다. 한국 법은 어떻게 다를지 함께 짚어 본다.</li>
       </ul>
     </details>
   </section>
 
-  <div id="issues"></div>
+  <div id="issues"><p class="no-js">카드가 보이지 않으면 파일을 직접 열었기 때문일 수 있습니다. 웹 주소로 열어 주세요.</p></div>
 </main>
 
 <footer class="d-wrap">
   <p class="d-note">교육용 토론 자료이며 법률 자문이 아닙니다. 리서치 2026년 7월, 마지막 확인 2026년 11월 17일 —
-  <b>🔥 논쟁 진행 중</b>으로 표시된 사건은 이후 결과가 바뀔 수 있습니다.</p>
+  <b>🔥 논쟁 진행 중</b>으로 표시된 쟁점은 이후 결과가 바뀔 수 있습니다.</p>
   <p><a class="d-back" href="index.html">← 게임으로 돌아가기</a></p>
 </footer>
 
