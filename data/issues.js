@@ -1,19 +1,39 @@
 /* [데이터] AI 시대의 지식재산 쟁점 12건 — 도감이 이 데이터만 읽는다.
    설계·검증표: docs/superpowers/specs/2026-07-18-ip-dogam-design.md (§8 = 교사 검수 관문, 검수 전 배포 금지)
-   스키마: {id,right,rightEmoji,title,hook,sides[2~3]{label,stance,points[≥2]},think,status,realCase{name,gist,date},sources[≥1]{label,url}}
-   status: decided(판결)·ongoing(진행 중)·varies(국가·전략별 상이). 미결을 확정처럼 쓰지 말 것(verify가 금칙어 차단).
+   스키마: {id,right,rightEmoji,title,hook,sides[2~3]{label,stance,points[≥2]},think,status,realCase{name,gist,date,where},sources[≥1]{label,url}}
+   status: ongoing(논쟁 진행 중)·partial(일부 판결)·varies(나라마다 다름)·strategy(전략 선택). 미결을 확정처럼 쓰지 말 것(verify가 금칙어 차단).
+   rightEmoji는 게임(data/episodes.js)과 같게: 저작권 ⚖️·특허권 🛡️·상표권 📋·영업비밀 🔐. where = 사례의 나라(없으면 '').
    리서치 2026-07, 재확인 2026-11-17(docs/review/2026-11-17-dogam-verifier.md 교체 문구 전부 반영). 진행 중 사건은 결과가 바뀔 수 있음. */
 
+// 배지 뜻은 desc 하나로만 쓴다(도감 '배지 읽는 법'이 이 글을 그대로 보여 준다). ⚖️는 게임에서 저작권 기호라 쓰지 않는다.
 export const STATUS_META = {
-  decided: { emoji: '⚖️', label: '판결' },
-  ongoing: { emoji: '🔥', label: '논쟁 진행 중' },
-  varies: { emoji: '🌍', label: '국가·상황별 상이' },
+  ongoing: { emoji: '🔥', label: '논쟁 진행 중', desc: '재판이나 논쟁이 아직 끝나지 않았다.' },
+  partial: { emoji: '🏛️', label: '일부 판결', desc: '한 부분은 판결로 정해졌고, 나머지는 아직 다툰다.' },
+  varies: { emoji: '🌍', label: '나라마다 다름', desc: '같은 문제를 나라마다 다르게 판단한다.' },
+  strategy: { emoji: '🧭', label: '전략 선택', desc: '법이 답을 정하기보다 회사가 골라야 하는 문제다.' },
 };
+
+// 낱말 풀이 — 카드 글(훅·양측·질문·사례)에 나오는 낱말만 그 카드 아래에 보여 준다. 풀이는 80자 이하.
+export const GLOSSARY = [
+  { term: '공정이용', def: '허락을 받지 않아도 남의 저작물을 쓸 수 있는 예외. 쓰는 목적과 양, 원작 시장에 주는 영향을 따진다.' },
+  { term: '1심', def: '사건을 처음 맡아 판단하는 법원. 결과에 불복하면 위 법원에 다시 판단을 청할 수 있다.' },
+  { term: '항소', def: '1심 판결에 불복해 위 법원(항소법원)에 다시 판단을 청하는 것.' },
+  { term: '상고', def: '항소법원 판결에 불복해 대법원에 판단을 청하는 것. 미국 대법원은 맡을 사건을 골라 받는다.' },
+  { term: '기각', def: '법원이 청구를 받아들이지 않는 것.' },
+  { term: '심리', def: '법원이 증거와 주장을 살펴 판단해 가는 과정.' },
+  { term: '도운 책임', def: '직접 베끼지 않았어도 남의 침해를 부추기거나 거든 쪽이 지는 책임. 미국에서는 기여 책임이라고 한다.' },
+  { term: '라이선스', def: '저작자가 정해 둔 사용 조건. 조건을 지키면 따로 묻지 않고 쓸 수 있다.' },
+  { term: '출원', def: '특허나 상표를 등록해 달라고 신청하는 것.' },
+  { term: '특허상표청', def: '미국에서 특허와 상표를 심사하는 정부 기관.' },
+  { term: '식별력', def: '그 표시를 보고 어느 회사 상품인지 구별할 수 있게 하는 힘.' },
+  { term: '희석', def: '유명 상표를 흉내 내서 그 이름값이 흐려지는 것. 소비자가 헷갈리지 않아도 생길 수 있다.' },
+  { term: '감독기관', def: '법이 잘 지켜지는지 살피는 정부 기관. 유럽에서는 개인정보 보호 기관이 맡는다.' },
+];
 
 export const ISSUES = [
   // ── 저작권 (4) ──
   {
-    id: 'train', right: '저작권', rightEmoji: '©️',
+    id: 'train', right: '저작권', rightEmoji: '⚖️',
     title: '학습 데이터를 마음대로 써도 될까?',
     hook: 'AI는 남의 그림·글 수백만 개를 학습했다. 이건 도둑질일까, 사람처럼 "보고 배운" 것일까?',
     sides: [
@@ -24,7 +44,7 @@ export const ISSUES = [
     ],
     think: '"보고 배우는 것"과 "복제하는 것"의 경계는 어디일까?',
     status: 'ongoing',
-    realCase: { name: 'Bartz v. Anthropic / 지상파 3사 v. 네이버', date: '2025~2026',
+    realCase: { name: 'Bartz v. Anthropic / 지상파 3사 v. 네이버', date: '2025~2026', where: '미국·한국',
       gist: '미국의 한 1심 법원은 산 책으로 AI를 학습시킨 것은 공정이용이라고 보았다. 하지만 해적판 책을 내려받아 쌓아 둔 것은 공정이용이 아니라고 했고, Anthropic은 약 15억 달러를 물어주기로 합의했다. 한국에서는 지상파 3사가 뉴스 학습을 두고 네이버와 소송 중이다.' },
     sources: [
       { label: '작가조합(Anthropic 합의 최종 승인)', url: 'https://authorsguild.org/news/court-grants-final-approval-anthropic-copyright-settlement/' },
@@ -33,7 +53,7 @@ export const ISSUES = [
     ],
   },
   {
-    id: 'aiwork', right: '저작권', rightEmoji: '©️',
+    id: 'aiwork', right: '저작권', rightEmoji: '⚖️',
     title: 'AI가 그린 그림, 저작권은 누구 것?',
     hook: '버튼 한 번에 나온 그림. 저작권은 사람 것일까, AI 것일까, 아니면 아무의 것도 아닐까?',
     sides: [
@@ -43,8 +63,8 @@ export const ISSUES = [
         points: ['프롬프트·수정·선택에도 사람의 판단이 들어간다', '보호가 없으면 창작에 투자하기를 꺼리게 된다'] },
     ],
     think: '"어느 정도" 사람이 개입해야 사람의 창작이라 할 수 있을까?',
-    status: 'decided',
-    realCase: { name: 'Thaler v. Perlmutter', date: '2026-03',
+    status: 'partial',
+    realCase: { name: 'Thaler v. Perlmutter', date: '2026-03', where: '미국·한국',
       gist: 'AI가 혼자 만든 그림의 저작권 등록을 두고 다툰 사건이다. 미국 항소법원은 "저작물은 사람이 만들어야 한다"고 판결했다. 2026년 3월 대법원이 상고를 받지 않아 이 판결이 확정됐다. 한국 정부 안내서(2025-06)도 사람이 창작적으로 기여한 부분만 등록할 수 있다고 안내한다. 사람이 얼마나 관여해야 보호받는지는 아직 다퉈지고 있다.' },
     sources: [
       { label: 'Morgan Lewis(대법원 상고기각)', url: 'https://www.morganlewis.com/pubs/2026/03/us-supreme-court-declines-to-consider-whether-ai-alone-can-create-copyrighted-works' },
@@ -53,7 +73,7 @@ export const ISSUES = [
     ],
   },
   {
-    id: 'provider', right: '저작권', rightEmoji: '©️',
+    id: 'provider', right: '저작권', rightEmoji: '⚖️',
     title: 'AI가 남의 글을 베끼면 누가 책임지나?',
     hook: 'AI가 신문 기사를 거의 그대로 뱉어냈다. 회사 책임일까, 그렇게 시킨 이용자 책임일까?',
     sides: [
@@ -64,7 +84,7 @@ export const ISSUES = [
     ],
     think: '칼을 만든 사람과 칼을 쓴 사람, 책임은 어떻게 나눌까?',
     status: 'ongoing',
-    realCase: { name: 'NYT v. OpenAI / Cox v. Sony', date: '2023~진행 중',
+    realCase: { name: 'NYT v. OpenAI / Cox v. Sony', date: '2023~진행 중', where: '미국',
       gist: '뉴욕타임스는 챗봇이 자사 기사를 거의 그대로 내놓는다며 2023년 OpenAI에 소송을 냈다. 2026년 3월 미국 대법원은 인터넷 회사 사건(Cox v. Sony)에서 기준을 정했다. 침해를 알기만 한 회사는 도운 책임이 없고, 부추기거나 침해용 서비스를 만들어야 진다. 이후 뉴욕타임스는 "이용자를 도왔다"는 주장을 접고 직접 베꼈다는 주장에 집중한다.' },
     sources: [
       { label: 'Hunton(Cox v. Sony 대법원 판결)', url: 'https://www.hunton.com/insights/legal/knowledge-is-not-enough-supreme-court-limits-contributory-copyright-liability-for-isps' },
@@ -73,7 +93,7 @@ export const ISSUES = [
     ],
   },
   {
-    id: 'oss', right: '저작권', rightEmoji: '©️',
+    id: 'oss', right: '저작권', rightEmoji: '⚖️',
     title: '공짜 오픈소스, 조건은 지켜야 할까?',
     hook: '누구나 쓰라고 공개한 코드로 AI를 만들었다. "출처를 밝히라"는 조건도 지켜야 할까?',
     sides: [
@@ -84,7 +104,7 @@ export const ISSUES = [
     ],
     think: '"자유롭게 쓰세요"라는 말에는 어떤 조건까지 담겨 있을까?',
     status: 'ongoing',
-    realCase: { name: 'Doe v. GitHub Copilot', date: '2022~진행 중',
+    realCase: { name: 'Doe v. GitHub Copilot', date: '2022~진행 중', where: '미국',
       gist: '개발자들은 코드 생성 AI가 오픈소스 코드를 내놓으며 저작자 표시를 떼어 냈다고 소송을 냈다. 2026년 9월 미국 항소법원은 AI가 새로 만든 코드에 표시가 없다고 해서 "표시를 제거했다"고 볼 수는 없다고 했다. 다만 라이선스(계약)를 어겼다는 주장은 1심에서 계속 다퉈지고 있다.' },
     sources: [
       { label: 'Gibson Dunn(제9항소법원 판결)', url: 'https://www.gibsondunn.com/ninth-circuit-clarifies-limits-of-dmca-liability-for-ai-generated-code/' },
@@ -94,26 +114,26 @@ export const ISSUES = [
   },
   // ── 특허권 (2) ──
   {
-    id: 'patprotect', right: '특허권', rightEmoji: '🔬',
-    title: 'AI 핵심 기술, 특허로 공개할까 숨길까?',
-    hook: '어렵게 만든 AI 기술. 특허로 공개하고 보호받을까, 비밀로 감추고 독점할까?',
+    id: 'patprotect', right: '특허권', rightEmoji: '🛡️',
+    title: 'AI 알고리즘, 특허를 받을 수 있을까?',
+    hook: '밤새 다듬은 AI 학습 방법. 수학 공식처럼 생긴 이 아이디어도 특허로 독점할 수 있을까?',
     sides: [
-      { label: '특허(공개)', stance: '특허로 공개하면 출원일부터 최대 20년간 보호받고 기술도 발전한다.',
-        points: ['법적으로 강하게 보호받는다', '공개된 기술 위에 다음 발전이 쌓인다'] },
-      { label: '영업비밀(비공개)', stance: '공개하면 모방당하기 쉬우니 비밀로 지키는 게 낫다.',
-        points: ['핵심 알고리즘은 공개 즉시 따라잡힐 수 있다', '기간 제한 없이 지킬 수 있다'] },
+      { label: '특허를 줘야', stance: '새 알고리즘도 큰 노력의 결과다. 발명으로 보호해야 한다.',
+        points: ['보호가 없으면 연구에 투자하기 어렵다', '공개하는 대신 독점을 주면 기술이 더 퍼진다'] },
+      { label: '모두의 것', stance: '수학과 아이디어는 누구나 쓸 수 있어야 한다.',
+        points: ['공식 하나를 독점하면 다른 연구가 막힌다', '컴퓨터로 돌린다고 수학이 발명이 되지는 않는다'] },
     ],
-    think: '"공개하고 보호받기"와 "숨기고 독점하기" 중 무엇이 더 안전할까?',
+    think: '"새로운 계산 방법"과 "새로운 기계"는 어디서 갈릴까?',
     status: 'varies',
-    realCase: { name: '보호 전략의 선택 문제', date: '상시',
-      gist: '판례로 정해지는 문제가 아니라 기업이 고르는 전략 문제다. 제품을 뜯어보면 알 수 있는 기술은 특허가, 안에 감출 수 있는 기술은 영업비밀이 유리하다는 견해가 많다. 또 AI 알고리즘 같은 수학적 방법 자체는 특허를 받기 어렵고, 컴퓨터에서 구체적으로 실행되는 형태여야 한다.' },
+    realCase: { name: 'Alice v. CLS Bank / 한국 AI 특허출원 안내서', date: '2014~2026', where: '미국·한국',
+      gist: '미국 대법원은 2014년, 추상적인 아이디어를 컴퓨터로 돌리기만 한 것은 특허를 받을 수 없다고 했다. 한국 지식재산처 안내서도 AI 발명은 하드웨어와 결합해 정보를 처리하는 형태여야 한다고 본다. 어디까지가 구체적인 기술인지는 사건마다 다퉈진다.' },
     sources: [
-      { label: 'Lexology(AI 보호 전략)', url: 'https://www.lexology.com/library/detail.aspx?g=15568a55-2a68-436e-8ebd-22240712987d' },
-      { label: '헤럴드경제(지식재산처 AI 특허출원 안내서)', url: 'https://www.heraldk.com/article/2026060818200872635' },
+      { label: '코넬 법률정보원(Alice 판결문)', url: 'https://www.law.cornell.edu/supremecourt/text/13-298' },
+      { label: '헤럴드경제(지식재산처 AI 특허출원 안내서, 2026-06)', url: 'https://www.heraldk.com/article/2026060818200872635' },
     ],
   },
   {
-    id: 'inventor', right: '특허권', rightEmoji: '🔬',
+    id: 'inventor', right: '특허권', rightEmoji: '🛡️',
     title: 'AI를 발명자로 인정할 수 있을까?',
     hook: 'AI가 새로운 기술을 발명했다. 특허 서류의 "발명자" 칸에 AI 이름을 쓸 수 있을까?',
     sides: [
@@ -124,7 +144,7 @@ export const ISSUES = [
     ],
     think: '"누가 발명했는가"와 "누구 이름으로 권리를 갖는가"는 같은 질문일까?',
     status: 'varies',
-    realCase: { name: 'DABUS (Thaler) 국제 소송', date: '2021~2026',
+    realCase: { name: 'DABUS (Thaler) 국제 소송', date: '2021~2026', where: '여러 나라',
       gist: '발명 AI "DABUS"를 발명자로 적은 특허 출원이 여러 나라에서 다퉈졌다. 일본·미국·영국 법원은 발명자는 사람이어야 한다며 받아들이지 않았다. 독일 법원은 사람을 발명자로 적으면 AI를 도구로 쓴 발명도 특허를 받을 수 있다고 봤다. 한국도 1·2심이 "AI는 발명자가 될 수 없다"고 했고, 대법원 선고 소식은 아직 없다.' },
     sources: [
       { label: '법무법인 세종(한국 DABUS 소송)', url: 'https://www.shinkim.com/kor/media/lawinfo/373' },
@@ -134,18 +154,18 @@ export const ISSUES = [
   },
   // ── 상표권 (3) ──
   {
-    id: 'tmmake', right: '상표권', rightEmoji: '™️',
+    id: 'tmmake', right: '상표권', rightEmoji: '📋',
     title: 'AI가 디자인한 로고, 상표로 등록될까?',
-    hook: 'AI가 뚝딱 만든 브랜드 로고. 상표로 등록해 독점할 수 있을까?',
+    hook: 'AI가 뚝딱 만든 브랜드 로고. 상표로 등록해 독점할 수 있을까? 하루에 100개를 찍어 낸다면?',
     sides: [
-      { label: '지금처럼', stance: '지금 법은 누가 만들었는지 묻지 않는다. 구별만 되면 된다.',
-        points: ['상표의 핵심은 "출처를 구별하는 힘"이다', '쓸 생각이 있는지는 이미 확인한다'] },
+      { label: '지금처럼', stance: 'AI 로고도 지금 기준이면 충분하다. 구별되고 쓸 생각이 있으면 된다.',
+        points: ['상표의 핵심은 "출처를 구별하는 힘"이다', '쓸 생각 확인은 지금 심사로 충분하다'] },
       { label: '더 엄격하게', stance: 'AI로 로고를 대량으로 찍어 선점하면 남이 쓸 표시가 줄어든다.',
         points: ['쓰지도 않을 상표를 쌓아 두기가 쉬워진다', '실제로 쓸 계획인지 더 꼼꼼히 봐야 한다'] },
     ],
     think: '로고 만들기가 쉬워진 지금, 상표 등록 문턱을 높여야 할까?',
-    status: 'varies',
-    realCase: { name: 'AI 생성 로고의 상표·저작권 보호', date: '상시',
+    status: 'ongoing',
+    realCase: { name: 'AI 생성 로고의 상표·저작권 보호', date: '현행법', where: '한국',
       gist: '한국 상표법은 "사람이 만들었는가"를 등록 요건으로 두지 않는다. 그래서 AI가 만든 로고도 식별력이 있고 먼저 등록된 상표와 비슷하지 않으면 등록될 수 있다. 또 상표는 실제로 쓰거나 쓰려는 사람만 등록받을 수 있다. 로고 그림 자체는 사람의 창작 기여가 없으면 저작권 보호를 받지 못할 수 있다.' },
     sources: [
       { label: '국가법령정보센터(상표법 제33조 — 등록 요건)', url: 'https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EC%83%81%ED%91%9C%EB%B2%95/%EC%A0%9C33%EC%A1%B0' },
@@ -154,7 +174,7 @@ export const ISSUES = [
     ],
   },
   {
-    id: 'tmdilute', right: '상표권', rightEmoji: '™️',
+    id: 'tmdilute', right: '상표권', rightEmoji: '📋',
     title: 'AI가 유명 브랜드를 흉내 내면?',
     hook: 'AI가 유명 로고와 비슷한 이미지를 대량으로 만들어낸다. 상표 침해일까?',
     sides: [
@@ -165,7 +185,7 @@ export const ISSUES = [
     ],
     think: '"비슷하다"는 느낌만으로 침해라 할 수 있을까?',
     status: 'varies',
-    realCase: { name: 'Getty Images v. Stability AI', date: '2025~2026',
+    realCase: { name: 'Getty Images v. Stability AI', date: '2025~2026', where: '영국·미국',
       gist: 'AI가 만든 이미지에 일그러진 Getty 워터마크가 찍혀 나온 사건이다. 영국 법원은 2025년 11월, 초기 모델이 만든 일부 이미지만 상표 침해로 보았다. 유명 상표의 가치를 흐린다는 "희석" 주장은 받아들이지 않았다. 미국 법원은 2026년 4월 상표 청구를 본격 심리로 넘겼을 뿐, 결론은 아직 나지 않았다.' },
     sources: [
       { label: 'Legal 500(미국 판단)', url: 'https://www.legal500.com/intelligence/united-states/intellectual-property/trademark-law-meets-generative-ai-key-takeaways-from-the-getty-v-stability-ai-ruling' },
@@ -173,7 +193,7 @@ export const ISSUES = [
     ],
   },
   {
-    id: 'tmname', right: '상표권', rightEmoji: '™️',
+    id: 'tmname', right: '상표권', rightEmoji: '📋',
     title: '"먼저 쓴 이름"을 대기업이 가져가면?',
     hook: '작은 회사가 먼저 쓰던 이름을, 거대 AI가 같은 이름으로 서비스를 냈다. 누가 쓸 수 있을까?',
     sides: [
@@ -184,7 +204,7 @@ export const ISSUES = [
     ],
     think: '같은 이름이라도 "헷갈리지 않으면" 함께 써도 될까?',
     status: 'ongoing',
-    realCase: { name: 'Gemini Data v. Google / P2B v. Google', date: '2024~진행 중',
+    realCase: { name: 'Gemini Data v. Google / P2B v. Google', date: '2024~진행 중', where: '미국',
       gist: '"Gemini"라는 이름을 먼저 등록해 쓰던 미국의 작은 AI 회사가 2024년 구글에 상표 소송을 냈다. 미국 특허상표청은 같은 해 구글의 GEMINI 상표 출원에 "헷갈릴 수 있다"며 거절 의견을 냈다. 같은 이름의 스피커 회사(P2B)는 재판 도중 구글의 사용부터 막아 달라고 했지만 받아들여지지 않았다. 두 소송 모두 최종 판결은 아직이다.' },
     sources: [
       { label: 'National Law Review(Gemini Data 소송·특허상표청 거절)', url: 'https://natlawreview.com/article/gemini-spells-double-trouble-googles-ai-gemini-data-inc-sues-trademark-infringement' },
@@ -194,7 +214,7 @@ export const ISSUES = [
   },
   // ── 영업비밀 (3) ──
   {
-    id: 'tsstrategy', right: '영업비밀', rightEmoji: '🔒',
+    id: 'tsstrategy', right: '영업비밀', rightEmoji: '🔐',
     title: '핵심 기술, 특허·오픈소스·영업비밀 중 무엇?',
     hook: '회사의 가장 중요한 AI 기술. 공개할까, 공유할까, 감출까? 세 갈래 길이 있다.',
     sides: [
@@ -206,15 +226,15 @@ export const ISSUES = [
         points: ['공개 비용 없이 오래 지킬 수 있다', '단, 남이 스스로 개발하거나 분석해 알아내면 막을 수 없다'] },
     ],
     think: '무엇을 얻는 대신 무엇을 포기해야 할까?',
-    status: 'varies',
-    realCase: { name: '보호 전략의 3지선다', date: '상시',
-      gist: '하나의 정답이 있는 문제가 아니라, 기술의 성격·모방 난이도·사업 전략에 따라 특허·오픈소스·영업비밀 중 무엇을 택할지 저울질하는 논쟁이다. 실제 기업은 기술마다 다른 조합을 쓰기도 한다.' },
+    status: 'strategy',
+    realCase: { name: '보호 전략의 3지선다', date: '판례 없음', where: '',
+      gist: '판례로 정해지는 문제가 아니라 회사가 고르는 전략 문제다. 제품을 뜯어보면 알 수 있는 기술은 특허가, 안에 감출 수 있는 기술은 영업비밀이 유리하다는 견해가 많다. 실제 기업은 기술마다 다른 조합을 쓰기도 한다.' },
     sources: [
       { label: 'Lexology(AI 보호 전략)', url: 'https://www.lexology.com/library/detail.aspx?g=15568a55-2a68-436e-8ebd-22240712987d' },
     ],
   },
   {
-    id: 'explain', right: '영업비밀', rightEmoji: '🔒',
+    id: 'explain', right: '영업비밀', rightEmoji: '🔐',
     title: 'AI가 나를 거절한 이유, 알 권리가 있을까?',
     hook: 'AI가 내 휴대전화 계약을 거절했다. "왜죠?"라고 물을 권리 vs "그건 회사 비밀"이라는 방패.',
     sides: [
@@ -225,7 +245,7 @@ export const ISSUES = [
     ],
     think: '"이유를 아는 것"과 "알고리즘을 통째로 보는 것"은 같은 요구일까?',
     status: 'varies',
-    realCase: { name: '유럽사법재판소(CJEU) Dun & Bradstreet 판결', date: '2025-02',
+    realCase: { name: '유럽사법재판소(CJEU) Dun & Bradstreet 판결', date: '2025-02', where: '유럽·한국',
       gist: '신용평가 점수로 휴대전화 계약이 자동 거절된 사람이 이유를 물은 사건이다. 유럽 최고법원은 "영업비밀"이라는 말만으로 설명을 거부할 수 없다고 했다. 다만 알고리즘 공식까지 공개할 필요는 없고, 비밀이 걸린 부분은 감독기관이나 법원이 따져 보게 했다. 한국도 2024년 3월부터 완전히 자동화된 결정에 설명을 요구할 권리가 생겼다.' },
     sources: [
       { label: 'Stibbe(설명 요구권)', url: 'https://www.stibbe.com/publications-and-insights/cjeu-confirms-right-of-explanation-in-battle-between-trade-secrets-and' },
@@ -233,7 +253,7 @@ export const ISSUES = [
     ],
   },
   {
-    id: 'tsleak', right: '영업비밀', rightEmoji: '🔒',
+    id: 'tsleak', right: '영업비밀', rightEmoji: '🔐',
     title: '직원이 AI 비밀을 들고 이직하면?',
     hook: '핵심 개발자가 경쟁사로 옮겨간다. 머릿속의 기술은 회사 것일까, 그 사람 것일까?',
     sides: [
@@ -244,7 +264,7 @@ export const ISSUES = [
     ],
     think: '"회사의 비밀"과 "개인의 경험"은 어디서 나뉠까?',
     status: 'ongoing',
-    realCase: { name: 'Apple v. OpenAI / xAI v. OpenAI', date: '2025~2026',
+    realCase: { name: 'Apple v. OpenAI / xAI v. OpenAI', date: '2025~2026', where: '미국',
       gist: 'Apple은 전직 직원들이 기밀 설계를 들고 OpenAI로 옮겼다며 2026년 7월 소송을 냈다. OpenAI는 어떤 비밀인지 밝히지 못했다며 맞서지만, 10월 재판 동안 문제의 정보를 쓰지 않기로 약속했다. xAI의 비슷한 소송은 1심에서 기각됐다. 면접에서 이전 일을 묻는 것만으로 유출을 부추겼다고 볼 수 없다는 이유였고, xAI는 항소했다.' },
     sources: [
       { label: 'TechCrunch(Apple v. OpenAI)', url: 'https://techcrunch.com/2026/07/13/the-wildest-allegations-in-apples-trade-secrets-lawsuit-against-openai/' },

@@ -17,7 +17,7 @@ function run() {
     log('훅 헤드라인', d.body.textContent.includes('누구 것이죠') && d.body.textContent.includes('12개의 논쟁'));
     log('쟁점 카드 12장', $$('.issue').length === 12);
     log('필터 칩 5개(전체+4권리)', $$('.fchip').length === 5);
-    log('상태 배지 3종 존재', !!($('.s-decided') && $('.s-ongoing') && $('.s-varies')));
+    log('상태 배지 4종 존재', !!($('#issues .s-partial') && $('#issues .s-ongoing') && $('#issues .s-varies') && $('#issues .s-strategy')));
     const cr = $$('.fchip').find(c => c.dataset.right === '저작권'); cr.click();
     log('저작권 필터 → 4장', $$('.issue:not([hidden])').length === 4);
     $$('.fchip').find(c => c.dataset.right === 'all').click();
@@ -52,7 +52,20 @@ function run() {
 
     // ── 2026-11-17 검증 반영(사실) ──
     const tm = $('#issue-tmname');
-    log('Gemini 사건 = 논쟁 진행 중 배지', !!tm.querySelector('.s-ongoing') && !tm.querySelector('.s-decided'));
+    log('Gemini 사건 = 논쟁 진행 중 배지', !!tm.querySelector('.s-ongoing') && !tm.querySelector('.s-partial'));
+
+    // ── 2026-11-17 평가 v2 기준점 반영 ──
+    log('배지 읽는 법: 범례 4줄(뜻 포함)', $$('#legend li').length === 4 && $$('#legend .legend-desc').every(e => e.textContent.trim().length > 5));
+    const guide = $('.guide');
+    log('읽는 법이 카드보다 위(필터 바로 아래)', !!guide && (guide.compareDocumentPosition($('#issues')) & 4) !== 0 && (guide.compareDocumentPosition($('#filters')) & 2) !== 0);
+    log('고지 한 줄이 위에도(법률 자문 아님·마지막 확인일)', /법률 자문이 아닙니다/.test($('.guide-note').textContent) && /11월 17일/.test($('.guide-note').textContent));
+    log('카드 읽는 순서·수업에 쓰기 접이식 2개', $$('.guide details').length === 2);
+    log('나라 꼬리표: 사례가 있는 카드 11장', $$('#issues .issue-where').length === 11 && /미국·한국 사례/.test($('#issue-train .issue-where').textContent));
+    log('낱말 풀이: train에 공정이용', /공정이용/.test($('#body-train .terms').textContent));
+    log('권리 이모지 = 게임(⚖️ 저작권)', $('#issue-train .issue-right').textContent.includes('⚖️') && !/⚖️/.test($$('#legend li').map(e => e.textContent).join('')));
+    log('히어로 그라데이션 글자 없음', !/text/.test(cs($('.d-hl'), 'backgroundClip') + cs($('.d-hl'), 'webkitBackgroundClip')));
+    log('히어로·안내·필터 왼쪽 정렬', ['.d-hero', '.d-lead'].every(s => /left|start/.test(cs($(s), 'textAlign'))) && /normal|flex-start|start/.test(cs($('#filters'), 'justifyContent')));
+    log('본문 17px·행간 1.7 이상', parseFloat(cs(d.body, 'fontSize')) >= 17 && parseFloat(cs(d.body, 'lineHeight')) / parseFloat(cs(d.body, 'fontSize')) >= 1.7);
     log('Gemini 사건에 "구글 승소" 문구 없음', !/구글 승소|손을 들어줬다/.test(tm.textContent));
     log('GitHub 사건 = 2026년 9월 항소심 반영', $('#more-oss').textContent.includes('2026년 9월'));
   } catch (e) { log('예외: ' + e.message, false); }

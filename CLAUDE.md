@@ -51,7 +51,7 @@ test/probe-shots.html  캡처용 프로브(원하는 장면까지 자동 진행)
 ## 규칙·함정
 
 - **데이터에 이름 하드코딩 금지** — 이름은 `{n}` 토큰, 받침 자동 조사(`{n가}{n는}{n를}{n랑}{n와}`). 치환기 `T()`=character.js, 통로=chat.js `esc()`. verify가 잡는다. 실존 인물 닮은꼴 금지(SPEC §12.5).
-- **미결 사건을 확정처럼 쓰지 말 것** — dogam은 status(decided/ongoing/varies) 배지로 표시, verify-dogam이 단정 금칙어 차단. 사례 갱신 시 웹 재확인 후 issues.js의 realCase·status·sources·하단 기준일 함께 수정.
+- **미결 사건을 확정처럼 쓰지 말 것** — dogam은 status(ongoing 논쟁 진행 중/partial 일부 판결/varies 나라마다 다름/strategy 전략 선택, 뜻은 STATUS_META.desc 하나 — 도감 '배지 읽는 법'이 그대로 보여 줌) 배지로 표시. 권리 이모지는 게임과 같게(verify가 대조). 낱말 풀이는 issues.js GLOSSARY(카드 글에 나오는 낱말만 자동 표시), verify-dogam이 단정 금칙어 차단. 사례 갱신 시 웹 재확인 후 issues.js의 realCase·status·sources·하단 기준일 함께 수정.
 - **ES 모듈이라 HTTP/Pages 전용** — `<script type="module">`은 file://(더블클릭)에서 CORS로 안 뜬다(코드 버그 아님). 게임·도감 모두 서버 서빙 필요.
 - engine.js는 규칙 단일 원천(수치 변경 금지). main.js는 계산 금지(engine 위임).
 - 이어하기 복원 = 현재 EP 시작 지점부터(채팅 중간 저장 안 함 — 의도된 단순화). **EP에 들어설 때 `G.epStart` 사본을 저장하고 이어 하기는 그 사본에서 다시**(`js/resume.js`, 2026-11-14) — 예전엔 선택·퀴즈·정산 중 새로 고치면 점수가 두 번 들어갔다. 사본 없는 옛 저장은 예전처럼.

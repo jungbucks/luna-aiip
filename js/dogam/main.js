@@ -1,6 +1,6 @@
 /* main.js — 도감 오케스트레이터: 렌더·필터·펼침·더보기 */
 import { ISSUES } from '../../data/issues.js';
-import { renderIssues, filterHtml } from './render.js';
+import { renderIssues, filterHtml, legendHtml } from './render.js';
 
 function toggle(btn) {
   const body = document.getElementById(btn.getAttribute('aria-controls'));
@@ -18,6 +18,7 @@ function setFilter(right, chip) {
 
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('filters').innerHTML = filterHtml(ISSUES);
+  document.getElementById('legend').innerHTML = legendHtml(ISSUES);
   document.getElementById('issues').innerHTML = renderIssues(ISSUES);
 
   document.getElementById('filters').addEventListener('click', e => {
