@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>루나 폰 UX 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#17181c;color:#e9eaf0;font-family:'Pretendard Variable','Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  line-height:1.6;padding:32px 24px 64px;word-break:keep-all}
+button{font-family:inherit;cursor:pointer}
+.page-head{max-width:1400px;margin:0 auto 20px}
+.page-head h1{font-size:22px;font-weight:800;margin-bottom:4px}
+.page-head p{color:#a4a7b5;font-size:15px}
+
+/* 톤 고르기 */
+.tones{max-width:1400px;margin:0 auto 28px;display:flex;gap:10px;flex-wrap:wrap}
+.tone{display:flex;align-items:center;gap:12px;padding:10px 16px 10px 10px;border-radius:18px;border:1.5px solid #34363f;background:#202228;color:#e9eaf0;text-align:left}
+.tone .sw{width:44px;height:44px;border-radius:12px;flex-shrink:0;border:1px solid rgba(255,255,255,.2)}
+.tone b{display:block;font-size:15.5px}
+.tone span{font-size:13px;color:#a4a7b5}
+.tone.on{border-color:#fff;background:#2a2c35}
+
+.row{max-width:1400px;margin:0 auto;display:flex;gap:28px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+.col{width:312px}
+.cap{margin-top:14px}
+.cap b{font-size:15.5px}
+.cap p{font-size:13.5px;color:#a4a7b5;margin-top:2px}
+
+/* ── 톤 변수 ── */
+body[data-tone="a"]{
+  --wall:radial-gradient(120% 80% at 12% 8%,#6d4bd8 0%,transparent 56%),radial-gradient(90% 70% at 92% 30%,#1aa9cc 0%,transparent 56%),radial-gradient(110% 80% at 50% 108%,#c0468f 0%,transparent 60%),#0b0e22;
+  --ink:#fff;--dim:rgba(255,255,255,.74);--glass:rgba(22,24,54,.44);--glass2:rgba(16,18,42,.68);--line:rgba(255,255,255,.24);
+  --hi:rgba(255,255,255,.34);--cta:#fff;--cta-ink:#17193a;--accent:#c9b8ff;--good:#6ee7b7;--bad:#fca5a5;--scrim:rgba(6,8,22,.42)}
+body[data-tone="b"]{
+  --wall:radial-gradient(110% 70% at 8% 0%,#ffd3bd 0%,transparent 60%),radial-gradient(90% 70% at 96% 18%,#bfd0ff 0%,transparent 60%),radial-gradient(120% 80% at 50% 110%,#d2bcff 0%,transparent 62%),#eef0fb;
+  --ink:#1a1c3a;--dim:rgba(26,28,58,.7);--glass:rgba(255,255,255,.5);--glass2:rgba(255,255,255,.78);--line:rgba(255,255,255,.9);
+  --hi:rgba(255,255,255,.95);--cta:#1a1c3a;--cta-ink:#fff;--accent:#5b3fd6;--good:#0f8a5f;--bad:#c62f3d;--scrim:rgba(60,60,110,.22)}
+body[data-tone="c"]{
+  --wall:radial-gradient(80% 60% at 18% 14%,#ff5a9e 0%,transparent 60%),radial-gradient(80% 60% at 88% 22%,#7655ff 0%,transparent 60%),radial-gradient(110% 70% at 50% 106%,#ffab2e 0%,transparent 60%),#2a1150;
+  --ink:#fff;--dim:rgba(255,255,255,.8);--glass:rgba(255,255,255,.17);--glass2:rgba(44,18,86,.6);--line:rgba(255,255,255,.42);
+  --hi:rgba(255,255,255,.5);--cta:#fff;--cta-ink:#3a1466;--accent:#ffe27a;--good:#8cf5c3;--bad:#ffc0c0;--scrim:rgba(30,8,60,.4)}
+
+/* ── 폰 ── */
+.phone{width:312px;height:664px;border-radius:52px;padding:9px;background:#08080a;box-shadow:0 0 0 1.5px #44464f,0 30px 60px rgba(0,0,0,.5)}
+.screen{position:relative;height:100%;border-radius:43px;overflow:hidden;background:var(--wall);color:var(--ink);display:flex;flex-direction:column}
+.island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:88px;height:25px;border-radius:14px;background:#000;z-index:5}
+.sbar{height:46px;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:4px 26px 0;font-weight:700;font-size:14.5px}
+.sbar svg{display:block}
+.sbar .ic{display:flex;gap:5px;align-items:center}
+.homebar{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);width:108px;height:4.5px;border-radius:3px;background:var(--ink);opacity:.55;z-index:6}
+
+.glass{background:var(--glass);border:1px solid var(--line);
+  -webkit-backdrop-filter:blur(18px) saturate(170%);backdrop-filter:blur(18px) saturate(170%);
+  box-shadow:inset 0 1px 0 var(--hi),0 8px 22px rgba(0,0,0,.16)}
+.glass2{background:var(--glass2);border:1px solid var(--line);
+  -webkit-backdrop-filter:blur(22px) saturate(170%);backdrop-filter:blur(22px) saturate(170%);
+  box-shadow:inset 0 1px 0 var(--hi),0 12px 30px rgba(0,0,0,.24)}
+
+/* ① 잠금화면 타이틀 */
+.lock{flex:1;display:flex;flex-direction:column;align-items:center;padding:6px 16px 26px;text-align:center}
+.lk-date{font-size:15px;font-weight:600;opacity:.9;margin-top:6px}
+.lk-clock{font-size:76px;font-weight:700;line-height:1;letter-spacing:-2px;margin-top:2px}
+.lk-duo{display:flex;justify-content:center;margin:2px 0 -6px;width:100%}
+.lk-duo img{width:46%;margin:0 -5%}
+.notif{width:100%;border-radius:22px;padding:12px 14px;display:flex;gap:11px;text-align:left;align-items:flex-start}
+.n-icon{width:38px;height:38px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;
+  background:linear-gradient(140deg,#8b6cf6,#2bb8d8)}
+.n-app{font-size:12.5px;color:var(--dim);display:flex;justify-content:space-between}
+.notif b{display:block;font-size:17.5px;font-weight:800;line-height:1.35}
+.notif p{font-size:13.5px;color:var(--dim);line-height:1.45;margin-top:1px}
+.n-main{flex:1;min-width:0}
+.cta{width:100%;margin-top:12px;padding:13px;border:none;border-radius:999px;font-size:16.5px;font-weight:800;background:var(--cta);color:var(--cta-ink)}
+.capsule{width:100%;margin-top:8px;padding:12px;border-radius:999px;font-size:16px;font-weight:700;color:var(--ink)}
+.lk-reset{margin-top:9px;font-size:13px;color:var(--dim);text-decoration:underline}
+
+/* 스탯 위젯 */
+.widget{margin:2px 14px 0;border-radius:20px;padding:9px 13px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
+.w-nums{white-space:nowrap;display:flex;gap:11px;font-weight:800;font-size:14.5px;font-variant-numeric:tabular-nums}
+.w-bd{display:flex;gap:4px}
+.w-bd i{width:22px;height:22px;border-radius:7px;border:1px solid var(--line);font-style:normal;font-size:12px;display:flex;align-items:center;justify-content:center;opacity:.38;filter:grayscale(1)}
+.w-bd i.got{opacity:1;filter:none;border-color:var(--accent)}
+
+/* ② 스토리 씬 */
+.ep-label{margin:10px 18px 0;font-size:13.5px;font-weight:700;color:var(--dim)}
+.st-char{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+.st-char img{width:178px}
+.story{margin:0 14px 26px;border-radius:26px;padding:16px 18px 14px;text-align:left}
+.story .em{font-size:30px;line-height:1}
+.story p{font-size:16.5px;font-weight:600;line-height:1.75;margin-top:8px}
+.story .hint{margin-top:10px;font-size:13px;color:var(--dim);display:flex;justify-content:space-between}
+
+/* ③ 메신저 */
+.chat-head{margin:2px 14px 0;border-radius:22px;padding:8px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.ava{width:38px;height:38px;border-radius:50%;overflow:hidden;background:rgba(255,255,255,.3);flex-shrink:0;border:1px solid var(--line)}
+.ava img{width:150%;margin:-4% 0 0 -25%}
+.chat-head b{display:block;font-size:15.5px;line-height:1.25}
+.chat-head span{font-size:12.5px;color:var(--dim)}
+.mini{white-space:nowrap;margin-left:auto;font-size:12.5px;font-weight:800;text-align:right;line-height:1.5;font-variant-numeric:tabular-nums}
+.log{flex:1;min-height:0;overflow:hidden;padding:10px 14px 4px;display:flex;flex-direction:column;gap:7px;justify-content:flex-end}
+.m{display:flex;gap:7px;align-items:flex-end}
+.m .a{width:26px;height:26px;border-radius:50%;flex-shrink:0;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;background:var(--glass2);border:1px solid var(--line)}
+.m .w{font-size:12px;color:var(--dim);margin:0 0 2px 4px}
+.m .b{display:inline-block;padding:8px 12px;border-radius:18px 18px 18px 6px;font-size:15px;line-height:1.45;background:var(--glass2);border:1px solid var(--line)}
+.m.cont .a{visibility:hidden}
+.sheet{margin:6px 10px 22px;border-radius:28px;padding:12px;flex-shrink:0}
+.sheet h4{font-size:14px;font-weight:800;color:var(--accent);margin:0 4px 8px}
+.ch{display:block;width:100%;text-align:left;padding:11px 14px;border-radius:16px;font-size:15px;font-weight:700;color:var(--ink);
+  background:var(--glass);border:1px solid var(--line);margin-top:7px}
+.ch:first-of-type{margin-top:0}
+.ch.info{border-style:dashed;color:var(--dim)}
+
+/* ④ 알림창 */
+.dimmed{position:absolute;inset:0;background:var(--scrim);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);z-index:3;display:flex;align-items:center;justify-content:center;padding:18px}
+.alert{width:100%;border-radius:30px;padding:20px 16px 14px;text-align:center}
+.alert .face{width:92px;margin:-4px auto 2px;display:block}
+.alert h3{font-size:18px;font-weight:800;line-height:1.4}
+.alert p{font-size:15px;line-height:1.6;margin-top:8px;color:var(--ink)}
+.chips{display:flex;gap:6px;justify-content:center;margin-top:12px}
+.chip{white-space:nowrap;padding:5px 11px;border-radius:999px;font-size:14px;font-weight:800;background:var(--glass);border:1px solid var(--line)}
+.chip.up{color:var(--good)}.chip.down{color:var(--bad)}
+.alert .cta{margin-top:14px;border-radius:16px}
+
+.foot{max-width:1400px;margin:34px auto 0;color:#a4a7b5;font-size:14px;border-top:1px solid #2c2e37;padding-top:16px}
+.foot b{color:#e9eaf0}
+</style>
+</head>
+<body data-tone="a">
+<style>
+body[data-tone="a"]{--app-bg:#0d0f1f;--bub:#242849;--bub-line:rgba(255,255,255,.09);--me:#7c5cf0;--me-ink:#fff}
+body[data-tone="b"]{--app-bg:#f2f3f9;--bub:#fff;--bub-line:rgba(26,28,58,.09);--me:#5b3fd6;--me-ink:#fff}
+.wrap{max-width:1000px;margin:0 auto;display:flex;gap:44px;flex-wrap:wrap;align-items:flex-start;justify-content:center}
+.notes{flex:1;min-width:280px;max-width:440px;padding-top:8px}
+.notes h3{font-size:16.5px;margin:18px 0 6px}
+.notes h3:first-child{margin-top:0}
+.notes li{margin:0 0 6px 18px;font-size:15px;color:#c9cbd6}
+.notes p{font-size:14px;color:#a4a7b5;margin-top:12px}
+.sbar{position:relative;z-index:8}
+.island{z-index:9}.homebar{z-index:9}
+
+/* 홈 */
+.home{flex:1;display:flex;flex-direction:column;min-height:0;position:relative}
+.hw{margin:4px 14px 0;border-radius:24px;padding:11px 14px}
+.hw-top{display:flex;justify-content:space-between;font-size:12.5px;color:var(--dim);font-weight:700}
+.hw-nums{display:flex;gap:16px;font-weight:800;font-size:18px;margin:3px 0 7px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.hw .w-bd i{width:25px;height:25px;border-radius:8px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);margin:14px 14px 0;row-gap:10px}
+.app{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;color:var(--ink);font-size:12px;font-weight:700;position:relative;padding:0}
+.app .ico{width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:27px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 4px 10px rgba(0,0,0,.2)}
+.ico.msg{background:linear-gradient(160deg,#5fe08a,#17a84e)}
+.ico.call{background:linear-gradient(160deg,#6fe28f,#12a150)}
+.ico.note{background:linear-gradient(160deg,#ffd76a,#f59e0b)}
+.ico.set{background:linear-gradient(160deg,#b6bcc9,#6b7280)}
+.ico.city{background:linear-gradient(160deg,#7fb2ff,#3b62e0)}
+.ico.cal{background:#fff;flex-direction:column;line-height:1;gap:1px}
+.ico.cal i{font-style:normal;font-size:11px;font-weight:800;color:#ff3b30}
+.ico.cal b{font-size:25px;font-weight:500;color:#111}
+.app .bdg{position:absolute;top:-5px;right:2px;min-width:22px;height:22px;border-radius:11px;background:#ff3b30;color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.9)}
+.app.nope{animation:nope .32s}
+@keyframes nope{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.home-idol{flex:1;display:flex;align-items:flex-end;justify-content:center;min-height:0;margin-top:-34px;pointer-events:none}
+.home-idol img{width:186px;margin-bottom:-4px}
+.home-hint{text-align:center;font-size:13.5px;font-weight:700;color:var(--dim);margin:6px 0 8px;min-height:21px}
+.dock{margin:0 12px 24px;border-radius:30px;padding:12px 6px;display:grid;grid-template-columns:repeat(4,1fr)}
+.banner{position:absolute;top:2px;left:10px;right:10px;border-radius:24px;padding:11px 13px;display:flex;gap:10px;align-items:center;z-index:4;text-align:left;cursor:pointer;
+  transform:translateY(-130%);opacity:0;transition:transform .5s cubic-bezier(.2,.9,.25,1.15),opacity .25s}
+.banner.in{transform:none;opacity:1}
+.banner .ico{width:38px;height:38px;border-radius:11px;font-size:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.banner b{display:block;font-size:14.5px;line-height:1.3}
+.banner p{font-size:14.5px;line-height:1.35}
+.banner .t{margin-left:auto;align-self:flex-start;font-size:12px;color:var(--dim)}
+
+/* 메신저 앱 */
+.applayer{position:absolute;inset:0;z-index:7;background:var(--app-bg);border-radius:43px;display:flex;flex-direction:column;padding-top:46px;
+  transform-origin:37% 91%;transform:scale(.1);opacity:0;pointer-events:none;
+  transition:transform .44s cubic-bezier(.2,.85,.25,1),opacity .22s}
+.applayer.open{transform:none;opacity:1;pointer-events:auto}
+.nav{margin:2px 10px 0;border-radius:26px;padding:7px 12px 7px 7px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.backbtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:22px;line-height:1;font-weight:700;flex-shrink:0}
+.nav b{display:block;font-size:15.5px;line-height:1.25}
+.nav span.sub{font-size:12.5px;color:var(--dim)}
+.statpill{margin:8px auto 0;padding:4px 14px;border-radius:999px;font-size:13px;font-weight:800;white-space:nowrap;flex-shrink:0;font-variant-numeric:tabular-nums}
+.alog{flex:1;min-height:0;overflow-y:auto;padding:10px 12px 6px;display:flex;flex-direction:column;gap:6px;cursor:pointer}
+.alog .sp{flex:1}
+.applayer .m .b{background:var(--bub);border:1px solid var(--bub-line)}
+.applayer .m .a{background:var(--bub);border:1px solid var(--bub-line)}
+.m.me{justify-content:flex-end}
+.applayer .m.me .b{background:var(--me);color:var(--me-ink);border:none;border-radius:18px 18px 6px 18px;max-width:82%}
+.m{animation:mIn .22s ease both}
+@keyframes mIn{from{opacity:0;transform:translateY(6px)}}
+.dots{display:inline-flex;gap:4px;padding:5px 2px}
+.dots s{width:6px;height:6px;border-radius:50%;background:var(--dim);animation:db 1s infinite}
+.dots s:nth-child(2){animation-delay:.15s}.dots s:nth-child(3){animation-delay:.3s}
+@keyframes db{0%,60%,100%{opacity:.35;transform:none}30%{opacity:1;transform:translateY(-3px)}}
+.fake{margin:4px 12px 24px;border-radius:999px;padding:7px 7px 7px 16px;font-size:14px;color:var(--dim);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bub);border:1px solid var(--bub-line)}
+.fake .send{width:32px;height:32px;border-radius:50%;background:var(--me);color:var(--me-ink);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;flex-shrink:0}
+.applayer .sheet{margin:4px 10px 4px}
+.applayer .sheet{display:none;animation:up .3s cubic-bezier(.2,.9,.25,1) both}
+@keyframes up{from{opacity:0;transform:translateY(30px)}}
+.applayer .dimmed{display:none}
+.applayer .dimmed.show{display:flex}
+.alert{animation:pop .26s cubic-bezier(.2,.9,.25,1.2) both}
+@keyframes pop{from{opacity:0;transform:scale(.9)}}
+
+/* v3: 아이폰 그대로가 아닌, 섞은 모습 */
+.island{width:12px;height:12px;border-radius:50%;top:16px;box-shadow:0 0 0 1.5px rgba(255,255,255,.14)}
+.phone{border-radius:44px}.screen{border-radius:35px}.applayer{border-radius:35px}
+body[data-tone="a"]{--tint:rgba(201,184,255,.2)}
+body[data-tone="b"]{--tint:rgba(91,63,214,.13)}
+.app .ico{border-radius:50%;background:var(--tint);border:1px solid var(--line);color:var(--accent);box-shadow:inset 0 1px 0 var(--hi);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.app .ico svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.app .ico.msg,.banner .ico.msg{background:var(--me);color:#fff;border-color:transparent}
+.banner .ico{border-radius:50%}
+.banner .ico svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.app .ico.cal{background:var(--tint)}.app .ico.cal i{color:var(--accent)}.app .ico.cal b{color:var(--ink);font-weight:700;font-size:22px}
+/* v4: 독 아이콘 색 (사용자 지정) */
+.app .ico.call{background:linear-gradient(160deg,#4ade80,#16a34a);color:#fff;border-color:transparent}
+.app .ico.msg,.banner .ico.msg{background:linear-gradient(45deg,#f9a03f 4%,#ee2a7b 50%,#6a2bd9 96%);color:#fff;border-color:transparent}
+.app .ico.note{background:linear-gradient(160deg,#fde047,#f5b301);color:#5a3b00;border-color:transparent}
+.app .ico.set{background:linear-gradient(160deg,#aeb4c0,#6b7280);color:#fff;border-color:transparent}
+/* v5: 위쪽 장식 앱 색 */
+.app .ico.city{background:linear-gradient(160deg,#7cc4ff,#2f6fe4);color:#fff;border-color:transparent}
+.app .ico.cal{background:#fff;border-color:rgba(26,28,58,.12)}
+.app .ico.cal i{color:#ef4444}.app .ico.cal b{color:#16182f}
+.applayer .m{align-items:flex-start}
+.applayer .m .a{border-radius:38%;width:30px;height:30px}
+.applayer .m .b,.applayer .m.me .b{border-radius:16px}
+.m .tm{display:inline-block;vertical-align:bottom;font-size:11px;color:var(--dim);margin:0 5px 2px;white-space:nowrap}
+.daychip{align-self:center;font-size:12px;color:var(--dim);background:var(--bub);border:1px solid var(--bub-line);border-radius:999px;padding:2px 12px;margin-bottom:4px}
+</style>
+
+<div class="page-head">
+  <h1>눌러 보는 시안 5 — 위쪽 앱 색(윤리시티 파랑 · 달력 흰색)</h1>
+  <p>왼쪽 폰은 실제로 눌립니다. 알림이나 메신저 아이콘을 눌러 보세요.</p>
+</div>
+
+<div class="tones">
+  <button class="tone on" data-choice="mode-dark" data-t="a">
+    <span class="sw" style="background:radial-gradient(120% 80% at 12% 8%,#6d4bd8,transparent 56%),radial-gradient(90% 70% at 92% 30%,#1aa9cc,transparent 56%),#0b0e22"></span>
+    <span><b>다크 모드</b><span>미드나잇 오로라</span></span>
+  </button>
+  <button class="tone" data-choice="mode-light" data-t="b">
+    <span class="sw" style="background:radial-gradient(110% 70% at 8% 0%,#ffd3bd,transparent 60%),radial-gradient(90% 70% at 96% 18%,#bfd0ff,transparent 60%),#eef0fb"></span>
+    <span><b>라이트 모드</b><span>새벽 파스텔</span></span>
+  </button>
+</div>
+
+<div class="wrap">
+  <div class="col">
+    <div class="phone"><div class="screen">
+      <div class="island"></div>
+      <div class="sbar"><span class="clk">9:41</span><span class="ic">
+        <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.6" y="5" width="3" height="6" rx="1"/><rect x="9.2" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.8" y="0" width="3" height="11" rx="1"/></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none" stroke="currentColor"><rect x=".5" y=".5" width="21" height="11" rx="3.5" opacity=".5"/><rect x="2" y="2" width="15" height="8" rx="2" fill="currentColor" stroke="none"/><rect x="23" y="4" width="1.6" height="4" rx=".8" fill="currentColor" stroke="none" opacity=".5"/></svg>
+      </span></div>
+
+      <!-- 홈 -->
+      <div class="home">
+        <div class="banner glass2" id="banner" data-choice="open-by-banner">
+          <span class="ico msg"><svg viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 3.5V16A2.5 2.5 0 0 1 4 13.5z"/></svg></span>
+          <div><b>루나 프로젝트 (3)</b><p>개발자 준호: 대표님 큰일남</p></div>
+          <span class="t">지금</span>
+        </div>
+        <div class="hw glass">
+          <div class="hw-top"><span>코드팩토리</span><span>EP1 · ⚖️ 저작권</span></div>
+          <div class="hw-nums"><span>💰 50</span><span>📈 20</span><span>🛡️ 70</span></div>
+          <div class="w-bd"><i>⚖️</i><i>🛡️</i><i>📋</i><i>🔐</i><i>🙅</i><i>💰</i></div>
+        </div>
+        <div class="grid">
+          <button class="app decor" data-choice="decor-city"><span class="ico city"><svg viewBox="0 0 24 24"><path d="M4 20V9l5-3v14M9 20V4l6 3v13M15 20v-9l5 2v7M3 20h18"/></svg></span>윤리시티</button>
+          <button class="app decor" data-choice="decor-cal"><span class="ico cal"><i id="calDow">화</i><b id="calDay">17</b></span>달력</button>
+        </div>
+        <div class="home-idol"><img src="../../../assets/characters/luna-neutral.png" alt="루나"></div>
+        <div class="home-hint" id="hint"></div>
+        <div class="dock glass">
+          <button class="app decor" data-choice="decor-call"><span class="ico call"><svg viewBox="0 0 24 24"><path d="M6.5 3.5h3l1.5 4-2 1.5a12 12 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2 2A16 16 0 0 1 4.5 5.5a2 2 0 0 1 2-2z"/></svg></span>통화</button>
+          <button class="app" id="icoMsg" data-choice="open-by-icon"><span class="ico msg"><svg viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 3.5V16A2.5 2.5 0 0 1 4 13.5z"/></svg></span><span class="bdg" id="bdg">1</span>메신저</button>
+          <button class="app soon" data-choice="app-note"><span class="ico note"><svg viewBox="0 0 24 24"><rect x="6" y="3.5" width="13" height="17" rx="2.5"/><path d="M9.5 8h6M9.5 12h6M4 7.5h2M4 12h2M4 16.5h2"/></svg></span>권리 수첩</button>
+          <button class="app soon" data-choice="app-set"><span class="ico set"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/></svg></span>설정</button>
+        </div>
+      </div>
+
+      <!-- 메신저 앱 -->
+      <div class="applayer" id="appLayer">
+        <div class="nav glass">
+          <button class="backbtn" id="back" aria-label="홈으로" data-choice="back-home">‹</button>
+          <div class="ava"><img id="navFace" src="../../../assets/characters/luna-neutral.png" alt=""></div>
+          <div><b>루나 프로젝트</b><span class="sub">준호, 세아, 나</span></div>
+        </div>
+        <div class="statpill glass">💰 <span id="pm">50</span> · 📈 <span id="pf">20</span> · 🛡️ <span id="ps">70</span></div>
+        <div class="alog" id="alog"><div class="sp"></div><div class="daychip">오늘</div></div>
+        <div class="sheet glass2" id="sheet">
+          <h4>어떻게 답할까?</h4>
+          <button class="ch" data-k="a" data-choice="pick-a">A. ㄱㄱ 학습용인데 뭐 어때</button>
+          <button class="ch" data-k="b" data-choice="pick-b">B. 라이선스 있는 데이터만 쓰자 (비용 발생)</button>
+          <button class="ch info" data-k="c" data-choice="pick-c">C. 잠깐, 저작권 확인부터</button>
+        </div>
+        <div class="fake" id="fake"><span id="fakeTx">탭하면 빨리 감기</span><span class="send">↑</span></div>
+        <div class="dimmed" id="dim">
+          <div class="alert glass2">
+            <img class="face" id="pFace" src="../../../assets/characters/luna-happy.png" alt="">
+            <h3 id="pT"></h3><p id="pB"></p>
+            <div class="chips" id="pC"></div>
+            <button class="cta" id="pOk">계속</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="homebar"></div>
+    </div></div>
+  </div>
+
+  <div class="notes">
+    <h3>이번에 섞은 것</h3>
+    <ul>
+      <li><b>다이내믹 아일랜드 삭제</b> — 작은 카메라 점 하나로. 모서리도 조금 덜 둥글게.</li>
+      <li><b>아이콘은 배경화면 색에 물드는 둥근 단색 아이콘</b> — 안드로이드(머티리얼 유)의 테마 아이콘 방식. 모드를 바꾸면 아이콘 색도 따라 바뀝니다. <b>독 네 개는 색을 채움</b>: 통화 초록 · 메신저 보라→분홍→주황 · 권리 수첩 노랑 · 설정 회색. 위쪽 장식 앱은 윤리시티 파랑, 달력 흰 바탕에 빨간 요일.</li>
+      <li><b>메신저는 한국 단톡방 문법</b> — 이름·프로필이 위에, 말풍선 옆에 작은 시각, 맨 위 날짜 칩.</li>
+    </ul>
+    <h3>앞 시안에서 이어지는 것</h3>
+    <ul>
+      <li><b>메신저가 따로 켜지는 앱이 됨</b> — 아이콘 자리에서 화면이 커지며 열리고, 배경화면 대신 앱 고유의 바탕이 깔립니다. 위에는 ‹ 뒤로 버튼이 있는 앱 머리줄.</li>
+      <li><b>내 답장이 말풍선으로 나감</b> — A나 B를 고르면 오른쪽에 내 말풍선이 먼저 뜨고, 그 다음 결과 알림창이 옵니다.</li>
+      <li><b>아래 입력창이 항상 남음</b> — 선택지는 입력창 위에 뜨고, 고른 뒤에도 입력창이 남아 맨 아래 내 말풍선이 가려지지 않습니다.</li>
+      <li><b>홈 화면</b> — 위에 장식 앱 둘(윤리시티·달력), 아래 독에 통화·메신저·권리 수첩·설정.</li>
+    </ul>
+    <h3>눌러 볼 순서</h3>
+    <ul>
+      <li>알림 또는 메신저 아이콘 → 앱이 열림</li>
+      <li>대화가 흐름(대화를 누르면 빨리 감기) → 선택지</li>
+      <li>B를 고르기 → 내 말풍선 → 결과 알림창</li>
+      <li>‹ 를 눌러 홈으로 → 다시 메신저</li>
+    </ul>
+    <p>윤리시티·달력·통화는 장식이라 누르면 살짝 흔들리기만 합니다. 권리 수첩·설정은 본작업에서 열리고, 이 시안에서는 메신저만 열립니다. 달력 아이콘에는 오늘 날짜가 나옵니다.</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  document.querySelectorAll('.tone').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.body.dataset.tone = b.dataset.t;
+      document.querySelectorAll('.tone').forEach(function (x) { x.classList.toggle('on', x === b); });
+    });
+  });
+  var d = new Date();
+  document.querySelectorAll('.clk').forEach(function (e) { e.textContent = d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0'); });
+  $('calDow').textContent = '일월화수목금토'[d.getDay()];
+  $('calDay').textContent = d.getDate();
+
+  var MSG = [
+    ['개발자 준호', '준', '대표님 큰일남'],
+    ['개발자 준호', '준', '데뷔곡 작곡 견적 받았는데 500만원 ㄷㄷ'],
+    ['마케터 세아', '세', 'ㅋㅋㅋㅋ 파산각'],
+    ['개발자 준호', '준', '이걸로 AI 학습시키면 루나가 직접 작곡함'],
+    ['개발자 준호', '준', '공짜임. 개이득 아님?'],
+    ['마케터 세아', '세', '대표님 콜?']
+  ];
+  var TM = (d.getHours() < 12 ? '오전 ' : '오후 ') + ((d.getHours() + 11) % 12 + 1) + ':' + String(d.getMinutes()).padStart(2, '0');
+  var i = 0, typing = null, timer = null, started = false, log = $('alog');
+
+  function scroll() { log.scrollTop = log.scrollHeight; }
+  function startTyping() {
+    var m = MSG[i], cont = i > 0 && MSG[i - 1][0] === m[0];
+    typing = document.createElement('div');
+    typing.className = 'm' + (cont ? ' cont' : '');
+    typing.innerHTML = '<span class="a">' + m[1] + '</span><div>' + (cont ? '' : '<div class="w">' + m[0] + '</div>') +
+      '<span class="b"><i class="dots"><s></s><s></s><s></s></i></span></div>';
+    log.appendChild(typing); scroll();
+    timer = setTimeout(finalize, 480);
+  }
+  function finalize() {
+    clearTimeout(timer);
+    typing.querySelector('.b').textContent = MSG[i][2];
+    if (i === MSG.length - 1 || MSG[i + 1][0] !== MSG[i][0]) typing.querySelector('.b').insertAdjacentHTML('afterend', '<span class="tm">' + TM + '</span>');
+    typing = null; i++; scroll();
+    if (i >= MSG.length) { $('fakeTx').textContent = '위에서 답장을 골라 주세요'; $('sheet').style.display = 'block'; scroll(); }
+    else timer = setTimeout(startTyping, 620);
+  }
+  function tap() {
+    if (i >= MSG.length) return;
+    clearTimeout(timer);
+    if (typing) finalize(); else startTyping();
+  }
+  log.addEventListener('click', tap);
+  $('fake').addEventListener('click', tap);
+
+  function openApp() {
+    $('appLayer').classList.add('open');
+    $('banner').classList.remove('in');
+    $('bdg').style.display = 'none';
+    $('hint').textContent = '';
+    if (!started) { started = true; setTimeout(startTyping, 520); }
+  }
+  $('banner').addEventListener('click', openApp);
+  $('icoMsg').addEventListener('click', openApp);
+  $('back').addEventListener('click', function () { $('appLayer').classList.remove('open'); });
+  document.querySelectorAll('.app.decor,.app.soon').forEach(function (a) {
+    a.addEventListener('click', function () { a.classList.remove('nope'); void a.offsetWidth; a.classList.add('nope'); });
+  });
+
+  function me(text) {
+    var el = document.createElement('div');
+    el.className = 'm me';
+    el.innerHTML = '<span class="tm">' + TM + '</span><span class="b"></span>';
+    el.lastChild.textContent = text;
+    log.appendChild(el); scroll();
+  }
+  function popup(o) {
+    $('pFace').src = '../../../assets/characters/' + o.face + '.png';
+    $('navFace').src = '../../../assets/characters/' + o.face + '.png';
+    $('pT').textContent = o.t; $('pB').textContent = o.b;
+    $('pC').innerHTML = (o.chips || []).map(function (c) { return '<span class="chip ' + c[1] + '">' + c[0] + '</span>'; }).join('');
+    $('pOk').textContent = o.ok;
+    $('pOk').onclick = function () { $('dim').classList.remove('show'); o.cb && o.cb(); };
+    $('dim').classList.add('show');
+  }
+  function done(m, f, s) {
+    $('pm').textContent = m; $('pf').textContent = f; $('ps').textContent = s;
+    $('fakeTx').textContent = '시안은 여기까지 — ‹ 를 눌러 홈으로';
+  }
+  document.querySelectorAll('#sheet .ch').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var k = b.dataset.k;
+      if (k === 'c') {
+        return popup({ face: 'luna-neutral', t: '💡 저작권 개념 카드', ok: '다시 고민하기',
+          b: "저작권은 창작물의 '표현'을 보호해요. 남의 저작물을 허락 없이 대량 복제하면, 목적이 학습이어도 침해 위험이 있습니다." });
+      }
+      $('sheet').style.display = 'none'; $('fakeTx').textContent = '메시지 입력';
+      me(b.textContent.replace(/^[AB]\. /, ''));
+      setTimeout(function () {
+        if (k === 'b') popup({ face: 'luna-happy', t: '✨ 저작권 배지 획득! ⚖️', ok: '계속',
+          b: "라이선스 데이터로 학습한 루나의 데뷔곡, '출처 깨끗한 노래'로 언론에 오히려 화제!",
+          chips: [['💰 −15', 'down'], ['📈 +20', 'up'], ['🛡️ +15', 'up']], cb: function () { done(35, 40, 85); } });
+        else popup({ face: 'luna-neutral', t: '🚨 3개월 후… 한국음악저작권협회에서 내용증명 도착!', ok: '대가를 치르고 진행',
+          b: '"남의 요리책 3천 권을 통째로 스캔해서 내 레시피북 만들어 판 셈입니다"',
+          chips: [['💰 −30', 'down'], ['📈 +5', 'up'], ['🛡️ −25', 'down']], cb: function () { done(20, 25, 45); } });
+      }, 750);
+    });
+  });
+
+  setTimeout(function () {
+    $('banner').classList.add('in');
+    $('hint').textContent = '💬 새 메시지가 왔어요 — 눌러서 열기';
+  }, 900);
+})();
+</script>
+</body>
+</html>
