@@ -12,8 +12,8 @@
 [data-theme="dark"]{
   --wall:radial-gradient(120% 80% at 12% 8%,#6d4bd8 0%,transparent 56%),radial-gradient(90% 70% at 92% 30%,#1aa9cc 0%,transparent 56%),radial-gradient(110% 80% at 50% 108%,#c0468f 0%,transparent 60%),#0b0e22;
   --out:#06070d; --bezel:#44464f;
-  --ink:#fff; --dim:rgba(255,255,255,.76);
-  --glass:rgba(22,24,54,.46); --glass2:rgba(16,18,42,.7); --solid:rgba(16,18,42,.94); --sheet:rgba(16,18,42,.86);
+  --ink:#fff; --dim:rgba(255,255,255,.78);
+  --glass:rgba(22,24,54,.54); --glass2:rgba(16,18,42,.7); --solid:rgba(16,18,42,.94); --sheet:rgba(16,18,42,.86);
   --line:rgba(255,255,255,.24); --hi:rgba(255,255,255,.34); --edge:rgba(255,255,255,.14);
   --chip:rgba(255,255,255,.08); --btn:rgba(255,255,255,.1);
   --cta:#fff; --cta-ink:#17193a; --accent:#c9b8ff;

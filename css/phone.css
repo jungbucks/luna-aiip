@@ -168,3 +168,7 @@
   .prod-result,.prod-note{background:none;border:1px solid #888;break-inside:avoid}
   #prodName{border:none;border-bottom:1px solid #000;border-radius:0;background:none}
 }
+
+/* 배경화면 위에 바로 얹히는 글자(앱 이름·안내 한 줄·잠금화면 날짜): 다크 배경화면의 밝은 얼룩 위에서도 읽히게 */
+[data-theme="dark"] .app-grid .app,[data-theme="dark"] #homeHint,[data-theme="dark"] .lk-date,[data-theme="dark"] .lk-clock{text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.ico-cal{text-shadow:none}

@@ -31,6 +31,20 @@ async function writeNote(text) {           // 적기: 글 상자에 넣고 [수�
   const i = E('noteInput'); i.value = text; i.dispatchEvent(new (W().Event)('input', { bubbles: true }));
   await sleep(50); E('noteSave').click();
 }
+const WALL = { dark: ['#6d4bd8', '#1aa9cc', '#c0468f', '#0b0e22'], light: ['#ffd3bd', '#bfd0ff', '#d2bcff', '#eef0fb'] };   // css/style.css의 --wall 색들
+const parseColor = c => { c = c.trim(); if (c[0] === '#') { const h = c.length === 4 ? c.slice(1).replace(/./g, x => x + x) : c.slice(1); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16), 1]; } const m = c.match(/[\d.]+/g).map(Number); return [m[0], m[1], m[2], m.length > 3 ? m[3] : 1]; };
+const over = (top, bot) => [0, 1, 2].map(i => top[i] * top[3] + bot[i] * (1 - top[3])).concat(1);
+const lum = c => { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]); };
+const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+function minContrast(theme) {            // 본문(--ink)·흐린 글자(--dim)가 유리(--glass, --glass2) 위에서 갖는 최소 대비
+  const cs = W().getComputedStyle(D().documentElement), v = n => parseColor(cs.getPropertyValue(n));
+  let min = 99, where = '';
+  for (const g of ['--glass', '--glass2']) for (const w of WALL[theme]) {
+    const bg = over(v(g), parseColor(w));
+    for (const t of ['--ink', '--dim']) { const r = ratio(over(v(t), bg), bg); if (r < min) { min = r; where = t + ' on ' + g + ' over ' + w; } }
+  }
+  return { min, where };
+}
 const savedNotes = () => JSON.parse(W().localStorage.getItem('luna_notes_v1') || '{}');
 
 async function run() {
@@ -203,6 +217,7 @@ async function run() {
     E('notesBack').click(); await until(() => !E('appNotes').classList.contains('on'));
     const save = JSON.parse(W().localStorage.getItem('luna_save_v1'));
     log('저장에 idol=sol', save && save.game.idol === 'sol');
+    log('콘솔 오류 0(솔 경로 EP1 완주까지)', (W().__errs || []).length === 0, (W().__errs || []).join(' | '));
 
     // 이어하기 복원
     f.src = '/index.html?r=1';
@@ -293,6 +308,25 @@ async function run() {
     [...D().querySelectorAll('#popup .pop-btn')].find(b => b.textContent.includes('지우기')).click();
     await sleep(400); await until(() => W().LUNA && E('btnNew') && active('scr-title'));
     log('settings: 초기화 — 게임 기록·적은 글은 지워지고 모드는 남음', W().localStorage.getItem('luna_save_v1') === null && W().localStorage.getItem('luna_notes_v1') === null && W().localStorage.getItem('luna_theme') === 'dark' && active('scr-title'));
+    // 대비: 유리 위 글자 4.5:1 이상(다크·라이트). 흐림·채도 효과는 빼고 색만 겹쳐 계산한 근삿값
+    for (const th of ['dark', 'light']) {
+      W().localStorage.setItem('luna_theme', th); f.src = '/index.html?c=' + th; await sleep(200);
+      await until(() => W().LUNA && E('btnNew') && D().documentElement.dataset.theme === th);
+      const c = minContrast(th);
+      log('contrast: ' + th + ' 유리 위 글자 최소 대비 4.5:1 이상', c.min >= 4.5, c.min.toFixed(2) + ' (' + c.where + ')');
+    }
+    // 전체 화면 모드(폰 세로·가로)와 기기 틀 모드(교실 노트북 높이)
+    f.width = 375; f.height = 667; f.src = '/index.html?r=10'; await sleep(300);
+    await until(() => W().LUNA && E('btnNew'));
+    log('full: 좁은 화면 — 가짜 상태바·카메라 점·기기 테두리 없음', E('statusBar').offsetParent === null && D().querySelector('.cam-dot').offsetParent === null && W().getComputedStyle(D().querySelector('.device')).paddingTop === '0px');
+    log('full: 가로 스크롤 0', D().documentElement.scrollWidth <= 375);
+    f.width = 844; f.height = 390; await sleep(300);
+    E('btnNew').scrollIntoView();
+    log('full: 가로로 든 폰 — 전체 화면 모드 + 시작 버튼까지 스크롤로 닿음', E('statusBar').offsetParent === null && E('btnNew').getBoundingClientRect().bottom <= 391, String(E('btnNew').getBoundingClientRect().bottom));
+    f.width = 1366; f.height = 650; await sleep(300);
+    log('frame: 교실 노트북 높이 — 기기 틀이 보이고 잠금화면이 안 잘림', E('statusBar').offsetParent !== null && E('btnNew').getBoundingClientRect().bottom <= E('app').getBoundingClientRect().bottom && E('scr-title').scrollHeight <= E('scr-title').clientHeight + 1, E('scr-title').scrollHeight + '/' + E('scr-title').clientHeight);
+    log('frame: 기기 높이 600~844 사이', (h => h >= 600 && h <= 844)(D().querySelector('.device').getBoundingClientRect().height));
+    log('콘솔 오류 0(마지막 화면)', (W().__errs || []).length === 0, (W().__errs || []).join(' | '));
   } catch (e) { log('예외 발생', false, e.message); }
   out.textContent += 'PROBE-DONE\n';
   document.title = 'PROBE-DONE';
