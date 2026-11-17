@@ -20,6 +20,10 @@ check('STATUS_META 3종', ['decided', 'ongoing', 'varies'].every(k => STATUS_MET
 
 const text = ISSUES.map(i => [i.title, i.hook, i.think, i.realCase.gist, ...i.sides.flatMap(s => [s.stance, ...s.points])].join(' ')).join(' ');
 check('단정 금칙어 없음', !/(정답은|무조건|반드시 승소|반드시 이긴다)/.test(text));
+// 진행 중·나라마다 다름 카드가 결론 난 것처럼 쓰지 않기 (2026-11-17 검증: Gemini 사건을 '구글 승소·판결'로 잘못 적었던 일)
+const VERDICT = /(손을 들어줬다|승소했다|확정됐다|확정되었다|최종 판결이 나왔다)/;
+check('미결 카드 요지에 결론 단정 없음', ISSUES.filter(i => i.status !== 'decided').every(i => !VERDICT.test(i.realCase.gist)));
+check('미결 카드 출처 이름에 "승소" 없음', ISSUES.filter(i => i.status !== 'decided').every(i => i.sources.every(s => !/승소/.test(s.label))));
 
 console.log(fail === 0 ? '== 전체 PASS ==' : `== FAIL ${fail}건 ==`);
 process.exit(fail === 0 ? 0 : 1);

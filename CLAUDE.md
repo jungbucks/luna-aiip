@@ -13,6 +13,7 @@
 - **캐릭터 에셋 개선**: 솔·루나 각각 neutral/happy/panic/shock 4종의 512px 투명 PNG. 기존 `.idol-svg`, `data-idol`, `data-expr` DOM 계약과 표정 전환 규칙은 유지하고 `img.src`를 교체한다.
 - **O/X 확인 퀴즈(2026-11-14)**: 정산 직전 O/X(틀리면 하나 더), 스탯·배지·엔딩 무관, 엔딩 '다시 볼 개념'에 둘 다 놓친 개념. 설계 `docs/superpowers/specs/2026-11-14-ox-quiz-design.md`, 계획 `docs/superpowers/plans/2026-11-14-ox-quiz.md`. 팝업 `guardMs`(퀴즈만 0.3초 버튼 잠금 — 연타가 다음 문제를 누르지 않게). 프로브용 `window.LUNA.showEnding(key)`. **문항 법적 정확성 교사 검수 대기.**
 - **도감 완성**: AI 지재권 쟁점 12건(저작권4·특허2·상표3·영업비밀3), 실제 판례 + 상태 배지, 게임 엔딩에 티저 링크 1줄.
+- **도감 검증자·평가자 루프 1회차(2026-11-17)**: 보고서 `docs/review/2026-11-17-dogam-verifier.md`(사실, 상3·중6·미확인12) · `-evaluator.md`(교육가치·가독성, P1 7·P2 16 + 재채점 체크리스트). **반영함**: 사실 상 2건(oss=제9항소법원 2026-09 DMCA 청구 기각 유지 / tmname=구글 승소 아님→`ongoing`), 가독성 P1 4건(keep-all·카드 1열·폰 머리줄 2줄·훅 왼쪽 띠 제거). **남음(교사 판단)**: tmmake 쟁점 재구성(상표법엔 인간 창작 요건 없음), 사실 중 6건, 배지 범례·고지 위치·나라 표시·용어 풀이(P1 4~6, 새 기능이라 설계 먼저), 한국 사례 추가. 기준일 문구는 나머지 사실 수정을 다 반영한 뒤 갱신.
 - **배포 대기**: GitHub Pages 예정. 원격 없음 → 사용자가 `luna-ip-game` public 레포 생성 후 "luna push" 지시 시 remote·push·Pages. dogam SPEC §8 개별 사실 검수는 교사 판단으로 기존 고지(법률자문 아님·기준일·상태배지·출처) 하에 배포 결정(미검수 상태).
 
 ## 구조 (전부 바닐라 ES 모듈)
@@ -41,8 +42,8 @@ data/strings.js     인트로·브릿지·법정·엔딩·리포트·퀴즈 문�
 data/quiz.js        O/X 확인 퀴즈 12문항(EP마다 본 문제+하나 더, 교사 검수 대기)
 js/quiz.js          퀴즈 판정·기록(G.quiz)·다시 볼 개념 목록(DOM 없음, verify가 검산)
 data/issues.js      도감 ISSUES 12·STATUS_META(양측 대립·상태 배지·실제 사례·출처)
-test/verify.mjs     게임 검산 78건(퀴즈 8·이어 하기 6·모드 6·프로필 3·수첩 12·말투·선택지·알림·장면 15 포함) / verify-dogam.mjs 도감 10건
-test/probe.html     게임 E2E / probe-dogam.html 도감 E2E
+test/verify.mjs     게임 검산 78건(퀴즈 8·이어 하기 6·모드 6·프로필 3·수첩 12·말투·선택지·알림·장면 15 포함) / verify-dogam.mjs 도감 12건(미결 카드 결론 단정 검사 포함)
+test/probe.html     게임 E2E / probe-dogam.html 도감 E2E 24건(`node test/run-probe.mjs test/probe-dogam.html`, 폰·넓은 화면 배치 포함)
 test/run-probe.mjs  프로브 실행기(서버 + 헤드리스 Edge + 수확) — `node test/run-probe.mjs`
 test/probe-shots.html  캡처용 프로브(원하는 장면까지 자동 진행)
 ```
@@ -65,7 +66,7 @@ test/probe-shots.html  캡처용 프로브(원하는 장면까지 자동 진행)
 
 ## 검증 (수정 후 필수)
 
-1. 게임 `node test/verify.mjs`(78건) — 미달 시 배포 금지. 도감 `node test/verify-dogam.mjs`(10건).
+1. 게임 `node test/verify.mjs`(78건) — 미달 시 배포 금지. 도감 `node test/verify-dogam.mjs`(12건) + `node test/run-probe.mjs test/probe-dogam.html`(24건).
 2. E2E 프로브(구조·흐름 변경 시): **`node test/run-probe.mjs`** 한 줄(종료 코드 0 = 전부 PASS). 캡처는 `node test/run-probe.mjs test/probe-shots.html --shot=<png> --url="/__probe.html?scene=home&theme=light&w=1366&h=700" --size=1366,700`. 아래는 실행기가 대신 해 주는 옛 수동 절차(원리 참고용): **게임과 같은 오리진에서 서빙 필수** — file:// 프로브 + http iframe은 크로스오리진으로 조용히 죽는다(2026-07-15 실제 발생). 절차: `probe.html`을 루트에 복사 → Node 정적 서버(scratchpad) → `msedge --headless=new --user-data-dir=<임시> --virtual-time-budget=20000 --dump-dom http://localhost:PORT/...` → 수확 후 복사본 삭제. 채팅은 타이핑 인디케이터 때문에 메시지당 최대 2탭.
 
 ## 참고 문서
