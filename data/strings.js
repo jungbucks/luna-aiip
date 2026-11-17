@@ -57,4 +57,33 @@ export const STRINGS = {
     cleanReview: '틀린 개념이 없습니다 — 완벽한 IP 감각! 👏',
     disclaimer: '※ 본 게임의 법 개념은 교육용으로 단순화한 것으로, 실제 법률 자문이 아닙니다.',
   },
+
+  /* v0.6 루나폰 — 폰 화면의 문구(잠금화면·홈·메신저·권리 수첩·설정·산출물). 이름은 직접 쓰지 않는다. */
+  ui: {
+    lockApp: '코드팩토리', lockNow: '지금',
+    themeToDark: '다크 모드로 바꾸기', themeToLight: '라이트 모드로 바꾸기',
+    notifyHint: '새 메시지가 왔어요 — 눌러서 열기',
+    apps: { city: '윤리시티', cal: '달력', call: '통화', msg: '메신저', notes: '권리 수첩', settings: '설정' },
+    decorSuffix: ' (장식)', back: '홈으로', today: '오늘',
+    composer: { playing: '탭하면 빨리 감기', choose: '위에서 답장을 골라 주세요', idle: '메시지 입력' },
+    notes: {
+      title: '권리 수첩', locked: n => `EP${n}에서 만나요`,
+      prompt: '이번 사건에서 알게 된 것을 내 말로 적어 보세요', placeholder: '내 말로 한두 문장',
+      save: '수첩에 적기', edit: '고치기', mine: '내가 적은 것',
+      need: n => `${n}자 이상 적어 주세요`, local: '적은 내용은 이 기기에만 저장됩니다.',
+      product: '📒 나의 권리 수첩 만들기',
+    },
+    product: {
+      title: '나의 권리 수첩', name: '학번·이름', withIdol: '함께한 아이돌', result: '결과', inProgress: '진행 중',
+      empty: '(아직 적지 않음)', print: '인쇄 · PDF로 저장', copy: '글 복사', copied: '복사했어요',
+      copyFail: '복사하지 못했어요 — 글을 길게 눌러 직접 복사해 주세요',
+    },
+    settings: {
+      title: '설정', mode: '화면 모드', system: '기기 설정 따름', light: '라이트', dark: '다크',
+      reset: '기록 초기화', resetAsk: '게임 기록과 수첩에 적은 글이 모두 지워집니다. 지울까요?',
+      resetYes: '지우기', resetNo: '그만두기', version: '버전 0.6',
+    },
+    restartAsk: '처음부터 다시 하면 수첩에 적은 글도 지워집니다. 산출물을 먼저 저장했나요?',
+    restartYes: '지우고 다시 하기', restartNo: '돌아가기',
+  },
 };

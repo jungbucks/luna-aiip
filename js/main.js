@@ -11,6 +11,7 @@ import * as quiz from './quiz.js';
 import * as resume from './resume.js';
 import { renderCourt, renderEnding } from './ui/ending.js';
 import { IDOLS, idolSVG, setIdol, getIdol, T, setExpression, autoExpression } from './ui/character.js';
+import { applyTheme, toggleTheme, watchSystemTheme } from './ui/theme.js';
 
 let G = null;
 const $ = id => document.getElementById(id);
@@ -61,7 +62,20 @@ function updateStatbar() {
 }
 
 /* ── 타이틀 / 캐릭터 선택 / 인트로 ── */
+/* 시계·날짜(잠금화면·상태바) — 분이 바뀔 때마다 갱신. Task 2에서 phone.js로 옮긴다 */
+function tickClock() {
+  const d = new Date();
+  const hm = d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
+  $('phoneTime').textContent = hm;
+  $('lockClock').textContent = hm;
+  $('lockDate').textContent = `${d.getMonth() + 1}월 ${d.getDate()}일 ${'일월화수목금토'[d.getDay()]}요일`;
+  setTimeout(tickClock, (60 - d.getSeconds()) * 1000 + 50);
+}
+
 function boot() {
+  applyTheme(); watchSystemTheme(); tickClock();
+  $('btnTheme').onclick = toggleTheme;
+  $('lockApp').textContent = STRINGS.ui.lockApp; $('lockNow').textContent = STRINGS.ui.lockNow;
   $('titleChars').innerHTML = idolSVG('sol') + idolSVG('luna');
   $('selRow').innerHTML = Object.keys(IDOLS).map(k =>
     `<button class="sel-card" data-idol="${k}" aria-label="${IDOLS[k].label} 선택">
@@ -78,6 +92,7 @@ function boot() {
 function applyIdol(key) {
   setIdol(key);
   $('epChar').innerHTML = idolSVG(getIdol());
+  $('introChar').innerHTML = idolSVG(getIdol());
 }
 
 function pickIdol(key) {
@@ -91,7 +106,7 @@ function intro(i) {
   if (i >= STRINGS.intro.length) { store.save(G, 'ep'); enterEp(); return; }
   const c = STRINGS.intro[i];
   $('introCard').innerHTML = `<div class="intro-emoji">${c.emoji}</div><p>${esc(c.text).replace(/\n/g, '<br>')}</p>
-    <div class="tap-hint">👆 눌러서 계속 (${i + 1}/${STRINGS.intro.length})</div>`;
+    <div class="tap-hint">눌러서 계속 (${i + 1}/${STRINGS.intro.length})</div>`;
   $('introCard').onclick = () => intro(i + 1);
   show('scr-intro');
 }
@@ -123,8 +138,6 @@ function renderScene() {
 
 function showPhone() {
   $('storyStage').classList.remove('on');
-  const d = new Date();
-  $('phoneTime').textContent = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
   $('phoneWrap').classList.add('on');
   startChat(ep(), choicesPhase);
 }

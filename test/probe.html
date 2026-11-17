@@ -26,6 +26,16 @@ async function run() {
     await until(() => W().LUNA && D().getElementById('btnNew'));
     W().localStorage.removeItem('luna_save_v1');
     log('부트: 타이틀 활성', active('scr-title'));
+    const html = () => D().documentElement;
+    log('shell: 폰 껍데기 안에 #app', !!D().querySelector('.device > #app.screen') && !!D().getElementById('statusBar'));
+    log('shell: 시계가 실제 시각', /^\d{1,2}:\d{2}$/.test(txt('phoneTime')) && /^\d{1,2}:\d{2}$/.test(txt('lockClock')));
+    log('theme: data-theme 항상 설정', ['light', 'dark'].includes(html().dataset.theme));
+    const before = html().dataset.theme;
+    D().getElementById('btnTheme').click();
+    log('theme: 버튼으로 전환 + 저장', html().dataset.theme !== before && W().localStorage.getItem('luna_theme') === html().dataset.theme);
+    log('theme: 주소창 색도 바뀜', D().querySelector('meta[name="theme-color"]').content === (html().dataset.theme === 'dark' ? '#0b0e22' : '#eef0fb'));
+    log('font: Pretendard 선언', [...D().fonts].some(ff => ff.family.replace(/["']/g, '') === 'Pretendard'));
+    log('no-gradient-text: 제목에 글자 그라데이션 없음', W().getComputedStyle(D().querySelector('.title-logo')).webkitTextFillColor !== 'rgba(0, 0, 0, 0)');
     log('타이틀 듀오 PNG 2개', D().querySelectorAll('#titleChars img.idol-svg').length === 2);
 
     D().getElementById('btnNew').click();
@@ -99,6 +109,7 @@ async function run() {
     f.src = '/index.html?r=1';
     await sleep(200);
     await until(() => W().LUNA && D().getElementById('btnContinue') && D().getElementById('btnContinue').style.display !== 'none');
+    log('theme: 새로 고쳐도 유지', D().documentElement.dataset.theme === W().localStorage.getItem('luna_theme'));
     D().getElementById('btnContinue').click();
     await until(() => active('scr-ep'));
     const epImg = D().querySelector('#epChar img.idol-svg');

@@ -153,6 +153,17 @@ console.log('[이어 하기] 에피소드 시작 상태에서 다시 (2026-11-14
   t('resume: 사본 없는 옛 저장은 그대로(지금 동작)', R.resumeState(old) === old);
 }
 
+console.log('[모드] 다크/라이트 결정 (theme.js)');
+{
+  const Th = await import('../js/ui/theme.js');
+  t('theme-system-dark', Th.resolveTheme('system', true) === 'dark');
+  t('theme-system-light', Th.resolveTheme('system', false) === 'light');
+  t('theme-explicit', Th.resolveTheme('light', true) === 'light' && Th.resolveTheme('dark', false) === 'dark');
+  t('theme-garbage→system', Th.resolveTheme('purple', true) === 'dark' && Th.resolveTheme(undefined, false) === 'light');
+  t('ui 문구 블록', STRINGS.ui && STRINGS.ui.composer.playing === '탭하면 빨리 감기' && STRINGS.ui.apps.notes === '권리 수첩');
+  t('ui 문구에 이름 하드코딩 없음', !/루나|LUNA/.test(JSON.stringify(STRINGS.ui, (k, v) => typeof v === 'function' ? v(1) : v)));
+}
+
 console.log('─'.repeat(40));
 if (fail) { console.log(`❌ ${fail}건 실패 / ${pass}건 통과 — 배포 금지`); process.exit(1); }
 console.log(`✅ ${pass}건 전부 통과 — 엔진 검산 완료`);
