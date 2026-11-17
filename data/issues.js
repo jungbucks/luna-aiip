@@ -2,7 +2,7 @@
    설계·검증표: docs/superpowers/specs/2026-07-18-ip-dogam-design.md (§8 = 교사 검수 관문, 검수 전 배포 금지)
    스키마: {id,right,rightEmoji,title,hook,sides[2~3]{label,stance,points[≥2]},think,status,realCase{name,gist,date},sources[≥1]{label,url}}
    status: decided(판결)·ongoing(진행 중)·varies(국가·전략별 상이). 미결을 확정처럼 쓰지 말 것(verify가 금칙어 차단).
-   리서치 기준일 2026-07. 진행 중 사건은 결과가 바뀔 수 있음. */
+   리서치 2026-07, 재확인 2026-11-17(docs/review/2026-11-17-dogam-verifier.md 교체 문구 전부 반영). 진행 중 사건은 결과가 바뀔 수 있음. */
 
 export const STATUS_META = {
   decided: { emoji: '⚖️', label: '판결' },
@@ -24,11 +24,12 @@ export const ISSUES = [
     ],
     think: '"보고 배우는 것"과 "복제하는 것"의 경계는 어디일까?',
     status: 'ongoing',
-    realCase: { name: 'Bartz v. Anthropic / NYT v. OpenAI', date: '2025~2026',
-      gist: 'Bartz 사건에서 미국 법원은 책으로 AI를 학습시키는 것 자체는 공정이용으로 보았지만, 불법 복제본을 저장한 것은 침해로 판단해 약 15억 달러 합의로 이어졌다. NYT가 OpenAI를 상대로 낸 소송은 AI 답변이 기사 시장을 대체하는지를 두고 아직 진행 중이다.' },
+    realCase: { name: 'Bartz v. Anthropic / Thomson Reuters v. Ross / 지상파 3사 v. 네이버', date: '2025~2026',
+      gist: '2025년 미국의 한 1심 법원은 합법적으로 산 책으로 AI를 학습시킨 것은 공정이용이지만 해적판 책을 내려받아 쌓아 둔 것은 공정이용이 아니라고 보았고, 이 사건은 재판 전에 약 15억 달러(책 한 권당 약 3천 달러) 합의로 끝났다(2026-07 최종 승인). 같은 법원의 다른 판사는 비슷한 사건에서 이유를 달리했고, 2026년 9월 미국 항소법원은 경쟁 서비스를 만들려고 법률 요약문을 학습한 사건(생성형 AI는 아님)에서 공정이용을 인정하지 않았다. 한국에서도 방송 3사가 네이버를 상대로 뉴스 학습 소송을 내 진행 중이다.' },
     sources: [
-      { label: '작가조합(Anthropic 합의)', url: 'https://authorsguild.org/advocacy/artificial-intelligence/what-authors-need-to-know-about-the-anthropic-settlement/' },
-      { label: 'Norton Rose Fulbright(2026 소송 업데이트)', url: 'https://www.nortonrosefulbright.com/en/knowledge/publications/ce8eaa5f/ai-in-litigation-series-an-update-on-ai-copyright-cases-in-2026' },
+      { label: '작가조합(Anthropic 합의 최종 승인)', url: 'https://authorsguild.org/news/court-grants-final-approval-anthropic-copyright-settlement/' },
+      { label: 'Jackson Walker(Ross 항소심)', url: 'https://www.jw.com/news/insights-ai-copyright-fair-use-case/' },
+      { label: 'MTN(지상파 3사 v. 네이버)', url: 'https://news.mtn.co.kr/news-detail/2026040915330140911' },
     ],
   },
   {
@@ -44,10 +45,11 @@ export const ISSUES = [
     think: '"어느 정도" 사람이 개입해야 사람의 창작이라 할 수 있을까?',
     status: 'decided',
     realCase: { name: 'Thaler v. Perlmutter', date: '2026-03',
-      gist: '순수하게 AI가 자율 생성한 미술품의 저작권 등록을 두고 다툰 사건에서, 미국 대법원이 2026년 3월 상고를 받아들이지 않아 하급심 결론이 확정됐다. 사람의 저작이 없는 순수 AI 생성물은 저작권 등록 대상이 아니라는 원칙이 유지됐다. 다만 사람이 충분히 개입한 AI 보조 창작물은 별개 문제로 남았다.' },
+      gist: '순수하게 AI가 자율 생성한 미술품의 저작권 등록을 두고 다툰 사건에서, 미국 대법원이 2026년 3월 상고를 받아들이지 않아 "저작물은 사람이 만들어야 한다"는 하급심 결론이 그대로 남았다(대법원이 직접 이유를 밝힌 판결은 아니다). 사람이 충분히 개입한 AI 보조 창작물은 별개 문제로, 미국에서는 관련 소송이 진행 중이다. 한국 정부 안내서(2025-06)도 AI가 기계적으로 만든 결과물은 저작물이 아니고, 사람이 창작적으로 기여한 부분만 등록할 수 있다고 안내한다.' },
     sources: [
       { label: 'Morgan Lewis(대법원 상고기각)', url: 'https://www.morganlewis.com/pubs/2026/03/us-supreme-court-declines-to-consider-whether-ai-alone-can-create-copyrighted-works' },
       { label: 'Baker Donelson(Thaler 해설)', url: 'https://www.bakerdonelson.com/supreme-court-denies-certiorari-in-thaler-v-perlmutter-ai-cannot-be-an-author-under-the-copyright-act' },
+      { label: '법률신문(한국 AI 저작물 등록 안내서)', url: 'https://www.lawtimes.co.kr/news/articleViewAmp.html?idxno=209882' },
     ],
   },
   {
@@ -62,9 +64,10 @@ export const ISSUES = [
     ],
     think: '칼을 만든 사람과 칼을 쓴 사람, 책임은 어떻게 나눌까?',
     status: 'ongoing',
-    realCase: { name: 'NYT v. OpenAI', date: '2024~진행 중',
-      gist: '뉴욕타임스는 챗봇의 답변이 자사 기사를 재현해 시장을 대체한다고 주장했고, 법원은 OpenAI의 각하 신청을 받아들이지 않아 본안 심리가 진행 중이다. AI 산출물에 대한 책임을 누가 지는지의 기준을 세울 대표 사건으로 꼽힌다.' },
+    realCase: { name: 'NYT v. OpenAI / Cox v. Sony', date: '2023~진행 중',
+      gist: '뉴욕타임스는 챗봇이 자사 기사를 거의 그대로 재현한다며 2023년 말 OpenAI를 상대로 소송을 냈고, 핵심 청구는 기각되지 않아 재판이 진행 중이다. 그런데 2026년 3월 미국 대법원은 인터넷 회사 사건(Cox v. Sony)에서 "이용자가 침해하는 걸 알면서 서비스를 계속했다"는 것만으로는 회사에 책임을 묻기 어렵고, 침해를 부추겼거나 침해용으로 만든 서비스여야 한다고 정리했다. 그 뒤 뉴욕타임스는 "이용자의 침해를 OpenAI가 도왔다"는 주장을 접고, OpenAI가 직접 베꼈다는 주장에 집중하고 있다.' },
     sources: [
+      { label: 'Hunton(Cox v. Sony 대법원 판결)', url: 'https://www.hunton.com/insights/legal/knowledge-is-not-enough-supreme-court-limits-contributory-copyright-liability-for-isps' },
       { label: 'Norton Rose Fulbright(2026 소송 업데이트)', url: 'https://www.nortonrosefulbright.com/en/knowledge/publications/ce8eaa5f/ai-in-litigation-series-an-update-on-ai-copyright-cases-in-2026' },
     ],
   },
@@ -94,7 +97,7 @@ export const ISSUES = [
     title: 'AI 핵심 기술, 특허로 공개할까 숨길까?',
     hook: '어렵게 만든 AI 기술. 특허로 공개하고 보호받을까, 비밀로 감추고 독점할까?',
     sides: [
-      { label: '특허(공개)', stance: '특허로 공개하면 20년간 보호받고 기술도 발전한다.',
+      { label: '특허(공개)', stance: '특허로 공개하면 출원일부터 최대 20년간 보호받고 기술도 발전한다.',
         points: ['법적으로 강하게 보호받는다', '공개된 기술 위에 다음 발전이 쌓인다'] },
       { label: '영업비밀(비공개)', stance: '공개하면 모방당하기 쉬우니 비밀로 지키는 게 낫다.',
         points: ['핵심 알고리즘은 공개 즉시 따라잡힐 수 있다', '기간 제한 없이 지킬 수 있다'] },
@@ -102,9 +105,10 @@ export const ISSUES = [
     think: '"공개하고 보호받기"와 "숨기고 독점하기" 중 무엇이 더 안전할까?',
     status: 'varies',
     realCase: { name: '보호 전략의 선택 문제', date: '상시',
-      gist: '특정 판례로 정해지는 문제가 아니라, 기업이 기술 성격에 따라 특허·영업비밀 중 무엇으로 보호할지 선택하는 전략 논쟁이다. 리버스 엔지니어링이 쉬운 기술은 특허가, 내부에 감출 수 있는 기술은 영업비밀이 유리하다는 견해가 맞선다.' },
+      gist: '특정 판례로 정해지는 문제가 아니라, 기업이 기술 성격에 따라 특허·영업비밀 중 무엇으로 보호할지 선택하는 전략 논쟁이다. 리버스 엔지니어링이 쉬운 기술은 특허가, 내부에 감출 수 있는 기술은 영업비밀이 유리하다는 견해가 맞선다. 또 AI 알고리즘 같은 수학적 방법 자체는 특허를 받기 어렵고 컴퓨터 등에서 구체적으로 실행되는 형태여야 한다는 점도 선택에 영향을 준다.' },
     sources: [
       { label: 'Lexology(AI 보호 전략)', url: 'https://www.lexology.com/library/detail.aspx?g=15568a55-2a68-436e-8ebd-22240712987d' },
+      { label: '헤럴드경제(지식재산처 AI 특허출원 안내서)', url: 'https://www.heraldk.com/article/2026060818200872635' },
     ],
   },
   {
@@ -120,10 +124,11 @@ export const ISSUES = [
     think: '"누가 발명했는가"와 "누구 이름으로 권리를 갖는가"는 같은 질문일까?',
     status: 'varies',
     realCase: { name: 'DABUS (Thaler) 국제 소송', date: '2021~2026',
-      gist: '발명 AI "DABUS"를 발명자로 올리려는 시도가 나라마다 다르게 판단됐다. 일본 대법원(2026-03)·미국·영국은 발명자는 자연인이어야 한다며 거부했고, 독일은 "사람을 발명자로 두되 AI를 활용한 발명 자체는 특허 가능"한 쪽으로 정리됐다. 어느 나라든 AI 활용 발명 자체를 금지하진 않는다.' },
+      gist: '발명 AI "DABUS"를 발명자로 올리려는 시도가 나라마다 다르게 판단됐다. 일본 최고재판소(2026-03)·미국·영국은 발명자는 사람이어야 한다며 거부했고, 독일은 사람을 발명자로 적되 AI를 활용한 발명 자체는 특허를 받을 수 있는 쪽으로 정리됐다. 한국에서도 서울행정법원(2023)과 서울고등법원(2024)이 "AI는 발명자가 될 수 없다"고 판단했고, 대법원 판단이 남아 있다(2026년 2월 기준). 어느 나라든 사람이 실질적으로 기여해 AI를 도구로 쓴 발명까지 막지는 않는다.' },
     sources: [
-      { label: 'The Leveraged Years(일본 대법원)', url: 'https://www.theleveragedyears.com/ai-regulation-news/japan-supreme-court-ai-inventor-dabus-final-2026' },
+      { label: '법무법인 세종(한국 DABUS 소송)', url: 'https://www.shinkim.com/kor/media/lawinfo/373' },
       { label: 'JUVE Patent(영국 대법원)', url: 'https://www.juve-patent.com/cases/uk-supreme-court-dabus-named-inventor-patent-stephen-thaler/' },
+      { label: 'Jones Day(일본 법원 판단)', url: 'https://www.jonesday.com/en/insights/2024/06/tokyo-court-holds-ai-system-cannot-be-inventor-under-patent-law' },
     ],
   },
   // ── 상표권 (3) ──
@@ -132,17 +137,19 @@ export const ISSUES = [
     title: 'AI가 디자인한 로고, 상표로 등록될까?',
     hook: 'AI가 뚝딱 만든 브랜드 로고. 상표로 등록해 독점할 수 있을까?',
     sides: [
-      { label: '등록 가능', stance: '실제로 쓰이고 브랜드를 구별해 준다면 누가 만들었는지는 상관없다.',
+      { label: '등록 가능', stance: 'AI가 만들었다는 이유만으로 등록이 막히지는 않는다. 브랜드를 구별해 주는 힘(식별력)이 있고 남의 상표와 헷갈리지 않으면 된다.',
         points: ['상표의 핵심은 "출처를 구별하는 힘"', '소비자가 그 표시로 브랜드를 알아보면 기능을 다한 것'] },
-      { label: '요건 문제', stance: '창작 주체·창작성 요건을 어떻게 볼지 문제가 남는다.',
-        points: ['저작권처럼 인간 창작성을 따질 여지', '대량 자동 생성으로 표시가 넘쳐날 우려'] },
+      { label: '보호의 빈틈', stance: '상표로 등록되더라도 AI 로고에는 따로 챙겨야 할 위험이 남는다.',
+        points: ['로고 그림 자체는 저작권 보호를 받지 못할 수 있다', 'AI가 이미 등록된 남의 상표와 닮은 로고를 만들 수 있다'] },
     ],
     think: '상표에서 중요한 건 "누가 만들었나"일까, "어떻게 쓰이나"일까?',
-    status: 'ongoing',
-    realCase: { name: 'AI 생성 상표의 등록 요건 논쟁', date: '진행 중',
-      gist: '상표는 저작권·특허와 달리 "식별력"과 "실제 사용"을 중심으로 판단해 AI 생성물도 등록 가능성이 열려 있다는 견해가 있으나, 창작 주체 요건을 어떻게 적용할지는 아직 정리되지 않았다.' },
+    status: 'varies',
+    realCase: { name: 'AI 생성 로고의 상표·저작권 보호', date: '상시',
+      gist: '상표법은 저작권법과 달리 "사람이 만들었는가"를 등록 요건으로 두지 않는다. 그래서 AI가 만든 로고도 식별력이 있고 먼저 등록된 상표와 비슷하지 않으면 등록될 수 있다는 설명이 일반적이다. 다만 같은 로고의 그림에 대한 저작권은 사람의 창작 기여가 없으면 인정되지 않을 수 있고, AI가 만든 결과가 기존 상표와 닮아 등록이 거절될 수도 있다. 생성 도구의 이용약관도 확인해야 한다.' },
     sources: [
-      { label: 'ABA(누가 소유하는가)', url: 'https://www.americanbar.org/groups/intellectual_property_law/resources/newsletters/ai-creates-who-owns-it-law-catches-up/' },
+      { label: '국가법령정보센터(상표법 제33조 — 등록 요건)', url: 'https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EC%83%81%ED%91%9C%EB%B2%95/%EC%A0%9C33%EC%A1%B0' },
+      { label: 'Gerben IP(AI 로고가 기존 상표와 닮을 위험)', url: 'https://www.gerbenlaw.com/blog/ai-guided-trademark-development-mitigating-infringement-risks/' },
+      { label: '법률신문(한국 AI 저작물 등록 안내서)', url: 'https://www.lawtimes.co.kr/news/articleViewAmp.html?idxno=209882' },
     ],
   },
   {
@@ -158,9 +165,9 @@ export const ISSUES = [
     think: '"비슷하다"는 느낌만으로 침해라 할 수 있을까?',
     status: 'varies',
     realCase: { name: 'Getty Images v. Stability AI', date: '2025~2026',
-      gist: 'AI가 만든 이미지에 왜곡된 Getty 워터마크가 나타난 것을 두고 다툰 사건. 미국 법원은 상표 희석 주장을 진행시켰지만(2026-04), 영국 고등법원은 희석을 인정하지 않았다(2025-11). 같은 사안도 나라에 따라 결론이 갈렸다.' },
+      gist: 'AI가 만든 이미지에 일그러진 Getty 워터마크가 나타난 것을 두고 다툰 사건. 영국 고등법원(2025-11)은 초기 버전 모델이 만든 일부 이미지에 대해서만 상표 침해를 인정하면서 "아주 제한적"이라고 했고, 유명 상표의 가치를 흐린다는 희석 주장은 받아들이지 않았다. 미국에서는 2026년 4월 법원이 희석을 포함한 상표 청구를 소송 초기에 기각하지 않고 본격 심리로 넘겼을 뿐, 결론은 아직 나지 않았다.' },
     sources: [
-      { label: 'Mondaq(미국 판단)', url: 'https://www.mondaq.com/unitedstates/trademark/1802566/trademark-law-meets-generative-ai-key-takeaways-from-the-getty-v-stability-ai-ruling' },
+      { label: 'Legal 500(미국 판단)', url: 'https://www.legal500.com/intelligence/united-states/intellectual-property/trademark-law-meets-generative-ai-key-takeaways-from-the-getty-v-stability-ai-ruling' },
       { label: 'Taylor Wessing(영국 판단)', url: 'https://www.taylorwessing.com/en/insights-and-events/insights/2025/11/getty-vs-stability-trade-marks' },
     ],
   },
@@ -190,10 +197,10 @@ export const ISSUES = [
     title: '핵심 기술, 특허·오픈소스·영업비밀 중 무엇?',
     hook: '회사의 가장 중요한 AI 기술. 공개할까, 공유할까, 감출까? 세 갈래 길이 있다.',
     sides: [
-      { label: '특허', stance: '공개하고 법으로 20년 독점한다.',
+      { label: '특허', stance: '공개하고 법으로 출원일부터 최대 20년 독점한다.',
         points: ['보호가 강하고 권리가 명확하다', '단, 내용이 세상에 공개된다'] },
       { label: '오픈소스', stance: '공유해서 생태계와 함께 성장한다.',
-        points: ['많은 사람이 쓰며 표준이 될 수 있다', '단, 독점 이익은 포기한다'] },
+        points: ['많은 사람이 쓰며 표준이 될 수 있다', '단, 그 코드로 얻는 독점 이익은 대부분 포기한다(저작권과 라이선스 조건은 남는다)'] },
       { label: '영업비밀', stance: '감춰서 기간 제한 없이 독점한다.',
         points: ['공개 비용 없이 오래 지킬 수 있다', '단, 유출되면 보호가 사라진다'] },
     ],
@@ -217,11 +224,11 @@ export const ISSUES = [
     ],
     think: '"이유를 아는 것"과 "알고리즘을 통째로 보는 것"은 같은 요구일까?',
     status: 'varies',
-    realCase: { name: '유럽사법재판소(CJEU) 판결', date: '2025-02',
-      gist: '자동화된 결정에 대한 설명 요구를 두고, 유럽 최고법원은 기업이 "영업비밀"만 내세워 설명을 거부할 수는 없지만 알고리즘 자체를 통째로 공개할 필요는 없고, 예외적인 경우에만 영업비밀이 앞선다고 정리했다. 알 권리와 비밀 보호의 균형점을 제시한 사례다.' },
+    realCase: { name: '유럽사법재판소(CJEU) Dun & Bradstreet 판결', date: '2025-02',
+      gist: '신용평가 점수 때문에 휴대전화 계약이 자동으로 거절된 사람이 이유를 물은 사건에서, 유럽 최고법원은 회사가 "영업비밀"이라는 말만으로 설명을 통째로 거부할 수 없고 실제로 적용된 절차와 원리를 이해할 수 있게 알려야 한다고 했다. 다만 알고리즘 공식 자체를 공개할 필요는 없고, 영업비밀이 걸린 부분은 회사가 감독기관이나 법원에 내면 그쪽이 무엇을 얼마나 알려줄지 저울질하도록 했다. 한국도 2024년 3월부터 개인정보보호법에 완전히 자동화된 결정에 대해 설명을 요구하거나 거부할 수 있는 권리가 생겼다.' },
     sources: [
-      { label: 'Inside Privacy(CJEU 판결)', url: 'https://www.insideprivacy.com/gdpr/cjeu-clarifies-gdpr-rights-on-automated-decision-making-and-trade-secrets/' },
       { label: 'Stibbe(설명 요구권)', url: 'https://www.stibbe.com/publications-and-insights/cjeu-confirms-right-of-explanation-in-battle-between-trade-secrets-and' },
+      { label: '국가법령정보센터(개인정보보호법 제37조의2)', url: 'https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EA%B0%9C%EC%9D%B8%EC%A0%95%EB%B3%B4%EB%B3%B4%ED%98%B8%EB%B2%95/%EC%A0%9C37%EC%A1%B0%EC%9D%982' },
     ],
   },
   {
@@ -237,10 +244,10 @@ export const ISSUES = [
     think: '"회사의 비밀"과 "개인의 경험"은 어디서 나뉠까?',
     status: 'ongoing',
     realCase: { name: 'Apple v. OpenAI / xAI v. OpenAI', date: '2025~2026',
-      gist: 'Apple은 전직 직원과 채용 과정을 통해 기밀 설계가 유출됐다며 OpenAI를 상대로 소송을 냈고(2026-07) 진행 중이다. 반면 xAI가 OpenAI를 상대로 낸 유사 주장은 증거 부족으로 각하됐다. 인재 이동과 영업비밀 보호의 경계가 계속 다퉈지고 있다.' },
+      gist: 'Apple은 전직 직원들이 기밀 설계를 들고 OpenAI로 옮겼고 채용 과정에서도 기밀을 요구했다며 2026년 7월 소송을 냈고, OpenAI는 "어떤 비밀인지 구체적으로 밝히지 못했다"며 소송을 끝내 달라고 맞서고 있다. xAI가 OpenAI를 상대로 낸 비슷한 소송은 1심에서 "면접에서 이전 경력을 묻는 것만으로 비밀 유출을 유도했다고 보기 어렵다"는 이유로 기각됐고(2026-06), xAI가 항소해 다투고 있다. 인재 이동과 영업비밀 보호의 경계가 계속 다퉈지고 있다.' },
     sources: [
       { label: 'TechCrunch(Apple v. OpenAI)', url: 'https://techcrunch.com/2026/07/13/the-wildest-allegations-in-apples-trade-secrets-lawsuit-against-openai/' },
-      { label: 'Courthouse News(xAI 각하)', url: 'https://www.courthousenews.com/judge-tosses-xai-claims-that-openai-stole-trade-secrets/' },
+      { label: 'Al Jazeera(xAI 소송 기각)', url: 'https://www.aljazeera.com/economy/2026/6/15/us-judge-dismisses-musks-xai-trade-secret-lawsuit-against-openai' },
     ],
   },
 ];
