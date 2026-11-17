@@ -12,6 +12,7 @@ import * as resume from './resume.js';
 import { renderCourt, renderEnding } from './ui/ending.js';
 import { IDOLS, idolSVG, setIdol, getIdol, T, setExpression, autoExpression } from './ui/character.js';
 import { applyTheme, toggleTheme, watchSystemTheme } from './ui/theme.js';
+import * as phone from './ui/phone.js';
 
 let G = null;
 const $ = id => document.getElementById(id);
@@ -62,18 +63,9 @@ function updateStatbar() {
 }
 
 /* ── 타이틀 / 캐릭터 선택 / 인트로 ── */
-/* 시계·날짜(잠금화면·상태바) — 분이 바뀔 때마다 갱신. Task 2에서 phone.js로 옮긴다 */
-function tickClock() {
-  const d = new Date();
-  const hm = d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
-  $('phoneTime').textContent = hm;
-  $('lockClock').textContent = hm;
-  $('lockDate').textContent = `${d.getMonth() + 1}월 ${d.getDate()}일 ${'일월화수목금토'[d.getDay()]}요일`;
-  setTimeout(tickClock, (60 - d.getSeconds()) * 1000 + 50);
-}
-
 function boot() {
-  applyTheme(); watchSystemTheme(); tickClock();
+  applyTheme(); watchSystemTheme();
+  phone.initPhone({ onMessenger: openMessenger }); phone.startClock();
   $('btnTheme').onclick = toggleTheme;
   $('lockApp').textContent = STRINGS.ui.lockApp; $('lockNow').textContent = STRINGS.ui.lockNow;
   $('titleChars').innerHTML = idolSVG('sol') + idolSVG('luna');
@@ -111,8 +103,9 @@ function intro(i) {
   show('scr-intro');
 }
 
-/* ── 에피소드 (v0.4: 스토리 씬 → 폰 슬라이드업 → 채팅 자동 재생) ── */
+/* ── 에피소드 (v0.6: 홈 화면 위 스토리 씬 → 알림 대기 → 알림·메신저를 누르면 채팅 자동 재생) ── */
 let sceneIdx = 0;
+let chatStarted = false;   // 이 EP의 채팅을 이미 시작했는가(알림 연타·다시 열기에 두 번 시작하지 않게)
 
 function enterEp() {
   resume.markEpStart(G); store.save(G, 'ep');   // 이어 하기 시작점(2026-11-14 — 선택·퀴즈·정산 중 새로 고침해도 점수가 두 번 들어가지 않게)
@@ -121,13 +114,16 @@ function enterEp() {
   $('epHead').textContent = T(`EP${G.ep} 「${ep().title}」 — ${ep().rightEmoji} ${ep().right}`);
   show('scr-ep');
   sceneIdx = 0;
-  $('phoneWrap').classList.remove('on');
+  chatStarted = false;
+  while (phone.topApp()) phone.closeApp(null, false);   // 열려 있던 앱은 닫고 홈에서 시작
+  phone.clearNotify();
+  phone.setHome('story');
   renderScene();
 }
 
 function renderScene() {
   const scenes = ep().scenes || [];
-  if (sceneIdx >= scenes.length) { showPhone(); return; }
+  if (sceneIdx >= scenes.length) { notifyPhase(); return; }
   const s = scenes[sceneIdx];
   const stage = $('storyStage');
   stage.classList.remove('on'); void stage.offsetWidth; stage.classList.add('on');
@@ -136,10 +132,17 @@ function renderScene() {
   $('storyIdx').textContent = (sceneIdx + 1) + '/' + scenes.length;
 }
 
-function showPhone() {
+/* 스토리가 끝나면 알림이 온다 — 그 EP 첫 메시지 미리보기. 누를 때까지 기다린다 */
+function notifyPhase() {
   $('storyStage').classList.remove('on');
-  $('phoneWrap').classList.add('on');
-  startChat(ep(), choicesPhase);
+  const m = ep().messages[0];
+  phone.showNotify({ room: T(ep().roomName), preview: T(m.who + ': ' + m.text) });
+}
+
+function openMessenger() {
+  phone.clearNotify();
+  phone.openApp('messenger');
+  if (!chatStarted) { chatStarted = true; startChat(ep(), choicesPhase); }
 }
 
 function choicesPhase() {
@@ -272,6 +275,6 @@ function endingScene(key) {
 /* ── 부트 ── */
 document.getElementById('chatLog').addEventListener('click', advance);
 document.getElementById('chatTapHint').addEventListener('click', advance);
-document.getElementById('storyStage').addEventListener('click', () => { sceneIdx++; renderScene(); });
-window.LUNA = { get state() { return G; }, engine, showEnding: key => endingScene(key) };   // 프로브·디버그용(showEnding = 상태 주입 뒤 엔딩 화면 바로 그리기)
+document.getElementById('storyStage').addEventListener('click', () => { if ($('storyStage').classList.contains('on')) { sceneIdx++; renderScene(); } });
+window.LUNA = { get state() { return G; }, engine, phone, showEnding: key => endingScene(key) };   // 프로브·디버그용(showEnding = 상태 주입 뒤 엔딩 화면 바로 그리기)
 boot();

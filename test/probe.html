@@ -20,6 +20,12 @@ async function until(fn, ms = 8000) {
 const active = id => D().getElementById(id).classList.contains('active');
 const txt = id => D().getElementById(id).textContent;
 const popupShown = () => D().getElementById('popup').classList.contains('show');
+const E = id => D().getElementById(id);
+const home = () => E('scr-ep').dataset.home;
+async function throughStory() {            // 스토리 씬 끝까지 → 알림 대기
+  for (let i = 0; i < 8 && home() !== 'notify'; i++) { E('storyStage').click(); await sleep(80); }
+  return until(() => home() === 'notify' && E('notifBanner').classList.contains('in'));
+}
 
 async function run() {
   try {
@@ -52,10 +58,31 @@ async function run() {
     // v0.4 스토리 씬: 무대가 먼저 뜨고, 탭으로 넘기면 폰이 슬라이드업
     log('스토리 씬 무대 표시', D().getElementById('storyStage').classList.contains('on'));
     log('씬 텍스트 토큰 치환', txt('storyText').includes('솔') || !txt('storyText').includes('{n'));
-    for (let i = 0; i < 6 && !D().getElementById('phoneWrap').classList.contains('on'); i++) {
-      D().getElementById('storyStage').click(); await sleep(80);
-    }
-    log('폰 프레임 등장', D().getElementById('phoneWrap').classList.contains('on'));
+    log('home: 스토리 동안 홈이 깔려 있고 앱은 안 눌림', home() === 'story' && !!E('homeScreen') && (E('dockNotes').click(), !E('appNotes').classList.contains('on')));
+    await throughStory();
+    log('notify: 알림 대기 — 메신저는 아직 닫힘', home() === 'notify' && !E('phoneWrap').classList.contains('on'));
+    log('notify: 미리보기 = 첫 메시지, 이름 토큰 풀림', E('notifBanner').textContent.includes('솔 프로젝트') && E('notifBanner').textContent.includes('개발자 준호: 대표님 큰일남') && !/\{[nN]/.test(E('notifBanner').textContent));
+    log('notify: 메신저 아이콘에 숫자', E('msgBadge').offsetParent !== null);
+    for (const id of ['appCity', 'appCal', 'dockCall']) E(id).click();
+    log('decor: 장식 앱 3개는 아무 층도 열지 않음', !D().querySelector('.applayer.on') && E('appCity').getAttribute('aria-label').includes('(장식)'));
+    log('decor: 달력에 오늘 날짜', E('calDay').textContent === String(new Date().getDate()));
+    E('notifBanner').click(); E('notifBanner').click(); E('dockMsg').click();     // notify-double: 연타
+    await until(() => E('phoneWrap').classList.contains('on'));
+    log('폰 프레임 등장', E('phoneWrap').classList.contains('on'));
+    await sleep(900);
+    log('notify-double: 연타해도 첫 메시지는 하나', [...D().querySelectorAll('#chatLog .msg')].filter(m => m.textContent.includes('대표님 큰일남')).length === 1);
+    E('msgBack').click();
+    await until(() => !E('phoneWrap').classList.contains('on'));
+    const kept = D().querySelectorAll('#chatLog .msg').length;
+    log('back: ‹ 로 홈 — 숫자 다시 붙고 대화는 남음', E('msgBadge').offsetParent !== null && kept > 0);
+    E('dockMsg').click();
+    await until(() => E('phoneWrap').classList.contains('on'));
+    log('back: 다시 열면 대화가 이어짐', D().querySelectorAll('#chatLog .msg').length >= kept);
+    W().history.back();
+    await until(() => !E('phoneWrap').classList.contains('on'));
+    log('back: 폰의 뒤로 가기 = 앱 닫기(게임 유지)', active('scr-ep') && !!W().LUNA.state);
+    E('dockMsg').click();
+    await until(() => E('phoneWrap').classList.contains('on'));
     log('단톡방 이름 치환(솔 프로젝트)', txt('chatRoom').includes('솔 프로젝트'));
 
     // v0.4 자동 재생: 클릭 없이도 메시지가 흐르는지 먼저 확인 → 이후 탭으로 빨리 감기
@@ -72,6 +99,8 @@ async function run() {
     await until(popupShown);
     log('정답 팝업(배지 획득)', D().querySelector('.pop-title').textContent.includes('배지 획득'));
     log('상태 idol=sol', W().LUNA.state.idol === 'sol');
+    W().history.back(); await sleep(150);
+    log('back-during-popup: 팝업 중 뒤로 가기는 무시', popupShown() && E('phoneWrap').classList.contains('on'));
 
     // 2026-11-14 O/X 확인 퀴즈: 정답 [계속] → 퀴즈 → (틀리면 하나 더) → 정산. 문항 원본은 data/quiz.js(EP1 본 문제 답 X, 하나 더 답 X)
     const ptitle = () => D().querySelector('.pop-title').textContent;
@@ -101,7 +130,8 @@ async function run() {
     D().querySelector('.pop-btn').click();                          // EP2 시작
     await until(() => txt('epHead').includes('EP2'));
     log('EP2 진입', txt('epHead').includes('EP2'));
-    log('popup-inert: 팝업이 닫히면 inert 해제', !D().querySelector('#app [inert]'));
+    log('ep-next: 다음 EP는 메신저가 닫힌 홈에서 스토리로', !E('phoneWrap').classList.contains('on') && home() === 'story');
+    log('popup-inert: 팝업이 닫히면 inert 해제', !D().querySelector('#app > [inert]'));
     const save = JSON.parse(W().localStorage.getItem('luna_save_v1'));
     log('저장에 idol=sol', save && save.game.idol === 'sol');
 
@@ -131,7 +161,8 @@ async function run() {
     // quiz-after-accept(실제 플레이): 루나로 EP1 오답 → [대가를 치르고 진행] → 퀴즈 → 정산
     for (let i = 0; i < 4; i++) { D().getElementById('introCard').click(); await sleep(80); }
     await until(() => active('scr-ep'));
-    for (let i = 0; i < 6 && !D().getElementById('phoneWrap').classList.contains('on'); i++) { D().getElementById('storyStage').click(); await sleep(80); }
+    await throughStory(); E('notifBanner').click();
+    await until(() => E('phoneWrap').classList.contains('on'));
     for (let i = 0; i < 40 && !D().querySelector('#chatChoices .choice-btn'); i++) { D().getElementById('chatLog').click(); await sleep(70); }
     await until(() => D().querySelector('#chatChoices .choice-btn'));
     D().querySelectorAll('#chatChoices .choice-btn')[0].click();   // A 오답
