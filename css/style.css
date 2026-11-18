@@ -120,6 +120,7 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .intro-emoji{font-size:30px;line-height:1}
 #introCard p{font-size:16.5px;font-weight:600;line-height:1.75;margin-top:8px}
 .tap-hint{margin-top:10px;color:var(--dim);font-size:13px}
+button.tap-hint{display:block;background:none;border:0;padding:2px 0;font-weight:400;text-align:left;color:var(--dim)}   /* 인트로·스토리 [다음] — 키보드로 누르는 단추, 겉모습은 안내 글 그대로 */
 
 /* ── 점수(위젯) ── */
 .statbar{margin:6px 14px 0;border-radius:20px;padding:9px 13px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}

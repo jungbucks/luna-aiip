@@ -16,7 +16,7 @@ import * as phone from './ui/phone.js';
 import { initSettings, openSettings } from './ui/settings.js';
 import * as notebook from './ui/notebook.js';
 import { initNotebook, openNotebook, askNote, openProduct } from './ui/notebook.js';
-import { clearNotes } from './notes.js';
+import { clearNotes, loadNotes } from './notes.js';
 
 let G = null;
 const $ = id => document.getElementById(id);
@@ -82,10 +82,34 @@ function boot() {
   $('selRow').querySelectorAll('.sel-card').forEach(btn => btn.onclick = () => pickIdol(btn.dataset.idol));
   const saved = store.load();
   $('btnContinue').style.display = saved ? '' : 'none';
-  $('btnContinue').onclick = () => { G = resume.resumeState(saved.game); applyIdol(G.idol); enterEp(); };   // EP 시작 상태에서 다시(점수 두 번 방지)
-  $('btnNew').onclick = () => { store.clear(); clearNotes(); G = engine.newGame(); show('scr-select'); };
-  $('btnReset').onclick = resetAll;
+  $('btnContinue').onclick = () => {   // 진행 중이면 EP 시작 상태에서 다시(점수 두 번 방지), 끝난 판이면 그 엔딩·리포트 그대로
+    const p = resume.resumePoint(saved);
+    G = p.state; applyIdol(G.idol);
+    if (p.ended) endingScene(engine.judgeEnding(G)); else enterEp();
+  };
+  const U = STRINGS.ui, S = U.settings;
+  $('btnNew').onclick = () => askWipe('btnNew', U.newTitle, U.newAsk, U.newNo, U.newYes, startNew);
+  $('btnReset').onclick = () => askWipe('btnReset', S.reset, S.resetAsk, S.resetNo, S.resetYes, resetAll);
   show('scr-title');
+}
+
+/* 타이틀의 새로 시작·기록 초기화: 지울 기록(게임·적은 글)이 있으면 한 번 묻고, 승인한 뒤에만 지운다.
+   처음 온 사람(기록 없음)은 묻지 않는다. 그만두면 누른 단추로 초점을 돌려준다 */
+const hasRecords = () => !!store.load() || Object.keys(loadNotes()).length > 0;
+function askWipe(btnId, title, ask, no, yes, onYes) {
+  if (!hasRecords()) return onYes();
+  showPopup({
+    title,
+    html: `<p>${esc(ask)}</p>`,
+    buttons: [{ label: no, cls: 'ghost', cb: () => $(btnId).focus() }, { label: yes, cls: 'danger', cb: onYes }],
+  });
+}
+
+function startNew() {
+  store.clear(); clearNotes();
+  G = engine.newGame();
+  show('scr-select');
+  $('selRow').querySelector('.sel-card').focus();   // 키보드로 바로 고를 수 있게
 }
 
 /* 기록 초기화(타이틀·설정·엔딩 공통): 게임 기록 + 수첩에 적은 글. 화면 모드(luna_theme)는 지우지 않는다 */
@@ -113,9 +137,10 @@ function intro(i) {
   if (i >= STRINGS.intro.length) { store.save(G, 'ep'); enterEp(); return; }
   const c = STRINGS.intro[i];
   $('introCard').innerHTML = `<div class="intro-emoji">${c.emoji}</div><p>${esc(c.text).replace(/\n/g, '<br>')}</p>
-    <div class="tap-hint">눌러서 계속 (${i + 1}/${STRINGS.intro.length})</div>`;
-  $('introCard').onclick = () => intro(i + 1);
+    <button type="button" class="tap-hint" id="introNext">눌러서 계속 (${i + 1}/${STRINGS.intro.length})</button>`;
+  $('introCard').onclick = () => intro(i + 1);   // 카드 어디를 눌러도, 단추를 Enter·Space로 눌러도 click 한 번 = 한 장면(keydown은 따로 받지 않는다)
   show('scr-intro');
+  $('introNext').focus({ preventScroll: true });
 }
 
 /* ── 에피소드 (v0.6: 홈 화면 위 스토리 씬 → 알림 대기 → 알림·메신저를 누르면 채팅 자동 재생) ── */
@@ -147,6 +172,7 @@ function renderScene() {
   $('storyEmoji').textContent = s.emoji;
   $('storyText').innerHTML = esc(T(s.text)).replace(/\n/g, '<br>');
   $('storyIdx').textContent = (sceneIdx + 1) + '/' + scenes.length;
+  $('storyNext').focus({ preventScroll: true });   // 키보드: 다음 장면 단추(click은 무대가 받는다 — 한 번에 한 장면)
 }
 
 /* 스토리가 끝나면 알림이 온다 — 그 EP 첫 메시지 미리보기. 누를 때까지 기다린다 */
@@ -154,6 +180,7 @@ function notifyPhase() {
   $('storyStage').classList.remove('on');
   const m = ep().messages[0];
   phone.showNotify({ room: T(ep().roomName), preview: T(m.who + ': ' + m.text) });
+  $('notifBanner').focus({ preventScroll: true });   // 키보드: 장면 단추가 사라졌으니 알림으로(Enter로 메신저)
 }
 
 function openMessenger() {

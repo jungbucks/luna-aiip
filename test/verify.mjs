@@ -207,6 +207,36 @@ console.log('[이어 하기] 에피소드 시작 상태에서 다시 (2026-11-14
   t('resume: 사본 없는 옛 저장은 그대로(지금 동작)', R.resumeState(old) === old);
 }
 
+console.log('[이어 하기] 끝난 판은 엔딩 그대로 (2026-11-18 검토 P1 — 엔딩 저장에서 이어 하면 EP6 시작으로 되돌아가 배지가 6→5)');
+{
+  const finish = kind => {                     // main.js 순서: EP마다 시작 사본 → 선택 → 정산 → 다음 EP, 끝나면 판정 + 'end' 저장
+    const st = E.newGame(); st.idol = 'luna';
+    for (;;) {
+      R.markEpStart(st);
+      const right = kind === 'unicorn' || (kind === 'survive' && st.ep !== 1 && st.ep !== 4);
+      if (right) E.chooseRight(st, st.ep, ep(st.ep).choices.right.delta);
+      else if (E.chooseWrongAccept(st, st.ep, ep(st.ep).choices.wrong.delta) === 'court') break;
+      E.settle(st);
+      if (st.ep === 6) break;
+      E.nextEp(st);
+    }
+    const end = E.judgeEnding(st);
+    return { end, data: JSON.parse(JSON.stringify({ schemaVersion: 1, game: st, phase: 'end' })) };   // localStorage 왕복
+  };
+  for (const kind of ['unicorn', 'survive', 'court']) {
+    const { end, data } = finish(kind);
+    const p = R.resumePoint(JSON.parse(JSON.stringify(data)));
+    t(`resume-end: ${kind} — 엔딩·점수·배지 그대로`, end === kind && p.ended === true && E.judgeEnding(p.state) === kind
+      && JSON.stringify(p.state.stats) === JSON.stringify(data.game.stats) && JSON.stringify(p.state.badges) === JSON.stringify(data.game.badges), fmt(p.state));
+  }
+  { const st = E.newGame(); R.markEpStart(st); E.chooseRight(st, 1, ep(1).choices.right.delta);
+    const p = R.resumePoint({ schemaVersion: 1, game: JSON.parse(JSON.stringify(st)), phase: 'ep' });
+    t('resume-end: 진행 중 저장은 지금처럼 EP 시작 사본에서', p.ended === false && p.state.ep === 1 && p.state.badges[0] === null); }
+  { const st = E.newGame(); st.idol = 'sol';
+    const p = R.resumePoint({ schemaVersion: 1, game: st, phase: 'intro' });
+    t('resume-end: 인트로 저장(사본 없음)은 그대로 EP1로', p.ended === false && p.state === st); }
+}
+
 console.log('[모드] 다크/라이트 결정 (theme.js)');
 {
   const Th = await import('../js/ui/theme.js');

@@ -86,5 +86,9 @@ export const STRINGS = {
     restartTitle: '🔄 처음부터 다시',
     restartAsk: '처음부터 다시 하면 수첩에 적은 글도 지워집니다. 산출물을 먼저 저장했나요?',
     restartYes: '지우고 다시 하기', restartNo: '돌아가기',
+    // 타이틀 [새로 시작] — 이어 할 기록이나 적은 글이 있을 때만 묻는다(기록 초기화는 settings 문구를 같이 쓴다)
+    newTitle: '새로 시작',
+    newAsk: '게임 기록과 수첩에 적은 글이 모두 지워집니다. 새로 시작할까요?',
+    newYes: '지우고 새로 시작', newNo: '돌아가기',
   },
 };

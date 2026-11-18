@@ -16,3 +16,11 @@ export function resumeState(saved) {
   back.epStart = JSON.parse(JSON.stringify(saved.epStart));
   return back;
 }
+
+/** 저장본(state.js load() 결과) → 이어 할 곳 {state, ended}.
+    끝난 판(phase 'end')은 상태 그대로 엔딩으로 — EP 시작 사본으로 되돌리면 엔딩·마지막 배지가 사라지고
+    저장 단계도 'ep'로 덮였다(2026-11-18 검토 P1). 진행 중·인트로 저장은 지금처럼 resumeState. */
+export function resumePoint(data) {
+  if (data && data.phase === 'end' && data.game) return { state: data.game, ended: true };
+  return { state: resumeState(data && data.game), ended: false };
+}
