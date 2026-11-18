@@ -26,7 +26,7 @@ css/phone.css       홈 화면·앱 층(메신저·권리 수첩·설정)·적�
 assets/fonts/       Pretendard 서브셋 woff2 3종(400·600·800) + LICENSE.txt (외부 CDN 없음)
 css/dogam.css       도감 스타일(게임 팔레트 공유)
 js/engine.js        규칙 단일 원천(SPEC §6). DOM 없음, 수치 변경 금지
-js/state.js         localStorage(luna_save_v1, schemaVersion 검사)
+js/state.js         localStorage(luna_save_v1, schemaVersion 검사 + checkSave: 칸마다 타입·범위·허용값, 어긋나면 null)
 js/main.js          게임 루프 오케스트레이터(규칙 계산 금지 — engine 위임)
 js/ui/chat.js       채팅 로그·선택지 + esc()=토큰 치환+이스케이프 단일 통로
 js/ui/popup.js      팝업·델타 / ending.js 법정·엔딩·리포트
@@ -43,7 +43,7 @@ data/strings.js     인트로·브릿지·법정·엔딩·리포트·퀴즈 문�
 data/quiz.js        O/X 확인 퀴즈 12문항(EP마다 본 문제+하나 더, 교사 검수 대기)
 js/quiz.js          퀴즈 판정·기록(G.quiz)·다시 볼 개념 목록(DOM 없음, verify가 검산)
 data/issues.js      도감 ISSUES 12·STATUS_META(양측 대립·상태 배지·실제 사례·출처)
-test/verify.mjs     게임 검산 93건(배포 4·기록 지우기 6·퀴즈 8·이어 하기 11·모드 6·프로필 3·수첩 12·말투·선택지·알림·장면 15 포함) / verify-dogam.mjs 도감 15건(미결 카드 결론 단정·사례 칸 길이 200자/문장 80자/괄호 1개 검사 포함)
+test/verify.mjs     게임 검산 104건(배포 4·기록 지우기 6·저장 불러오기 11·퀴즈 8·이어 하기 11·모드 6·프로필 3·수첩 12·말투·선택지·알림·장면 15 포함) / verify-dogam.mjs 도감 15건(미결 카드 결론 단정·사례 칸 길이 200자/문장 80자/괄호 1개 검사 포함)
 test/probe.html     게임 E2E / probe-dogam.html 도감 E2E 24건(`node test/run-probe.mjs test/probe-dogam.html`, 폰·넓은 화면 배치 포함)
 test/run-probe.mjs  프로브 실행기(서버 + 헤드리스 Edge + 수확) — `node test/run-probe.mjs`
 test/probe-shots.html  캡처용 프로브(원하는 장면까지 자동 진행)
@@ -66,6 +66,7 @@ _config.yml         Pages(Jekyll) 배포 범위: test·docs·CLAUDE/SPEC/ROADMAP
 - **테스트 페이지는 자동화 브라우저 + `?probe=1`에서만 저장을 만진다**(`navigator.webdriver` 검사). `run-probe.mjs`가 `--enable-automation`·`?probe=1`·새 임시 프로필을 붙인다. 저장을 만지는 테스트 페이지를 새로 만들면 같은 가드를 넣고 probe-guard에 추가.
 - **새 층은 `#app`의 자손이어야 한다** — 팝업이 떠 있는 동안 `popup.js`가 `#app`의 직계 자식(팝업 제외)에 `inert`를 건다. 밖에 두면 팝업 뒤에서 눌려 점수가 두 번 들어가는 옛 결함이 돌아온다.
 - **저장 키 셋은 서로 별개**: `luna_save_v1`(게임) · `luna_notes_v1`(적은 글) · `luna_theme`(모드). 기록 초기화·처음부터는 게임+글을 지우고 모드는 남긴다. 적은 글은 점수·배지·엔딩과 무관.
+- **불러온 저장은 믿지 않는다**(보안 검토 2026-11-18 C): `state.load()`가 `checkSave()`로 알려진 칸만 검사해 새 객체로 옮기고 하나라도 어긋나면 null(이어 하기 숨김, 모르는 칸은 버림). 저장에 칸을 새로 더하면 `checkSave`에도 넣을 것 — 안 넣으면 그 칸이 불러올 때 사라진다. 점수는 화면에 `chat.js statsLine()/num()`(정수만 숫자, 아니면 '-'), 배지 class는 `notebook.js badgeCls()` 허용값만.
 - **학생이 적은 글은 `notebook.js`의 `escPlain()`으로** — `esc()`는 `{n}` 토큰을 아이돌 이름으로 바꿔 버린다.
 - **뒤로 가기는 방문 기록 한 칸 규칙**(`phone.js`): 앱이 열릴 때만 한 칸을 채우고, 프로그램이 `history.back()`을 부르지 않는다. 팝업·적기 단계에서는 무시.
 - **흐림(`backdrop-filter`)은 배경화면 위에 떠 있고 스크롤되지 않는 면에만.** 메신저 안·수첩 목록·리포트에는 쓰지 않는다(저사양 폰, v0.3.1의 교훈).
@@ -74,7 +75,7 @@ _config.yml         Pages(Jekyll) 배포 범위: test·docs·CLAUDE/SPEC/ROADMAP
 
 ## 검증 (수정 후 필수)
 
-1. 게임 `node test/verify.mjs`(93건) — 미달 시 배포 금지. 도감 `node test/verify-dogam.mjs`(15건) + `node test/run-probe.mjs test/probe-dogam.html`(24건).
+1. 게임 `node test/verify.mjs`(104건) — 미달 시 배포 금지. 도감 `node test/verify-dogam.mjs`(20건) + `node test/run-probe.mjs test/probe-dogam.html`(45건). 게임 E2E 145건.
 2. E2E 프로브(구조·흐름 변경 시): **`node test/run-probe.mjs`** 한 줄(종료 코드 0 = 전부 PASS). 배포본만으로 도는지는 `--pages`(올라갈 파일만 서빙). 가드는 `node test/run-probe.mjs test/probe-guard.html`. 캡처는 `node test/run-probe.mjs test/probe-shots.html --shot=<png> --url="/__probe.html?scene=home&theme=light&w=1366&h=700" --size=1366,700`. 아래는 실행기가 대신 해 주는 옛 수동 절차(원리 참고용): **게임과 같은 오리진에서 서빙 필수** — file:// 프로브 + http iframe은 크로스오리진으로 조용히 죽는다(2026-07-15 실제 발생). 절차: `probe.html`을 루트에 복사 → Node 정적 서버(scratchpad) → `msedge --headless=new --user-data-dir=<임시> --virtual-time-budget=20000 --dump-dom http://localhost:PORT/...` → 수확 후 복사본 삭제. 채팅은 타이핑 인디케이터 때문에 메시지당 최대 2탭.
 
 ## 참고 문서

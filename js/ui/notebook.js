@@ -5,7 +5,7 @@
    규칙·게임 저장에는 손대지 않는다. 학생이 적은 글은 반드시 escPlain()을 거쳐 그린다. */
 import { EPISODES } from '../../data/episodes.js';
 import { STRINGS } from '../../data/strings.js';
-import { esc } from './chat.js';
+import { esc, statsLine } from './chat.js';
 import { T } from './character.js';
 import { openApp, closeApp, lockApps, armBack, onSheetBack } from './phone.js';
 import { getNote, saveNote, isValid, MIN_LEN, MAX_LEN, buildProductText } from '../notes.js';
@@ -21,6 +21,8 @@ function escPlain(s) {
   return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 }
 const badgeLabel = b => STRINGS.report.badgeLabel[b] || STRINGS.report.badgeLabel.none;
+const BADGE_CLS = { full: 'b-full', half: 'b-half', none: 'b-none' };   // 저장값을 class에 그대로 넣지 않는다(보안 검토 2026-11-18 C)
+const badgeCls = b => (Object.prototype.hasOwnProperty.call(BADGE_CLS, b) ? BADGE_CLS[b] : 'b-none');
 
 export function initNotebook(opts) {
   getState = opts.getState;
@@ -53,7 +55,7 @@ function cardHTML(e, i, state) {
   const note = getNote(e.id);
   const mustWrite = !!(writing && writing.done);   // 필수 적기 중에는 다른 카드를 고칠 수 없다 — 고치기가 필수 진행을 덮어 갇히던 것(2026-11-17 검토)
   return `<div class="note-card" data-ep="${e.id}" data-state="open">
-    <b class="note-h">${e.rightEmoji} ${esc(e.right)} <span class="note-badge b-${badge}">${esc(badgeLabel(badge))}</span></b>
+    <b class="note-h">${e.rightEmoji} ${esc(e.right)} <span class="note-badge ${badgeCls(badge)}">${esc(badgeLabel(badge))}</span></b>
     <p class="note-hint">${esc(e.hint)}</p>
     ${note ? `<div class="note-mine"><span class="note-mine-l">${esc(S.mine)}</span><p>${escPlain(note)}</p></div>` : ''}
     ${mustWrite ? '' : `<button type="button" class="note-edit" data-ep="${e.id}">${esc(note ? S.edit : S.save)}</button>`}
@@ -142,7 +144,7 @@ export function openProduct(endingName, opener) {
     <h2 class="prod-title">${escPlain(data.title)}</h2>
     <label class="prod-name"><span>${esc(P.name)}</span><input id="prodName" type="text" maxlength="30" autocomplete="off"></label>
     <div class="prod-meta"><span>${data.date}</span><span>${esc(P.withIdol)}: ${escPlain(data.idol)}</span></div>
-    <div class="prod-result"><b>${esc(P.result)}: ${escPlain(data.result)}</b><span>💰 ${data.stats.money} · 📈 ${data.stats.fame} · 🛡️ ${data.stats.safety}</span></div>
+    <div class="prod-result"><b>${esc(P.result)}: ${escPlain(data.result)}</b><span>${statsLine(data.stats)}</span></div>
     ${data.items.map(it => `<div class="prod-note" data-ep="${it.id}">
       <b>${it.emoji} ${escPlain(it.right)} <span class="prod-badge">${escPlain(it.badge)}</span></b>
       <p class="prod-hint">${escPlain(it.hint)}</p>

@@ -459,6 +459,30 @@ async function run() {
           (active('scr-ep') ? '열린 화면 EP ' + txt('epHead') : '') + ' full=' + full);
         log('resume-end: ' + kind + ' — 저장 단계가 end 그대로', JSON.parse(W().localStorage.getItem('luna_save_v1')).phase === 'end');
       }
+      // 보안 검토 2026-11-18 C: 손댄 저장(점수 자리에 마크업·모르는 배지)은 불러오지 않는다. 그려도 점수는 숫자 글자, 배지 class는 허용값만
+      { const { g } = finish('survive');
+        const stats = '💰 ' + g.stats.money + ' · 📈 ' + g.stats.fame + ' · 🛡️ ' + g.stats.safety;
+        const pwned = () => !!(D().getElementById('pwnS') || D().getElementById('pwnB') || D().querySelector('.pwn'));
+        const tampered = JSON.parse(JSON.stringify(g));
+        tampered.stats.money = '<img id="pwnS" src="x">'; tampered.badges[0] = '"><i id="pwnB" class="pwn"></i>';
+        W().localStorage.setItem('luna_save_v1', JSON.stringify({ schemaVersion: 1, game: tampered, phase: 'end' }));
+        f.src = '/index.html?tamper=1'; await sleep(200); await until(() => W().LUNA && E('btnNew') && active('scr-title'));
+        log('tamper: 손댄 저장은 이어 하기를 보여 주지 않음', E('btnContinue').style.display === 'none' && !pwned());
+        const old = JSON.parse(JSON.stringify(g)); delete old.epStart; delete old.quiz;   // 시작 사본·퀴즈 이전의 옛 저장
+        W().localStorage.setItem('luna_save_v1', JSON.stringify({ schemaVersion: 1, game: old, phase: 'end' }));
+        f.src = '/index.html?tamper=2'; await sleep(200);
+        await until(() => W().LUNA && E('btnContinue') && E('btnContinue').style.display !== 'none');
+        E('btnContinue').click(); await until(() => active('scr-end'), 3000);
+        log('tamper: 옛 저장은 예전처럼 이어 하기(같은 점수)', active('scr-end') && D().querySelector('.rp-stats').textContent.trim() === stats);
+        // 방어 한 겹 더: 이미 불러온 상태가 오염됐다고 치고 엔딩·수첩·산출물을 다시 그린다
+        const Gs = W().LUNA.state; Gs.stats.money = '<img id="pwnS" src="x">'; Gs.badges[0] = '"><i id="pwnB" class="pwn"></i>';
+        W().LUNA.showEnding('survive'); W().LUNA.notebook.renderNotebook();
+        W().LUNA.notebook.openProduct(null, E('endProduct')); await sleep(100);
+        const nb = D().querySelector('.note-card[data-ep="1"] .note-badge');
+        log('tamper: 엔딩·수첩·산출물이 점수·배지를 HTML로 해석하지 않음', !pwned() && !D().querySelector('.rp-stats').innerHTML.includes('<')
+          && D().querySelector('.rp-stats').textContent.includes('💰 - ·') && !!nb && nb.className === 'note-badge b-none' && D().querySelector('.prod-result span').textContent.startsWith('💰 - ·'),
+          nb ? nb.className : 'no badge');
+        W().LUNA.notebook.closeProduct(); }
       W().localStorage.removeItem('luna_save_v1'); }
     // 대비: 유리 위 글자 4.5:1 이상(다크·라이트). 흐림·채도 효과는 빼고 색만 겹쳐 계산한 근삿값
     for (const th of ['dark', 'light']) {

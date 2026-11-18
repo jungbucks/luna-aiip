@@ -306,6 +306,40 @@ console.log('[기록 지우기] 진행·수첩 키마다 지워졌는지 확인 
   N.clearNotes({ getItem: () => null, setItem() {}, removeItem() {} });
 }
 
+console.log('[저장 불러오기] 타입·범위·허용값 검사 (보안 검토 2026-11-18 C — 버전만 보고 game을 그대로 돌려줬다)');
+{
+  const S = await import('../js/state.js');
+  const mem = raw => { const m = { luna_save_v1: raw }; return { m, getItem: k => (k in m ? m[k] : null), setItem: (k, v) => { m[k] = String(v); }, removeItem: k => { delete m[k]; } }; };
+  const wrap = (game, phase = 'ep') => JSON.stringify({ schemaVersion: 1, game, phase });
+  const load = (game, phase) => S.load(mem(wrap(game, phase)));
+  // 정상 저장: EP 셋까지 하고(오답·재선택·퀴즈·시작 사본 포함) 저장 → 그대로 돌아온다
+  const g = E.newGame(); g.idol = 'sol';
+  R.markEpStart(g); E.chooseWrongRetry(g, 1, ep(1).choices.wrong.delta); E.chooseRight(g, 1, ep(1).choices.right.delta); Q.record(g, 1, 'more-ok'); E.settle(g); E.nextEp(g);
+  R.markEpStart(g); E.chooseWrongAccept(g, 2, ep(2).choices.wrong.delta); Q.record(g, 2, 'missed'); E.settle(g); E.nextEp(g);
+  R.markEpStart(g);
+  const canon = v => Array.isArray(v) ? v.map(canon) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map(k => [k, canon(v[k])])) : v;
+  const same = (a, b) => JSON.stringify(canon(a)) === JSON.stringify(canon(b));   // 칸 순서는 따지지 않는다
+  const ok = load(g);
+  t('load: 정상 저장은 그대로', !!ok && same(ok.game, g) && ok.phase === 'ep', ok ? '' : 'null');
+  const old = JSON.parse(JSON.stringify(g)); delete old.quiz; delete old.epStart; delete old.schemaVersion;   // 퀴즈·시작 사본 이전의 옛 저장
+  const okOld = load(old);
+  t('load: 옛 저장(퀴즈·시작 사본 없음)도 예전처럼', !!okOld && same(okOld.game, old) && R.resumePoint(okOld).state.ep === 3);
+  const done = E.newGame(); for (let i = 1; i <= 6; i++) { E.chooseRight(done, i, ep(i).choices.right.delta); E.settle(done); if (i < 6) E.nextEp(done); } E.judgeEnding(done);
+  t('load: 끝난 판(end)도 그대로', (r => !!r && r.phase === 'end' && r.game.ending === 'unicorn')(load(done, 'end')));
+  const vOld = mem(JSON.stringify({ schemaVersion: 0, game: g, phase: 'ep' }));
+  t('load: 다른 버전은 예전처럼 버림', S.load(vOld) === null && vOld.getItem('luna_save_v1') === null);
+  const bad = f => { const x = JSON.parse(JSON.stringify(g)); f(x); return load(x); };
+  t('load: 점수 자리에 마크업 → 거부', bad(x => { x.stats.money = '<img src=x onerror=alert(1)>'; }) === null);
+  t('load: 모르는 배지 값 → 거부', bad(x => { x.badges[0] = '"><b>pwn</b>'; }) === null);
+  t('load: 숫자 범위 밖·소수·문자 숫자 → 거부', [x => { x.stats.fame = 101; }, x => { x.stats.safety = -1; }, x => { x.stats.money = 1.5; }, x => { x.stats.money = '50'; },
+    x => { x.ep = 7; }, x => { x.ep = 0; }, x => { x.courtCount = 3; }, x => { x.wrongs = [9]; }, x => { x.wrongs = ['1']; }].every(f => bad(f) === null));
+  t('load: 모양이 틀린 칸 → 거부', [x => { x.badges = x.badges.slice(0, 5); }, x => { x.badges = 'full'; }, x => { x.stats = null; }, x => { x.idol = '<b>'; },
+    x => { x.retryUsed = 'yes'; }, x => { x.ending = 'win'; }, x => { x.quiz = { 1: '<i>' }; }, x => { x.quiz = { 9: 'ok' }; }, x => { x.epStart.stats.money = '<b>'; }].every(f => bad(f) === null));
+  t('load: 단계 값이 이상하면 거부', load(g, '<b>') === null && S.load(mem(JSON.stringify({ schemaVersion: 1, game: null, phase: 'ep' }))) === null);
+  t('load: 모르는 칸은 버리고 불러옴', (r => !!r && !('evil' in r.game) && !('evil' in r.game.stats))(bad(x => { x.evil = '<b>'; x.stats.evil = 1; })));
+  t('load: 깨진 JSON → null', S.load(mem('{깨짐')) === null);
+}
+
 console.log('[배포] GitHub Pages에 올라갈 파일 (보안 검토 2026-11-18 A — 테스트 페이지가 같은 오리진에서 게임 저장을 지울 수 있었다)');
 {
   const P = await import('./pages-files.mjs');

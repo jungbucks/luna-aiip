@@ -120,3 +120,14 @@ export function sendMine(text) {
 export function esc(s) {
   return T(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 }
+
+/* 점수 → 화면 글자(보안 검토 2026-11-18 C). 정수만 숫자로, 그 밖의 값은 '-' — HTML에 넣어도 숫자 글자만 남는다 */
+export function num(v) {
+  return Number.isInteger(v) ? String(v) : '-';
+}
+
+/* 리포트·수첩·산출물 공통 점수 한 줄 */
+export function statsLine(s) {
+  const st = s || {};
+  return `💰 ${num(st.money)} · 📈 ${num(st.fame)} · 🛡️ ${num(st.safety)}`;
+}

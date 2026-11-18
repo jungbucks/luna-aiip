@@ -1,7 +1,7 @@
 /* ending.js — 법정 씬·엔딩·최종 리포트 (SPEC §6.6~6.7). */
 import { STRINGS } from '../../data/strings.js';
 import { EPISODES } from '../../data/episodes.js';
-import { esc } from './chat.js';
+import { esc, statsLine } from './chat.js';
 import { missedEps } from '../quiz.js';
 
 /* 법정 복습 목록 — 오답 EP들의 권리·교훈 */
@@ -54,7 +54,7 @@ export function renderEnding(state, endingKey, restartCb, productCb) {
       <h2>${esc(e.name)}</h2>
       <p class="end-body">${esc(e.body).replace(/\n/g, '<br>')}</p>
       <h3>${esc(r.head)}</h3>
-      <div class="rp-stats">💰 ${state.stats.money} · 📈 ${state.stats.fame} · 🛡️ ${state.stats.safety}</div>
+      <div class="rp-stats">${statsLine(state.stats)}</div>
       <div class="rp-badges">${badges}</div>
       <h3>${esc(r.reviewHead)}</h3>
       <div class="rv-list">${endReview(state)}</div>
