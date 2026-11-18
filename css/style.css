@@ -191,6 +191,7 @@ button.tap-hint{display:block;background:none;border:0;padding:2px 0;font-weight
 .rv-sub{margin:12px 0 6px;font-size:15px;font-weight:600;color:var(--dim)}
 .pop-body .lesson{background:var(--gold-bg);border:1px solid var(--gold-line);border-radius:14px;padding:10px 13px}
 .pop-body .money-zero{color:var(--warn);font-size:15px}
+.pop-body .wipe-left{margin:0 0 4px 1.3em;font-size:15.5px;font-weight:600}
 .pop-btns{display:flex;flex-direction:column;gap:8px;margin-top:12px}
 .pop-btn{padding:13px;border-radius:16px;font-size:16px;font-weight:800;border:none;background:var(--cta);color:var(--cta-ink)}   /* 바깥 30 = 안 16 + 여백 14 */
 .pop-btn.ghost{background:var(--btn);color:var(--ink);border:1px solid var(--edge)}

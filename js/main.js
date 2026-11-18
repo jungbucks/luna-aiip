@@ -71,7 +71,7 @@ function updateStatbar() {
 function boot() {
   applyTheme(); watchSystemTheme();
   phone.initPhone({ onMessenger: openMessenger, onNotes: openNotebook, onSettings: openSettings }); phone.startClock();
-  initSettings({ onReset: resetAll });
+  initSettings({ onReset: () => resetAll('setReset') });
   initNotebook({ getState: () => G });
   $('btnTheme').onclick = toggleTheme;
   $('lockApp').textContent = STRINGS.ui.lockApp; $('lockNow').textContent = STRINGS.ui.lockNow;
@@ -89,7 +89,7 @@ function boot() {
   };
   const U = STRINGS.ui, S = U.settings;
   $('btnNew').onclick = () => askWipe('btnNew', U.newTitle, U.newAsk, U.newNo, U.newYes, startNew);
-  $('btnReset').onclick = () => askWipe('btnReset', S.reset, S.resetAsk, S.resetNo, S.resetYes, resetAll);
+  $('btnReset').onclick = () => askWipe('btnReset', S.reset, S.resetAsk, S.resetNo, S.resetYes, () => resetAll('btnReset'));
   show('scr-title');
 }
 
@@ -105,18 +105,33 @@ function askWipe(btnId, title, ask, no, yes, onYes) {
   });
 }
 
-function startNew() {
-  store.clear(); clearNotes();
-  G = engine.newGame();
-  show('scr-select');
-  $('selRow').querySelector('.sel-card').focus();   // 키보드로 바로 고를 수 있게
+/* 게임 기록·적은 글을 각각 지우고 확인한다(보안 검토 2026-11-18 B). 다 지워졌을 때만 then()(새 판·새로 고침).
+   하나라도 남으면 남은 것을 알리고 [다시 지우기]를 준다 — 그만두면 누른 단추(backId)로 초점을 돌려준다 */
+function wipeThen(then, backId) {
+  const W = STRINGS.ui.wipeFail, left = [];
+  if (!store.clear()) left.push(W.save);
+  if (!clearNotes()) left.push(W.notes);
+  if (!left.length) return then();
+  showPopup({
+    title: W.title,
+    html: `<p>${esc(W.ask)}</p><ul class="wipe-left">${left.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`,
+    buttons: [{ label: W.no, cls: 'ghost', cb: () => { const b = $(backId); if (b && b.offsetParent !== null) b.focus(); } },
+      { label: W.retry, cls: 'danger', cb: () => wipeThen(then, backId) }],
+  });
 }
 
-/* 기록 초기화(타이틀·설정·엔딩 공통): 게임 기록 + 수첩에 적은 글. 화면 모드(luna_theme)는 지우지 않는다 */
-function resetAll() {
-  store.clear();
-  clearNotes();
-  location.reload();
+function startNew() {
+  wipeThen(() => {
+    G = engine.newGame();
+    show('scr-select');
+    $('selRow').querySelector('.sel-card').focus();   // 키보드로 바로 고를 수 있게
+  }, 'btnNew');
+}
+
+/* 기록 초기화(타이틀·설정·엔딩 공통): 게임 기록 + 수첩에 적은 글. 화면 모드(luna_theme)는 지우지 않는다.
+   다 지워졌을 때만 새로 고친다 */
+function resetAll(backId) {
+  wipeThen(() => location.reload(), backId);
 }
 
 function applyIdol(key) {
@@ -337,7 +352,7 @@ function endingScene(key) {
     () => showPopup({                                  // 다시 하기 전에 한 번 묻는다 — 적은 글도 지워지므로
       title: U.restartTitle,
       html: `<p>${esc(U.restartAsk)}</p>`,
-      buttons: [{ label: U.restartNo, cls: 'ghost' }, { label: U.restartYes, cls: 'danger', cb: resetAll }],
+      buttons: [{ label: U.restartNo, cls: 'ghost' }, { label: U.restartYes, cls: 'danger', cb: () => resetAll('endRestart') }],
     }),
     () => openProduct(STRINGS.endings[key].name, $('endProduct')));
   show('scr-end');

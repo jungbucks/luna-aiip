@@ -18,6 +18,16 @@ export function load() {
   } catch (e) { return null; }
 }
 
-export function clear() {
-  try { localStorage.removeItem(KEY); } catch (e) {}
+const defaultStorage = () => { try { return globalThis.localStorage; } catch (e) { return null; } };
+
+/* 지웠으면 true. 지운 뒤 다시 읽어 확인한다(보안 검토 2026-11-18 B — 예전엔 예외를 삼키고 성공으로 처리했다).
+   읽기조차 안 되는 저장소(시크릿 등)는 남은 기록을 불러올 길도 없으므로 true */
+export function clear(storage = defaultStorage()) {
+  return removeAndCheck(storage, KEY);
+}
+
+export function removeAndCheck(storage, key) {
+  if (!storage) return true;
+  try { storage.removeItem(key); } catch (e) { /* 아래에서 남았는지로 판단 */ }
+  try { return storage.getItem(key) === null; } catch (e) { return true; }
 }

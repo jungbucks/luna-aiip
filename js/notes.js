@@ -1,6 +1,8 @@
 /* notes.js — "알게 된 것 적기"의 저장·검사·산출물 글 (v0.6). DOM 없음.
    게임 저장(luna_save_v1)과 별개 키. 점수·배지·엔딩과 무관하다(O/X 퀴즈와 같은 원칙).
    저장소는 인자로 받는다(기본 localStorage) — verify.mjs가 가짜 저장소로 검산한다. */
+import { removeAndCheck } from './state.js';
+
 export const NOTES_KEY = 'luna_notes_v1';
 export const MIN_LEN = 5;
 export const MAX_LEN = 200;
@@ -46,9 +48,10 @@ export function saveNote(epId, text, storage = defaultStorage()) {
   catch (e) { pending[epId] = cache[epId]; return false; }
 }
 
+/* 지웠으면 true(state.js clear와 같은 판단 — 보안 검토 2026-11-18 B). 실패하면 남은 글은 다음 읽기에서 그대로 보인다 */
 export function clearNotes(storage = defaultStorage()) {
   cache = {}; pending = {};
-  try { storage.removeItem(NOTES_KEY); } catch (e) { /* 무시 */ }
+  return removeAndCheck(storage, NOTES_KEY);
 }
 
 /* 산출물 "나의 권리 수첩"을 붙여 넣기용 글로. items = [{ emoji, right, badge, hint, note }] */

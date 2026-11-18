@@ -285,6 +285,27 @@ console.log('[수첩] 알게 된 것 적기 (notes.js — 점수와 무관)');
   t('notes-normalize: 빈 줄을 여러 번 넣어도 한 줄바꿈으로', N.normalize('가\n\n\n\n나') === '가\n나' && N.normalize('가 \n \n 나').split('\n').length === 2);
 }
 
+console.log('[기록 지우기] 진행·수첩 키마다 지워졌는지 확인 (보안 검토 2026-11-18 B — 예외를 삼키고 성공으로 처리했다)');
+{
+  const S = await import('../js/state.js');
+  const N = await import('../js/notes.js');
+  const store = blocked => {     // blocked 키는 removeItem이 던진다
+    const m = { luna_save_v1: '{"schemaVersion":1}', luna_notes_v1: JSON.stringify({ 1: '저작권은 표현을 보호' }), luna_theme: 'dark' };
+    return { getItem: k => (k in m ? m[k] : null), setItem: (k, v) => { m[k] = String(v); }, removeItem: k => { if (k === blocked) throw new Error('blocked'); delete m[k]; } };
+  };
+  const a = store('luna_notes_v1');
+  t('wipe: 지워진 게임 키 → true', S.clear(a) === true && a.getItem('luna_save_v1') === null);
+  t('wipe: 안 지워진 수첩 키 → false, 남은 글은 그대로 보임', N.clearNotes(a) === false && N.getNote(1, a) === '저작권은 표현을 보호');
+  const b = store('luna_save_v1');
+  t('wipe: 안 지워진 게임 키 → false', S.clear(b) === false && b.getItem('luna_save_v1') !== null);
+  t('wipe: 지워진 수첩 키 → true, 모드 키는 남음', N.clearNotes(b) === true && b.getItem('luna_notes_v1') === null && b.getItem('luna_theme') === 'dark');
+  const liar = { getItem: () => 'x', setItem() {}, removeItem() {} };   // 던지지 않는데 값이 남는 저장소
+  t('wipe: 지운 척만 하는 저장소도 false', S.clear(liar) === false && N.clearNotes(liar) === false);
+  const boom = { getItem() { throw new Error('x'); }, setItem() { throw new Error('x'); }, removeItem() { throw new Error('x'); } };
+  t('wipe: 아예 못 쓰는 저장소(남은 기록을 읽을 길도 없음) → true', S.clear(boom) === true && N.clearNotes(boom) === true && S.clear(null) === true);
+  N.clearNotes({ getItem: () => null, setItem() {}, removeItem() {} });
+}
+
 console.log('[배포] GitHub Pages에 올라갈 파일 (보안 검토 2026-11-18 A — 테스트 페이지가 같은 오리진에서 게임 저장을 지울 수 있었다)');
 {
   const P = await import('./pages-files.mjs');

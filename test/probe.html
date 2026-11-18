@@ -94,6 +94,34 @@ async function run() {
     await until(() => active('scr-select'), 3000);
     log('wipe-ask: btnNew — 승인하면 진행·수첩 둘 다 지우고 캐릭터 선택으로', active('scr-select') && W().localStorage.getItem('luna_save_v1') === null && W().localStorage.getItem('luna_notes_v1') === null);
 
+    // 보안 검토 2026-11-18 B: 키 하나가 안 지워지면(removeItem 예외) 남은 기록과 [다시 지우기]를 보여 주고, 새 판·새로 고침은 보류
+    const LABEL = { luna_save_v1: '게임 기록', luna_notes_v1: '수첩에 적은 글' };
+    for (const [id, stuck] of [['btnReset', 'luna_notes_v1'], ['btnNew', 'luna_save_v1']]) {
+      const other = stuck === 'luna_save_v1' ? 'luna_notes_v1' : 'luna_save_v1';
+      f.src = '/index.html?wipe=' + id; await sleep(200); await until(() => W().LUNA && E('btnNew') && active('scr-title'));
+      seedSave();
+      const SP = W().Storage.prototype, orig = SP.removeItem;
+      SP.removeItem = function (k) { if (k === stuck) throw new Error('blocked'); return orig.call(this, k); };
+      W().__wipeMark = 1;                                     // 새로 고침이 일어나면 사라진다
+      const failShown = () => popupShown() && txt('popup').includes('다시 지우기');
+      E(id).click(); await until(popupShown, 3000);
+      popBtn('danger').click(); await until(failShown, 3000);
+      log(`wipe-fail: ${id} — 하나가 안 지워지면 알리고 남은 기록만 보여 줌`, failShown() && txt('popup').includes(LABEL[stuck]) && !txt('popup').includes(LABEL[other]));
+      log(`wipe-fail: ${id} — 초기화 성공 처리 보류(타이틀 그대로·새로 고침 없음)`, active('scr-title') && W().__wipeMark === 1 && W().localStorage.getItem(stuck) !== null && W().localStorage.getItem(other) === null);
+      if (id === 'btnReset') {                                // 그만두면 남은 기록 그대로, 누른 단추로 초점
+        popBtn('ghost').click(); await sleep(100);
+        log('wipe-fail: 그만두기 — 팝업 닫히고 초점은 누른 단추로', !popupShown() && active('scr-title') && D().activeElement === E(id) && W().__wipeMark === 1);
+        E(id).click(); await until(popupShown, 3000);       // 남은 글이 있으니 다시 묻는다
+        popBtn('danger').click(); await until(failShown, 3000);
+      }
+      SP.removeItem = orig;                                   // 이제는 지워지는 상태
+      popBtn('danger').click();                               // [다시 지우기]
+      if (id === 'btnReset') { await sleep(300); await until(() => W().LUNA && E('btnNew') && W().__wipeMark !== 1 && active('scr-title')); }
+      else await until(() => active('scr-select'), 3000);
+      log(`wipe-fail: ${id} — 다시 지우기로 다 지우고 원래 다음 단계로(모드는 남음)`, W().localStorage.getItem('luna_save_v1') === null && W().localStorage.getItem('luna_notes_v1') === null && W().localStorage.getItem('luna_theme') !== null
+        && (id === 'btnNew' ? active('scr-select') : W().__wipeMark !== 1 && active('scr-title')));
+    }
+
     D().getElementById('btnNew').click();
     await until(() => active('scr-select'));
     log('캐릭터 선택 화면 + 카드 2개', active('scr-select') && D().querySelectorAll('.sel-card').length === 2);
