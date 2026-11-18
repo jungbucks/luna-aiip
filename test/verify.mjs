@@ -285,6 +285,35 @@ console.log('[수첩] 알게 된 것 적기 (notes.js — 점수와 무관)');
   t('notes-normalize: 빈 줄을 여러 번 넣어도 한 줄바꿈으로', N.normalize('가\n\n\n\n나') === '가\n나' && N.normalize('가 \n \n 나').split('\n').length === 2);
 }
 
+console.log('[배포] GitHub Pages에 올라갈 파일 (보안 검토 2026-11-18 A — 테스트 페이지가 같은 오리진에서 게임 저장을 지울 수 있었다)');
+{
+  const P = await import('./pages-files.mjs');
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const pub = P.publishedFiles(), set = new Set(pub);
+  const outside = pub.filter(f => !P.ALLOWED.some(a => f === a || (a.endsWith('/') && f.startsWith(a))));
+  t('pages: 게임·도감과 그 자산만 올라감', outside.length === 0, outside.slice(0, 8).join(', '));
+  t('pages: 테스트·문서는 빠짐(캡처 프로브 포함)', !pub.some(f => f.startsWith('test/') || f.startsWith('docs/')) && !set.has('test/probe-shots.html'));
+  t('pages: index.html·dogam.html은 올라감', set.has('index.html') && set.has('dogam.html'));
+  // 게임·도감이 부르는 파일(HTML의 src·href, JS import, CSS url, 캐릭터 PNG)이 전부 올라가는지 — 빠지면 배포본이 깨진다
+  const need = new Set(), missing = [];
+  const rel = (from, ref) => path.posix.normalize(path.posix.join(path.posix.dirname(from), ref));
+  const visit = f => {
+    if (need.has(f)) return; need.add(f);
+    const p = path.join(P.ROOT, f);
+    if (!set.has(f)) missing.push(f);
+    if (!fs.existsSync(p)) return;
+    const src = fs.readFileSync(p, 'utf8');
+    const refs = f.endsWith('.html') ? [...src.matchAll(/(?:src|href)="([^"#?:]+)"/g)].map(m => m[1])
+      : f.endsWith('.js') ? [...src.matchAll(/(?:from|import\()\s*'([^']+)'/g)].map(m => m[1])
+      : f.endsWith('.css') ? [...src.matchAll(/url\('?([^')]+)'?\)/g)].map(m => m[1]).filter(u => !u.startsWith('data:')) : [];
+    refs.forEach(r => visit(rel(f, r)));
+  };
+  ['index.html', 'dogam.html'].forEach(visit);
+  ['sol', 'luna'].forEach(k => ['neutral', 'happy', 'panic', 'shock'].forEach(e => visit(`assets/characters/${k}-${e}.png`)));
+  t('pages: 게임·도감이 부르는 파일이 전부 올라감', missing.length === 0 && need.size > 20, missing.join(', ') + ' / ' + need.size + '개');
+}
+
 console.log('─'.repeat(40));
 if (fail) { console.log(`❌ ${fail}건 실패 / ${pass}건 통과 — 배포 금지`); process.exit(1); }
 console.log(`✅ ${pass}건 전부 통과 — 엔진 검산 완료`);

@@ -5,7 +5,7 @@
      → <pre id="out">의 PASS/FAIL 수확 → __probe.html 삭제. -->
 <meta charset="utf-8">
 <pre id="out"></pre>
-<iframe id="f" src="/index.html" width="480" height="800"></iframe>
+<iframe id="f" width="480" height="800"></iframe>
 <script>
 const out = document.getElementById('out');
 const log = (name, ok, extra = '') => out.textContent += (ok ? 'PASS ' : 'FAIL ') + name + (extra ? ' — ' + extra : '') + '\n';
@@ -47,7 +47,11 @@ function minContrast(theme) {            // 본문(--ink)·흐린 글자(--dim)�
 }
 const savedNotes = () => JSON.parse(W().localStorage.getItem('luna_notes_v1') || '{}');
 
+// 보안 검토 2026-11-18 A: 자동화 브라우저 + ?probe=1(run-probe.mjs가 붙임)일 때만 게임을 띄우고 저장을 만진다 — 사람이 이 주소를 열어도 게임 기록을 지우지 않게
+const AUTOMATED = navigator.webdriver === true && new URLSearchParams(location.search).get('probe') === '1';
 async function run() {
+  if (!AUTOMATED) { out.textContent = '자동 검사 전용 페이지입니다. 아무것도 하지 않았습니다.\n'; return; }
+  f.src = '/index.html';
   try {
     await until(() => W().LUNA && D().getElementById('btnNew'));
     W().localStorage.removeItem('luna_save_v1'); W().localStorage.removeItem('luna_notes_v1');

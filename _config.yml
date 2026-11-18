@@ -1,0 +1,12 @@
+# GitHub Pages(Jekyll 기본 빌드) 배포 범위 — 보안 검토 2026-11-18 A
+# 올리는 것: 게임(index.html)·도감(dogam.html)과 그 자산(css/ js/ data/ assets/)뿐.
+# 테스트 페이지는 게임과 같은 오리진에서 열리면 저장(진행·수첩)을 지울 수 있어 배포하지 않는다. 문서도 뺀다.
+# '.'·'_'로 시작하는 파일(이 파일, 프로브 실행기가 잠깐 만드는 __probe.html)은 Jekyll이 원래 빼고 올린다.
+# 검사: node test/verify.mjs의 [배포] 항목(test/pages-files.mjs가 이 목록을 읽어 올라갈 파일을 계산한다).
+# 새 파일·폴더를 루트에 더하면 여기 exclude에 넣거나, 배포해야 하면 test/pages-files.mjs의 ALLOWED에 넣는다.
+exclude:
+  - test
+  - docs
+  - CLAUDE.md
+  - SPEC.md
+  - ROADMAP.md

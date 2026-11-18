@@ -1,0 +1,45 @@
+<!DOCTYPE html><meta charset="utf-8"><title>probe-guard</title>
+<!-- probe-guard.html — 테스트 페이지 가드 검사(보안 검토 2026-11-18 A).
+     실행: node test/run-probe.mjs test/probe-guard.html
+     테스트 페이지는 자동화 브라우저(navigator.webdriver) + ?probe=1일 때만 게임 저장(luna_save_v1·luna_notes_v1·luna_theme)을 만진다.
+     사람이 주소로 열면 아무것도 지우지 않아야 한다. 이 페이지도 같은 가드 아래에서만 저장을 만든다. -->
+<pre id="out"></pre>
+<script>
+const out = document.getElementById('out');
+const log = (name, ok, extra = '') => out.textContent += (ok ? 'PASS ' : 'FAIL ') + name + (extra ? ' — ' + extra : '') + '\n';
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const AUTOMATED = navigator.webdriver === true && new URLSearchParams(location.search).get('probe') === '1';
+const SEED = { luna_save_v1: '{"schemaVersion":1,"marker":"guard"}', luna_notes_v1: '{"1":"가드 검사용 글"}', luna_theme: 'light' };
+const KEYS = Object.keys(SEED);
+const seed = () => KEYS.forEach(k => localStorage.setItem(k, SEED[k]));
+const intact = () => KEYS.every(k => localStorage.getItem(k) === SEED[k]);
+const dump = () => KEYS.map(k => k + '=' + localStorage.getItem(k)).join(' ');
+async function openIn(src, ms = 2500) {
+  const f = document.createElement('iframe');
+  f.width = 480; f.height = 800;
+  document.body.appendChild(f);
+  await new Promise(r => { f.onload = r; f.src = src; });
+  await sleep(ms);
+  let text = '';
+  try { text = f.contentDocument.body.textContent; } catch (e) {}
+  f.remove();
+  return text;   // 가드가 실제로 돌았는지(문법 오류로 스크립트가 통째로 죽은 게 아닌지) 확인용
+}
+async function run() {
+  if (!AUTOMATED) { out.textContent = '자동 검사 전용 페이지입니다. 아무것도 하지 않았습니다.\n'; return; }
+  try {
+    for (const p of ['test/probe-shots.html', 'test/probe-shots.html?scene=home', 'test/probe.html']) {
+      seed();
+      const text = await openIn('/' + p);
+      log(p + ' — ?probe=1 없이 열면 게임 저장을 건드리지 않음', intact(), dump());
+      log(p + ' — 가드 안내가 보임(스크립트가 살아 있음)', text.includes('자동 검사 전용'));
+    }
+    seed();
+    await openIn('/test/probe-shots.html?probe=1&scene=lock');
+    log('대조: ?probe=1이면 캡처 프로브가 원래대로 동작(저장 지움)', localStorage.getItem('luna_save_v1') === null && localStorage.getItem('luna_theme') === 'dark', dump());
+  } catch (e) { log('예외 발생', false, e.message); }
+  KEYS.forEach(k => localStorage.removeItem(k));
+  out.textContent += 'PROBE-DONE\n';
+}
+run();
+</script>
