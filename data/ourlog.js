@@ -1,5 +1,7 @@
 /* [데이터] ourlog 팬 반응 글 — 가상 SNS 앱(설계 docs/superpowers/specs/2026-11-20-ourlog-design.md §3).
    ⚠️ 교사 검수 대기: 캡션·댓글 문구 전부(팬 말투, 점잖은 비판만, 40자 이하, 실존 계정 닮은 아이디 금지).
+   2026-11-20 교육 개선: 팬 댓글은 법적 판단의 근거가 아니다 — 정답이라고 다 칭찬받지 않고, 팬은 공개된 것만 안다(내부 사정·경고장 언급 없음).
+   EP1은 학습 데이터 이용허락과 결과물 표절 의혹을 섞지 않는다.
    이름은 {N}/{n} 토큰 — 하드코딩 금지. 아이디는 지어낸 영문 소문자.
    likes: live = 알림으로 막 열었을 때(오답이 더 터짐), later = 지난 게시물로 다시 볼 때(역풍 반영, 오답이 덜함).
    half.at = right 목록에 끼워 넣은 뒤의 자리(0부터). posts에는 EP별 글이 들어간다. */
@@ -23,7 +25,7 @@ export const OURLOG = {
     1: {
       img: { right: 'ep1', wrong: 'ep1' },
       caption: {
-        right: '데뷔곡이 나왔어요. 허락받은 음원으로 한 달을 더 다듬었어요 🎵',
+        right: '데뷔곡이 나왔어요. 학습 이용 조건을 확인한 음원으로 한 달을 더 다듬었어요 🎵',
         wrong: '데뷔곡이 나왔어요. 처음 들려드리는 노래예요 🎵',
       },
       comments: {
@@ -31,8 +33,8 @@ export const OURLOG = {
           { who: 'moon_1004', text: '드디어 나왔다ㅠㅠ 기다린 보람 있어' },
           { who: 'haneul_bbang', text: '첫 소절부터 귀에 쏙 들어와요 🎧' },
           { who: 'cloud.nine', text: '한 달 기다리느라 목 빠지는 줄 알았어요' },
-          { who: 'dalgom_92', text: '믿고 기다렸더니 이렇게 좋은 노래가' },
-          { who: 'sora_note', text: '허락받은 음원이라 마음 편히 들어요' },
+          { who: 'dalgom_92', text: '후렴은 좋은데 1절은 평범한 것 같아요' },
+          { who: 'sora_note', text: 'AI가 만든 노래라 아직은 조금 낯설어요' },
           { who: 'pinkdot77', text: '후렴 계속 흥얼거리는 중ㅋㅋ' },
           { who: 'winter_ij', text: '늦어진 건 아쉬웠지만 들으니 이해돼요' },
           { who: 'bori_tea', text: '데뷔 축하해요! 오래 응원할게요 💜' },
@@ -43,10 +45,10 @@ export const OURLOG = {
           { who: 'cloud.nine', text: '후렴 중독성이 정말 강해요' },
           { who: 'dalgom_92', text: '작곡가 누구예요? 궁금해요' },
           { who: 'pinkdot77', text: '친구한테 바로 공유했어요 🎧' },
-          { who: 'sora_note', text: '후렴 어디서 들어 본 것 같은데..?' },
-          { who: 'winter_ij', text: '그 노래랑 진행이 비슷하지 않아요?' },
-          { who: 'bori_tea', text: '좋긴 한데 어디서 가져온 건지 궁금해요' },
-          { who: 'nuri_log', text: '출처 설명이 있으면 좋겠어요' },
+          { who: 'sora_note', text: 'AI는 어떤 노래로 배운 거예요? 궁금해요' },
+          { who: 'winter_ij', text: '요즘 AI 음악 저작권 얘기 많던데 괜찮은 거죠?' },
+          { who: 'bori_tea', text: '노래만 좋으면 됐죠, 저는 상관없어요' },
+          { who: 'nuri_log', text: '학습 데이터를 어떻게 모았는지도 알려 주세요' },
         ],
         half: [
           { at: 2, who: 'jam_jam01', text: '처음 공지 땐 좀 불안했는데 다행이에요' },
@@ -72,7 +74,7 @@ export const OURLOG = {
           { who: 'dalgom_92', text: '출원부터 하고 공개한 거죠? 든든해요' },
           { who: 'sora_note', text: '무대에서 쓰는 모습이 벌써 기대돼요' },
           { who: 'pinkdot77', text: '영상 계속 돌려 보는 중이에요 🎧' },
-          { who: 'winter_ij', text: '기다린 만큼 완성도가 높네요' },
+          { who: 'winter_ij', text: '설명이 생각보다 짧아서 조금 아쉬워요' },
           { who: 'bori_tea', text: '꼼꼼한 회사라 믿음이 가요 💜' },
         ],
         wrong: [
@@ -82,7 +84,7 @@ export const OURLOG = {
           { who: 'dalgom_92', text: '영상 보고 바로 친구한테 공유했어요' },
           { who: 'pinkdot77', text: '입 모양이 정말 자연스러워요 🎤' },
           { who: 'sora_note', text: '다른 회사 신제품이 이거랑 똑같던데요?' },
-          { who: 'winter_ij', text: '우리 기술을 보고 따라 만든 것 같아요' },
+          { who: 'winter_ij', text: '비슷한 제품이 벌써 나왔던데 우연일까요?' },
           { who: 'bori_tea', text: '특허는 내셨나요? 걱정돼요' },
           { who: 'nuri_log', text: '공개하기 전에 지켜 뒀으면 좋았을 텐데요' },
         ],
@@ -99,16 +101,16 @@ export const OURLOG = {
     3: {
       img: { right: 'ep3', wrong: 'ep3' },
       caption: {
-        right: '상표 등록을 마쳤어요. 이제 {n} 이름은 공식으로 지켜져요 📋',
+        right: '공식 앱은 이것 하나예요. 이름을 지키기 위한 상표 출원도 했어요 📋',
         wrong: '비슷한 이름의 앱이 생겼지만 저희는 저희 길을 갈게요 📋',
       },
       comments: {
         right: [
-          { who: 'moon_1004', text: '등록 축하해요! 이름이 이제 확실하네요' },
-          { who: 'haneul_bbang', text: '공식 이름이 굳어지니 마음이 놓여요 🎉' },
+          { who: 'moon_1004', text: '공식 앱 알려 줘서 고마워요' },
+          { who: 'haneul_bbang', text: '어느 쪽이 공식인지 알게 돼서 다행이에요 🎉' },
           { who: 'cloud.nine', text: '짝퉁 앱 때문에 걱정했는데 다행이에요' },
           { who: 'dalgom_92', text: '앞으로도 {n} 이름 크게 키워 가요' },
-          { who: 'sora_note', text: '경고장까지 보낼 수 있다니 든든해요' },
+          { who: 'sora_note', text: '등록까지는 시간이 걸린다던데 잘되길 바라요' },
           { who: 'pinkdot77', text: '공식 계정만 믿고 따라갈게요 💜' },
           { who: 'winter_ij', text: '이름을 지키는 일도 중요하군요' },
           { who: 'bori_tea', text: '응원하는 마음은 그대로예요, 파이팅!' },
@@ -147,7 +149,7 @@ export const OURLOG = {
           { who: 'cloud.nine', text: '천천히 만들어 주세요, 기다릴게요' },
           { who: 'dalgom_92', text: '회사가 알아서 잘 챙기겠죠, 믿어요' },
           { who: 'sora_note', text: '작업 소식만 들어도 설레요' },
-          { who: 'pinkdot77', text: '담담하게 소식 전해 줘서 고마워요' },
+          { who: 'pinkdot77', text: '작업 모습을 조금이라도 보고 싶었는데 아쉬워요' },
           { who: 'winter_ij', text: '무리하지 말고 건강 챙기세요' },
           { who: 'bori_tea', text: '언제든 나오면 바로 들을게요 💜' },
         ],
@@ -156,11 +158,11 @@ export const OURLOG = {
           { who: 'haneul_bbang', text: '작업 모습 보니 열심히 하시네요 🎶' },
           { who: 'cloud.nine', text: '응원합니다, 천천히 해 주세요' },
           { who: 'dalgom_92', text: '그냥 지나가다 들렀어요, 파이팅' },
-          { who: 'pinkdot77', text: '경쟁사 신제품이랑 기능이 똑같네요' },
+          { who: 'pinkdot77', text: '다른 회사 신제품이랑 기능이 비슷하네요' },
           { who: 'sora_note', text: '그쪽 신제품이 먼저 나온 건가요?' },
-          { who: 'winter_ij', text: '우리가 준비하던 것과 너무 비슷해요' },
+          { who: 'winter_ij', text: '작업 중이라던 기능이랑 비슷해 보여요' },
           { who: 'bori_tea', text: '이런 일이 생기다니 실망이에요' },
-          { who: 'nuri_log', text: '내부 관리가 잘 되고 있는지 걱정돼요' },
+          { who: 'nuri_log', text: '비슷한 기능이 다른 데서 먼저 나와 아쉬워요' },
         ],
         half: [
           { at: 4, who: 'jam_jam01', text: '처음엔 뭔가 새어 나갈까 불안했어요' },
@@ -187,7 +189,7 @@ export const OURLOG = {
           { who: 'sora_note', text: '그날 즐거웠어요, 또 만나요!' },
           { who: 'pinkdot77', text: '팬을 존중하는 회사라 좋아요 🎤' },
           { who: 'winter_ij', text: '저도 얼굴 나오는 건 조심스러웠어요' },
-          { who: 'bori_tea', text: '앞으로도 이런 모습 기대할게요' },
+          { who: 'bori_tea', text: '저는 얼굴 나와도 괜찮았는데 조금 아쉬워요' },
         ],
         wrong: [
           { who: 'moon_1004', text: '어, 나 찍혔다! 현장 사진 반가워요' },
@@ -213,14 +215,14 @@ export const OURLOG = {
     6: {
       img: { right: 'ep6', wrong: 'ep6-k' },
       caption: {
-        right: '이번 광고 제안은 정중히 거절했어요. {n는} {n} 그대로 무대에 설게요 ✨',
+        right: '이번 광고는 함께하지 않기로 했어요. {n는} {n}의 모습으로 무대에 설게요 ✨',
         wrong: '새 광고가 공개됐어요. 어디선가 본 듯한 얼굴일지도요 ✨',
       },
       comments: {
         right: [
-          { who: 'moon_1004', text: '거절했다니, 멋있어요' },
+          { who: 'moon_1004', text: '광고 나오길 기다렸는데 아쉬워요' },
           { who: 'haneul_bbang', text: '있는 그대로가 제일 좋아요 💜' },
-          { who: 'cloud.nine', text: '계약을 놓쳐도 응원하는 마음은 그대로예요' },
+          { who: 'cloud.nine', text: '광고가 없어도 응원하는 마음은 그대로예요' },
           { who: 'dalgom_92', text: '원래 모습이 최고예요' },
           { who: 'sora_note', text: '누구를 닮지 않아도 충분해요' },
           { who: 'pinkdot77', text: '다음 무대도 기다릴게요 🎤' },
@@ -236,7 +238,7 @@ export const OURLOG = {
           { who: 'sora_note', text: '이거 K 씨 허락받은 거야?' },
           { who: 'winter_ij', text: '닮은 얼굴로 광고해도 괜찮은 걸까요?' },
           { who: 'bori_tea', text: '허락 없이 썼다면 문제가 될 것 같아요' },
-          { who: 'nuri_log', text: '경고장이 왔다는 얘기도 들었어요' },
+          { who: 'nuri_log', text: 'K 씨 쪽은 이 광고를 알고 있을까요?' },
         ],
         half: [
           { at: 3, who: 'jam_jam01', text: '광고 얘기 나올 땐 조금 아쉬웠어요' },

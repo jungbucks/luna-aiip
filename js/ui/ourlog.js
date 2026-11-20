@@ -73,6 +73,7 @@ function postHTML(item, state, liveEp, newest) {
     <div class="ol-react"><span class="ol-ic">${ICON_LIKE}<b class="ol-likes">${int(likes)}</b></span><span class="ol-ic">${ICON_CMT}<span class="ol-ccount">${esc(S.comments(Number.isInteger(list.length) ? list.length : 0))}</span></span></div>
     <p class="ol-cap">${esc(post.caption[item.variant])}</p>
     <ul class="ol-comments">${list.map(c => `<li><b>${esc(c.who)}</b> ${esc(c.text)}</li>`).join('')}</ul>
+    ${newest ? `<p class="ol-think">${esc(S.think)}</p>` : ''}
   </article>`;
 }
 

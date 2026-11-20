@@ -28,8 +28,8 @@ export function load(storage = defaultStorage()) {
 const PHASES = ['intro', 'ep', 'end'];
 const IDOLS = ['sol', 'luna'];
 const BADGES = [null, 'full', 'half', 'none'];
-const ENDINGS = [null, 'court', 'unicorn', 'survive'];
-const QUIZ = ['ok', 'more-ok', 'missed'];
+const ENDINGS = [null, 'crisis', 'unicorn', 'survive', 'court'];   // 'court'는 옛 저장 — 불러오면 'crisis'로 바꾼다(2026-11-20)
+const QUIZ = ['2/2', '1/2', '0/2', 'ok', 'more-ok', 'missed'];   // 적용 문제 맞힌 수(2026-11-20) + 옛 값
 const EP_COUNT = 6;
 const isObj = v => !!v && typeof v === 'object' && !Array.isArray(v);
 const intIn = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
@@ -44,7 +44,8 @@ function checkGame(g, withStart) {
   need(isObj(g.stats) && ['money', 'fame', 'safety'].every(k => intIn(g.stats[k], 0, 100)));
   need(Array.isArray(g.badges) && g.badges.length === EP_COUNT && g.badges.every(b => BADGES.includes(b)));
   need(Array.isArray(g.wrongs) && g.wrongs.every(n => intIn(n, 1, EP_COUNT)));
-  need(intIn(g.courtCount, 0, 2));
+  const crisis = g.crisisCount !== undefined ? g.crisisCount : g.courtCount;   // 옛 저장은 courtCount(법정 횟수)
+  need(intIn(crisis, 0, EP_COUNT));
   need(typeof g.retryUsed === 'boolean');
   need(ENDINGS.includes(g.ending));
   need(['broke', 'brokeEver'].every(k => g[k] === undefined || typeof g[k] === 'boolean'));   // 2026-11-20 — 옛 저장에는 없다
@@ -53,7 +54,7 @@ function checkGame(g, withStart) {
     idol: g.idol, ep: g.ep,
     stats: { money: g.stats.money, fame: g.stats.fame, safety: g.stats.safety },
     badges: [...g.badges], wrongs: [...new Set(g.wrongs)],
-    courtCount: g.courtCount, retryUsed: g.retryUsed, ending: g.ending,
+    crisisCount: crisis, retryUsed: g.retryUsed, ending: g.ending === 'court' ? 'crisis' : g.ending,
   };
   ['broke', 'brokeEver'].forEach(k => { if (g[k] !== undefined) out[k] = g[k]; });
   if (g.quiz !== undefined) {

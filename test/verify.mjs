@@ -19,8 +19,7 @@ const ep = n => EPISODES[n - 1];
 function playRight(st) { E.chooseRight(st, st.ep, ep(st.ep).choices.right.delta); E.settle(st); E.nextEp(st); }
 function playWrongAccept(st) {
   const ev = E.chooseWrongAccept(st, st.ep, ep(st.ep).choices.wrong.delta);
-  if (ev === 'court') return 'court';
-  E.settle(st); E.nextEp(st);
+  E.settle(st); if (st.ep < 6) E.nextEp(st);
   return ev;
 }
 
@@ -34,19 +33,19 @@ console.log('[경로 A] 전부 정답 → 유니콘');
   t('엔딩 = unicorn', end === 'unicorn', end);
 }
 
-console.log('[경로 B] 전부 오답(대가 진행) → EP3 집행유예 → EP4 법정');
+console.log('[경로 B] 전부 오답(대가 진행) → 위기 점검 회의 EP3·EP4·EP6, 그래도 6편 끝까지 (2026-11-20 — 법정·집행유예 없음)');
 {
   const st = E.newGame();
-  let probationAt = 0, courtAt = 0;
-  for (let i = 1; i <= 6 && !courtAt; i++) {
+  const crisisAt = [];
+  for (let i = 1; i <= 6; i++) {
     const before = st.ep;
-    const ev = playWrongAccept(st);
-    if (ev === 'probation') probationAt = before;
-    if (ev === 'court') courtAt = before;
+    if (playWrongAccept(st) === 'crisis') crisisAt.push(before);
   }
-  t('집행유예 = EP3', probationAt === 3, 'at EP' + probationAt);
-  t('법정 확정 = EP4', courtAt === 4, 'at EP' + courtAt);
-  t('엔딩 = court', E.judgeEnding(st) === 'court');
+  t('6편을 모두 지나감(중간에 끝나지 않음)', st.ep === 6 && st.badges.every(b => b === 'none'), 'ep ' + st.ep);
+  t('위기 점검 회의 = EP3·EP4·EP6, 회의 뒤 신뢰 30으로 회복', JSON.stringify(crisisAt) === '[3,4,6]' && st.crisisCount === 3, JSON.stringify(crisisAt));
+  t('최종 스탯 10/25/30', st.stats.money === 10 && st.stats.fame === 25 && st.stats.safety === 30, fmt(st));
+  t('엔딩 = crisis(운영 결과)', E.judgeEnding(st) === 'crisis');
+  t('checkCrisis는 게임을 끝내지 않음(ending 미정)', (() => { const x = E.newGame(); x.stats.safety = 0; const r = E.checkCrisis(x); return r === 'crisis' && x.stats.safety === 30 && x.ending === null; })());
 }
 
 console.log('[경로 C] 오답 EP1·EP4(대가 진행) + 나머지 정답 → 생존');
@@ -58,7 +57,7 @@ console.log('[경로 C] 오답 EP1·EP4(대가 진행) + 나머지 정답 → �
   t('최종 스탯 10/65/60', st.stats.money === 10 && st.stats.fame === 65 && st.stats.safety === 60, fmt(st));
   t('통장 바닥을 겪음(brokeEver)', st.brokeEver === true);
   t('완전 배지 4 + none 2', st.badges.filter(b => b === 'full').length === 4 && st.badges.filter(b => b === 'none').length === 2);
-  t('법정 씬 0회', st.courtCount === 0);
+  t('위기 점검 회의 0회', st.crisisCount === 0);
   t('엔딩 = survive', end === 'survive', end);
 }
 
@@ -98,6 +97,30 @@ console.log('[시스템 줄] 방 나가기 (2026-11-20)');
   const sys = EPISODES.flatMap(e => e.messages.filter(m => m.sys).map(m => ({ ep: e.id, ...m })));
   t('EP6: 코스모 담당자가 나가면 시스템 줄 + 방 인원 (4)→(3)', EPISODES[5].roomName.endsWith('(4)') && sys.some(m => m.ep === 6 && m.sys.includes('코스모 담당자') && m.room.endsWith('(3)')));
   t('시스템 줄은 첫 줄·마지막 줄이 아니고 who·text가 없음', EPISODES.every(e => !e.messages[0].sys && !e.messages[e.messages.length - 1].sys) && sys.every(m => !m.who && !m.text));
+}
+
+console.log('[교육 개선] 법 개념·평가 구조 지킴이 (2026-11-20)');
+{
+  const OL = (await import('../data/ourlog.js')).OURLOG;
+  const strSrc = (await import('node:fs')).readFileSync(new URL('../data/strings.js', import.meta.url), 'utf8');
+  const e = n => EPISODES[n - 1];
+  t('kind: 우리 권리 관리(특허·상표·영업비밀) / 남의 권리 침해 위험(저작권·초상권·퍼블리시티)', EPISODES.map(x => x.kind).join() === 'others,own,own,own,others,others');
+  t('notePrompt: 편마다 구체적인 질문(물음표, 서로 다름)', EPISODES.every(x => typeof x.notePrompt === 'string' && x.notePrompt.endsWith('?')) && new Set(EPISODES.map(x => x.notePrompt)).size === 6);
+  t('공용 문구(화면에 나오는 값)에 법정·피고·집행유예·판사·완전/반쪽 배지 없음', !/법정|피고|집행유예|판사|반쪽 배지|완전 배지/.test(JSON.stringify(STRINGS)) && strSrc.includes('crisis:'));
+  // 바로잡은 오개념이 돌아오지 않게
+  t('EP1: 정답은 학습 이용 조건 확인(음원 구매가 아님), 요리책 비유 없음', /학습/.test(e(1).choices.right.label) && !/사용료를 내고/.test(e(1).choices.right.label + e(1).choices.right.popup.body) && !/요리책/.test(e(1).choices.wrong.popup.analogy)
+    && /듣는/.test(e(1).concept) && /결과물|나온 노래/.test(e(1).concept));
+  t('EP2: 출원만으로 베끼기를 막는다고 하지 않음(등록되어야 특허권)', !/베낄 수 없/.test(e(2).choices.right.popup.body) && /등록/.test(e(2).choices.right.popup.body) && /예외/.test(e(2).concept));
+  t('EP3: 출원했다(등록했다 아님)·신고와 출원을 함께·구청 간판 비유 없음·사업자 등록 ≠ 상표 등록', /출원/.test(e(3).choices.right.popup.body) && !/등록했다/.test(e(3).choices.right.popup.body)
+    && /신고/.test(e(3).choices.right.label) && /출원/.test(e(3).choices.right.label) && !/구청/.test(e(3).choices.wrong.popup.analogy) && /사업자 등록/.test(e(3).concept));
+  t('EP4: 세 조건(비공지·경제적 가치·비밀 관리) + 일반 경험과 구분, 모든 직원에게 같은 절차', /알려지지 않/.test(e(4).concept) && /경제적 가치/.test(e(4).concept) && /비밀로 관리/.test(e(4).concept) && /일반적인 경험/.test(e(4).concept) && /모든 직원/.test(e(4).choices.right.label));
+  t('EP5: 촬영 동의와 홍보·광고 이용 동의를 구분', /촬영/.test(e(5).choices.wrong.popup.lesson) && /광고|홍보/.test(e(5).choices.wrong.popup.lesson) && /홍보/.test(e(5).choices.right.label));
+  t('EP6: 남의 인기를 무단으로 광고에 쓰는 문제 + 닮은꼴 + 정식 협업 여지 + 여러 권리가 함께', /협업/.test(e(6).choices.right.label + e(6).choices.right.popup.body) && /닮은꼴/.test(e(6).concept) && /함께/.test(e(6).concept));
+  t('대화: 편마다 준호·세아가 둘 다 말한다(한쪽만 정답 단서를 내지 않게)', EPISODES.every(x => ['개발자 준호', '마케터 세아'].every(w => x.messages.some(m => m.who === w))));
+  const olAll = Object.values(OL.posts).flatMap(p => ['right', 'wrong'].flatMap(v => p.comments[v]).concat(p.comments.half)).map(c => c.text);
+  t('ourlog: 팬이 내부 사정(경고장·내용증명·내부 관리)을 아는 댓글 없음', olAll.every(x => !/경고장|내용증명|내부 관리/.test(x)));
+  t('ourlog EP1: 학습 데이터 문제를 결과물 표절 의혹과 섞지 않음', OL.posts[1].comments.wrong.every(c => !/표절|베낀|비슷하지|들어 본 것 같/.test(c.text)));
+  t('ourlog: 정답 게시물에도 아쉬움·갈리는 반응이 있다(정답 = 늘 칭찬이 아님)', Object.values(OL.posts).filter(p => p.comments.right.some(c => /아쉬|낯설|평범|짧아서/.test(c.text))).length >= 4);
 }
 
 console.log('[데이터 정합] episodes.js');
@@ -250,21 +273,32 @@ console.log('[캐릭터 에셋] PNG 표정 렌더링');
   t('기존 DOM 계약 유지', sol.includes('class="idol-svg"') && sol.includes('data-idol="sol"') && sol.includes('data-expr="neutral"'));
 }
 
-console.log('[O/X 퀴즈] 문항·판정·기록 (2026-11-14, 스탯 무관)');
+console.log('[적용 문제] 문항·판정·학습 결과 (2026-11-20 — 두 문항 모두, 재선택만으로 이해 인정 안 함)');
 {
   const eps = [1, 2, 3, 4, 5, 6];
   const ok = (it) => it && typeof it.q === 'string' && it.q.trim() && typeof it.exp === 'string' && it.exp.trim() && typeof it.a === 'boolean';
-  t('quiz-shape: EP1~6 본 문제·하나 더 = 12문항', Object.keys(QUIZ).length === 6 && eps.every(e => QUIZ[e] && ok(QUIZ[e].main) && ok(QUIZ[e].more)));
-  t('quiz-answers: 설계 표 그대로', JSON.stringify(eps.map(e => QUIZ[e].main.a)) === JSON.stringify([false, false, false, true, true, false]) && JSON.stringify(eps.map(e => QUIZ[e].more.a)) === JSON.stringify([false, true, true, false, true, true]));
-  const texts = eps.flatMap(e => [QUIZ[e].main.q, QUIZ[e].main.exp, QUIZ[e].more.q, QUIZ[e].more.exp]);
+  t('quiz-shape: EP1~6 편마다 두 문항(모두 출제, 숨은 문항 없음)', Object.keys(QUIZ).length === 6 && eps.every(e => QUIZ[e] && Array.isArray(QUIZ[e].items) && QUIZ[e].items.length === 2 && QUIZ[e].items.every(ok) && !('more' in QUIZ[e])));
+  t('quiz-balance: O·X가 섞임(한쪽으로 몰리지 않음)', (n => n >= 4 && n <= 8)(eps.flatMap(e => QUIZ[e].items).filter(it => it.a).length));
+  const texts = eps.flatMap(e => QUIZ[e].items.flatMap(it => [it.q, it.exp]));
   t('quiz-no-names: 이름 토큰·캐릭터 이름 없음', texts.every(x => !/{[nN]|솔|루나|SOL|LUNA/.test(x)));
   t('quiz-guardrail: 단정 금칙어 없음', texts.every(x => !/무조건 불법|반드시|절대로/.test(x)));
-  t('resultOf: 맞음 ok / 둘째에서 맞음 more-ok / 둘 다 틀림 missed', Q.resultOf(true) === 'ok' && Q.resultOf(false, true) === 'more-ok' && Q.resultOf(false, false) === 'missed');
-  const s1 = {}; Q.record(s1, 2, 'missed'); Q.record(s1, 2, 'ok');
-  t('record-overwrite: 같은 EP는 덮어씀', s1.quiz && s1.quiz[2] === 'ok');
-  t('missed-excludes-unplayed: 둘 다 틀린 EP만, 오름차순', JSON.stringify(Q.missedEps({ quiz: { 5: 'missed', 1: 'missed', 3: 'ok' } })) === '[1,5]');
+  const qs = eps.flatMap(e => QUIZ[e].items.map(it => it.q));
+  t('quiz-no-cue: 문제에 답을 흘리는 말(마음대로·아무 문제 없다·자동으로·모두) 없음', qs.every(x => !/마음대로|아무 문제|문제가 없다|자동으로|모두/.test(x)), qs.filter(x => /마음대로|아무 문제|문제가 없다|자동으로|모두/.test(x)).join(' / '));
+  t('scoreOf: 맞힌 수 → 2/2·1/2·0/2', Q.scoreOf(2) === '2/2' && Q.scoreOf(1) === '1/2' && Q.scoreOf(0) === '0/2');
+  t('learnOf: 2/2 확인 · 1/2 일부 · 0/2 다시 + 옛 값(ok·more-ok·missed)', Q.learnOf('2/2') === 'confirmed' && Q.learnOf('1/2') === 'partial' && Q.learnOf('0/2') === 'review'
+    && Q.learnOf('ok') === 'confirmed' && Q.learnOf('more-ok') === 'partial' && Q.learnOf('missed') === 'review' && Q.learnOf(undefined) === null);
+  const s1 = {}; Q.record(s1, 2, '0/2'); Q.record(s1, 2, '2/2');
+  t('record-overwrite: 같은 EP는 덮어씀', s1.quiz && s1.quiz[2] === '2/2');
+  t('reviewEps: 다 확인하지 못한 편만, 오름차순', JSON.stringify(Q.reviewEps({ quiz: { 5: '0/2', 1: '1/2', 3: '2/2' } })) === '[1,5]');
   const old = {};
-  t('missed-old-save: quiz 없는 옛 저장 → [] (상태를 바꾸지 않음)', JSON.stringify(Q.missedEps(old)) === '[]' && !('quiz' in old));
+  t('reviewEps-old-save: quiz 없는 옛 저장 → [] (상태를 바꾸지 않음)', JSON.stringify(Q.reviewEps(old)) === '[]' && !('quiz' in old));
+  // 재선택 후 학습 인정: 처음 판단은 틀렸어도(배지 half) 새 사례 두 문항을 맞히면 학습 결과는 '확인'
+  const st = E.newGame();
+  E.chooseWrongRetry(st, 1, ep(1).choices.wrong.delta); E.chooseRight(st, 1, ep(1).choices.right.delta); Q.record(st, 1, Q.scoreOf(2));
+  t('재선택 후 학습 인정: 처음 판단 기록(half)과 학습 결과(confirmed)가 따로', st.badges[0] === 'half' && Q.learnAt(st, 1) === 'confirmed');
+  const st2 = E.newGame();
+  E.chooseRight(st2, 1, ep(1).choices.right.delta); Q.record(st2, 1, Q.scoreOf(0));
+  t('처음에 맞혀도 적용을 못 하면 학습 결과는 다시 볼 것', st2.badges[0] === 'full' && Q.learnAt(st2, 1) === 'review');
 }
 
 console.log('[이어 하기] 에피소드 시작 상태에서 다시 (2026-11-14 — 퀴즈·정산 중 새로 고침 시 점수 두 번 방지)');
@@ -272,7 +306,7 @@ console.log('[이어 하기] 에피소드 시작 상태에서 다시 (2026-11-14
   const st = E.newGame(); st.idol = 'sol';
   R.markEpStart(st);
   const startStats = JSON.stringify(st.stats);
-  E.chooseRight(st, st.ep, ep(1).choices.right.delta); Q.record(st, 1, 'ok');      // 정답 + 퀴즈까지 한 뒤 저장된 상태
+  E.chooseRight(st, st.ep, ep(1).choices.right.delta); Q.record(st, 1, '2/2');      // 정답 + 퀴즈까지 한 뒤 저장된 상태
   const saved = JSON.parse(JSON.stringify(st));                                      // localStorage 왕복
   const back = R.resumeState(saved);
   t('resume: 에피소드 시작 수치로', JSON.stringify(back.stats) === startStats && back.ep === 1 && back.badges[0] === null, fmt(back));
@@ -293,7 +327,7 @@ console.log('[이어 하기] 끝난 판은 엔딩 그대로 (2026-11-18 검토 P
       R.markEpStart(st);
       const right = kind === 'unicorn' || (kind === 'survive' && st.ep !== 1 && st.ep !== 4);
       if (right) E.chooseRight(st, st.ep, ep(st.ep).choices.right.delta);
-      else if (E.chooseWrongAccept(st, st.ep, ep(st.ep).choices.wrong.delta) === 'court') break;
+      else E.chooseWrongAccept(st, st.ep, ep(st.ep).choices.wrong.delta);
       E.settle(st);
       if (st.ep === 6) break;
       E.nextEp(st);
@@ -301,7 +335,7 @@ console.log('[이어 하기] 끝난 판은 엔딩 그대로 (2026-11-18 검토 P
     const end = E.judgeEnding(st);
     return { end, data: JSON.parse(JSON.stringify({ schemaVersion: 1, game: st, phase: 'end' })) };   // localStorage 왕복
   };
-  for (const kind of ['unicorn', 'survive', 'court']) {
+  for (const kind of ['unicorn', 'survive', 'crisis']) {
     const { end, data } = finish(kind);
     const p = R.resumePoint(JSON.parse(JSON.stringify(data)));
     t(`resume-end: ${kind} — 엔딩·점수·배지 그대로`, end === kind && p.ended === true && E.judgeEnding(p.state) === kind
@@ -352,8 +386,9 @@ console.log('[수첩] 알게 된 것 적기 (notes.js — 점수와 무관)');
   t('notes-storage-throws: 저장 실패해도 그 판에서는 보임', N.saveNote(1, '저작권은 표현을 보호', boom) === false && N.getNote(1, boom) === '저작권은 표현을 보호');
   N.clearNotes(mem());
   const txt = N.buildProductText({ title: '나의 권리 수첩', name: '10101 홍길동', date: '2026-11-17', idol: 'X', result: '유니콘', stats: { money: 1, fame: 2, safety: 3 },
-    items: [{ emoji: '⚖️', right: '저작권', badge: '완전', hint: '힌트', note: '<b>내 글</b>' }, { emoji: '🛡️', right: '특허권', badge: '미획득', hint: '힌트2', note: '' }] });
-  t('product-text: 권리·배지·내 글·빈칸 표시', txt.includes('나의 권리 수첩') && txt.includes('10101 홍길동') && txt.includes('⚖️ 저작권 (완전)') && txt.includes('<b>내 글</b>') && txt.includes('(아직 적지 않음)') && txt.includes('💰 1'));
+    items: [{ emoji: '⚖️', right: '저작권', badge: '바로 맞힘', learn: '확인 (2/2)', prompt: '질문1', hint: '힌트', note: '<b>내 글</b>' }, { emoji: '🛡️', right: '특허권', badge: '바꾸지 않음', learn: '다시 (0/2)', prompt: '질문2', hint: '힌트2', note: '' }] });
+  t('product-text: 처음 판단·새 사례 적용·편별 질문·내 답·빈칸·교사 확인란', txt.includes('나의 권리 수첩') && txt.includes('10101 홍길동') && txt.includes('⚖️ 저작권 (처음 판단: 바로 맞힘 · 새 사례 적용: 확인 (2/2))')
+    && txt.includes('- 질문: 질문1') && txt.includes('<b>내 글</b>') && txt.includes('(아직 적지 않음)') && txt.includes('💰 1') && (txt.match(/교사 확인: \[ \] 판단 기준을 설명함/g) || []).length === 2);
   t('notes는 게임 저장 키를 쓰지 않음', N.NOTES_KEY !== 'luna_save_v1');
   // 검토 반영(2026-11-17): 읽기는 되는데 쓰기만 실패하는 저장소(용량 초과 등) — 적은 글이 다음 읽기에서 사라지면 안 된다
   const full = (() => { const m = { luna_notes_v1: JSON.stringify({ 1: '전에 적은 글' }) }; return { getItem: k => (k in m ? m[k] : null), setItem() { throw new Error('quota'); }, removeItem: k => { delete m[k]; } }; })();
@@ -392,8 +427,8 @@ console.log('[저장 불러오기] 타입·범위·허용값 검사 (보안 검�
   const load = (game, phase) => S.load(mem(wrap(game, phase)));
   // 정상 저장: EP 셋까지 하고(오답·재선택·퀴즈·시작 사본 포함) 저장 → 그대로 돌아온다
   const g = E.newGame(); g.idol = 'sol';
-  R.markEpStart(g); E.chooseWrongRetry(g, 1, ep(1).choices.wrong.delta); E.chooseRight(g, 1, ep(1).choices.right.delta); Q.record(g, 1, 'more-ok'); E.settle(g); E.nextEp(g);
-  R.markEpStart(g); E.chooseWrongAccept(g, 2, ep(2).choices.wrong.delta); Q.record(g, 2, 'missed'); E.settle(g); E.nextEp(g);
+  R.markEpStart(g); E.chooseWrongRetry(g, 1, ep(1).choices.wrong.delta); E.chooseRight(g, 1, ep(1).choices.right.delta); Q.record(g, 1, '1/2'); E.settle(g); E.nextEp(g);
+  R.markEpStart(g); E.chooseWrongAccept(g, 2, ep(2).choices.wrong.delta); Q.record(g, 2, '0/2'); E.settle(g); E.nextEp(g);
   R.markEpStart(g);
   const canon = v => Array.isArray(v) ? v.map(canon) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map(k => [k, canon(v[k])])) : v;
   const same = (a, b) => JSON.stringify(canon(a)) === JSON.stringify(canon(b));   // 칸 순서는 따지지 않는다
@@ -410,12 +445,16 @@ console.log('[저장 불러오기] 타입·범위·허용값 검사 (보안 검�
   t('load: 점수 자리에 마크업 → 거부', bad(x => { x.stats.money = '<img src=x onerror=alert(1)>'; }) === null);
   t('load: 모르는 배지 값 → 거부', bad(x => { x.badges[0] = '"><b>pwn</b>'; }) === null);
   t('load: 숫자 범위 밖·소수·문자 숫자 → 거부', [x => { x.stats.fame = 101; }, x => { x.stats.safety = -1; }, x => { x.stats.money = 1.5; }, x => { x.stats.money = '50'; },
-    x => { x.ep = 7; }, x => { x.ep = 0; }, x => { x.courtCount = 3; }, x => { x.wrongs = [9]; }, x => { x.wrongs = ['1']; }].every(f => bad(f) === null));
+    x => { x.ep = 7; }, x => { x.ep = 0; }, x => { x.crisisCount = 7; }, x => { x.crisisCount = -1; }, x => { x.wrongs = [9]; }, x => { x.wrongs = ['1']; }].every(f => bad(f) === null));
   t('load: 모양이 틀린 칸 → 거부', [x => { x.badges = x.badges.slice(0, 5); }, x => { x.badges = 'full'; }, x => { x.stats = null; }, x => { x.idol = '<b>'; },
     x => { x.retryUsed = 'yes'; }, x => { x.broke = 'yes'; }, x => { x.brokeEver = 1; }, x => { x.ending = 'win'; }, x => { x.quiz = { 1: '<i>' }; }, x => { x.quiz = { 9: 'ok' }; }, x => { x.epStart.stats.money = '<b>'; }].every(f => bad(f) === null));
   t('load: 단계 값이 이상하면 거부', load(g, '<b>') === null && S.load(mem(JSON.stringify({ schemaVersion: 1, game: null, phase: 'ep' }))) === null);
   t('load: 모르는 칸은 버리고 불러옴', (r => !!r && !('evil' in r.game) && !('evil' in r.game.stats))(bad(x => { x.evil = '<b>'; x.stats.evil = 1; })));
   t('load: 깨진 JSON → null', S.load(mem('{깨짐')) === null);
+  // 2026-11-20 개편 전 저장: courtCount(법정 횟수)·ending 'court'·옛 퀴즈 값 → crisisCount·'crisis'로 읽고 이어 할 수 있다
+  { const o = JSON.parse(JSON.stringify(done)); delete o.crisisCount; o.courtCount = 2; o.ending = 'court'; o.quiz = { 1: 'ok', 2: 'more-ok', 3: 'missed' };
+    const r = load(o, 'end');
+    t('load: 옛 저장(법정 횟수·법정 엔딩·옛 퀴즈 값) → 위기 횟수·위기 엔딩으로 호환', !!r && r.game.crisisCount === 2 && r.game.ending === 'crisis' && !('courtCount' in r.game) && Q.learnAt(r.game, 2) === 'partial'); }
 }
 
 console.log('[배포] GitHub Pages에 올라갈 파일 (보안 검토 2026-11-18 A — 테스트 페이지가 같은 오리진에서 게임 저장을 지울 수 있었다)');

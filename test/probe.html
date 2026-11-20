@@ -263,7 +263,7 @@ async function run() {
     log('esc: 개념 카드는 ESC로 닫힘', !popupShown());
     log('kbd: 개념 카드를 닫으면 [확인] 단추로 초점이 돌아옴', D().activeElement === E('chatChoices').querySelector('.choice-btn[data-k="info"]'), D().activeElement && D().activeElement.outerHTML.slice(0, 60));
     const money0 = W().LUNA.state.stats.money;
-    log('조사 자동 치환(솔이 직접 곡을)', txt('chatLog').includes('솔이 직접 곡을 쓸 수 있어요'));
+    log('조사 자동 치환(솔을 학습시키면)', txt('chatLog').includes('솔을 학습시키면'));
     log('화면에 토큰 잔여 없음', !/\{[nN]/.test(D().body.textContent));
 
     { const bs = [...D().querySelectorAll('#chatChoices .choice-btn')], cs = b => W().getComputedStyle(b), look = b => [cs(b).borderTopColor, cs(b).backgroundColor, cs(b).color, cs(b).borderTopStyle].join('|');
@@ -294,24 +294,24 @@ async function run() {
     const ptitle = () => D().querySelector('.pop-title').textContent;
     const pbtns = () => [...D().querySelectorAll('#popup .pop-btn')];
     const clickWhenReady = async (pick) => { await until(() => pbtns().length && !pick().disabled); pick().click(); };
-    D().querySelector('.pop-btn').click();                          // 계속 → 퀴즈
-    await until(() => popupShown() && ptitle().includes('개념 확인 O/X'));
+    D().querySelector('.pop-btn').click();                          // 계속 → 적용 문제
+    await until(() => popupShown() && ptitle().includes('새 사례 적용'));
     log('pop-face: 퀴즈에는 얼굴 없음', !D().querySelector('.pop-face img'));
-    log('quiz-after-right: 정답 뒤 퀴즈(문장·버튼 2개)', ptitle().includes('개념 확인 O/X') && txt('popup').includes('출처만 밝히면') && pbtns().length === 2);
+    log('quiz-after-right: 정답 뒤 새 사례 적용 1/2(문장·버튼 2개)', ptitle().includes('새 사례 적용 O/X 1/2') && txt('popup').includes('정식으로 내려받은') && pbtns().length === 2);
     // 최종 검토(2026-11-14): 팝업이 떠 있는 동안 뒤 화면(선택지)에 Tab·클릭이 닿지 않음 + 버튼이 풀리면 첫 버튼에 초점
     log('popup-inert: 팝업 동안 뒤 화면(메신저 입력창·뒤로 버튼)이 inert', !!E('composer').closest('[inert]') && !!E('msgBack').closest('[inert]') && !D().getElementById('popup').closest('[inert]'));
     await until(() => !pbtns()[0].disabled);
     log('popup-focus: 잠금이 풀리면 첫 버튼에 초점', D().activeElement === pbtns()[0]);
     await clickWhenReady(() => pbtns()[0]);                        // ⭕ (틀림)
     await until(() => popupShown() && ptitle().includes('아쉬워요'));
-    log('quiz-wrong-more: 오답 → 아쉬워요·정답 X·해설·하나 더 버튼', ptitle().includes('아쉬워요') && txt('popup').includes('정답: X') && txt('popup').includes('허락을 대신하지') && pbtns().length === 1 && pbtns()[0].textContent.includes('하나 더'));
-    // quiz-no-double: 하나 더 버튼을 빠르게 두 번 — 둘째 문제의 ⭕가 눌리지 않아야 한다
+    log('quiz-wrong: 오답 → 아쉬워요·정답 X·해설·[다음 사례] 버튼', ptitle().includes('아쉬워요') && txt('popup').includes('정답: X') && txt('popup').includes('듣는 이용') && pbtns().length === 1 && pbtns()[0].textContent.includes('다음 사례'));
+    // quiz-no-double: [다음 사례]를 빠르게 두 번 — 둘째 문제의 ⭕가 눌리지 않아야 한다
     await clickWhenReady(() => pbtns()[0]); D().querySelector('#popup .pop-btn') && D().querySelector('#popup .pop-btn').click();
     await sleep(120);
-    log('quiz-no-double: 연타해도 둘째 문제가 열린 채 대기', popupShown() && ptitle().includes('개념 확인 O/X') && txt('popup').includes('등록한 작품에만'));
-    await clickWhenReady(() => pbtns()[1]);                        // ❌ (맞음)
+    log('quiz-no-double: 연타해도 둘째 문제(2/2)가 열린 채 대기 — 틀려도 둘째 문항을 누구나 봄', popupShown() && ptitle().includes('새 사례 적용 O/X 2/2') && txt('popup').includes('결과물이 기존 곡과 매우 비슷하면'));
+    await clickWhenReady(() => pbtns()[0]);                        // ⭕ (맞음)
     await until(() => popupShown() && ptitle().includes('맞았어요'));
-    log('quiz-wrong-more: 둘째 문제 맞음 → 맞았어요', ptitle().includes('맞았어요') && txt('popup').includes('정답: X'));
+    log('quiz-second: 둘째 문제 맞음 → 맞았어요', ptitle().includes('맞았어요') && txt('popup').includes('정답: O'));
     log('quiz-color: 맞았어요는 초록(.ok) 제목', D().querySelector('.pop-title').classList.contains('ok'));
     await clickWhenReady(() => pbtns()[0]);                        // 계속 → 적기 → 브릿지
     await until(() => E('appNotes').classList.contains('on') && !!E('noteInput'));
@@ -328,7 +328,7 @@ async function run() {
     await skipOurlog();
     await until(() => popupShown() && ptitle().includes('정산'));
     log('note: 적으면 수첩이 닫히고 정산 — 글은 별도 키에', !E('appNotes').classList.contains('on') && savedNotes()[1].startsWith('<b>x</b>&') && !W().localStorage.getItem('luna_save_v1').includes('학습용이어도'));
-    log('quiz-wrong-more: 퀴즈 기록 more-ok · 스탯 그대로', W().LUNA.state.quiz && W().LUNA.state.quiz[1] === 'more-ok');
+    log('quiz-record: 적용 결과 1/2(학습 결과 = 일부) · 처음 판단(배지 full)과 따로', W().LUNA.state.quiz && W().LUNA.state.quiz[1] === '1/2' && W().LUNA.state.badges[0] === 'full');
     log('브릿지 정산 이름 치환(솔 활동)', D().querySelector('.pop-title').textContent.includes('솔 활동'));
     D().querySelector('.pop-btn').click();                          // EP2 시작
     await until(() => txt('epHead').includes('EP2'));
@@ -337,7 +337,7 @@ async function run() {
     log('popup-inert: 팝업이 닫히면 inert 해제', !D().querySelector('#app > [inert]'));
     await throughStory();
     E('dockNotes').click(); await until(() => E('appNotes').classList.contains('on'));
-    log('notes: EP1을 마치면 1칸 열림 + 배지 문구는 엔딩과 같은 말', cards()[0].dataset.state === 'open' && cards()[0].textContent.includes('저작권') && cards()[0].textContent.includes('완전') && cards()[0].textContent.includes('표현') && cards()[1].dataset.state === 'locked');
+    log('notes: EP1을 마치면 1칸 열림 + 처음 판단 문구는 엔딩과 같은 말 + 개념 요약', cards()[0].dataset.state === 'open' && cards()[0].textContent.includes('저작권') && cards()[0].textContent.includes('바로 맞힘') && cards()[0].textContent.includes('듣는 데 대한 이용') && cards()[1].dataset.state === 'locked');
     log('note: 수첩 카드에 내 글이 글자 그대로(태그로 안 풀림)', cards()[0].querySelector('.note-mine').textContent.includes('<b>x</b>&') && !cards()[0].querySelector('.note-mine b'));
     cards()[0].querySelector('.note-edit').click(); await until(() => !!E('noteInput'));
     log('note: 고치기 — 전에 쓴 글이 들어 있고 뒤로 갈 수 있음', E('noteInput').value.startsWith('<b>x</b>&') && E('notesBack').offsetParent !== null);
@@ -403,12 +403,16 @@ async function run() {
     D().querySelector('#chatChoices .choice-btn[data-k="wrong"]').click();   // 오답(자리는 편마다 다름)
     await until(() => popupShown() && pbtns().some(b => b.textContent.includes('대가를 치르고')));
     pbtns().find(b => b.textContent.includes('대가를 치르고')).click();
-    await until(() => popupShown() && (ptitle().includes('개념 확인 O/X') || ptitle().includes('정산')) || active('scr-court'));
-    if (active('scr-court')) { D().getElementById('courtBtn').click(); await until(() => popupShown() && ptitle().includes('개념 확인 O/X')); }
-    log('quiz-after-accept: 오답 진행 뒤에도 정산 전에 퀴즈', popupShown() && ptitle().includes('개념 확인 O/X'));
-    await clickWhenReady(() => pbtns()[1]);                        // ❌ (맞음)
+    await until(() => popupShown() && (ptitle().includes('새 사례 적용') || ptitle().includes('정산')) || active('scr-court'));
+    if (active('scr-court')) { D().getElementById('courtBtn').click(); await until(() => popupShown() && ptitle().includes('새 사례 적용')); }
+    log('quiz-after-accept: 오답 진행 뒤에도 정산 전에 적용 문제', popupShown() && ptitle().includes('새 사례 적용'));
+    await clickWhenReady(() => pbtns()[1]);                        // ❌ (1번 맞음)
     await until(() => popupShown() && ptitle().includes('맞았어요'));
-    await clickWhenReady(() => pbtns()[0]);
+    await clickWhenReady(() => pbtns()[0]);                        // 다음 사례
+    await until(() => popupShown() && ptitle().includes('2/2'));
+    await clickWhenReady(() => pbtns()[0]);                        // ⭕ (2번 맞음)
+    await until(() => popupShown() && ptitle().includes('맞았어요'));
+    await clickWhenReady(() => pbtns()[0]);                        // 계속
     W().LUNA.state.stats.money = 0;                                // 2026-11-20 통장 바닥: 정산 직전 💰0 주입 → 세아 경고(이어 하기 검사는 EP 시작 사본으로 돌아가므로 영향 없음)
     await writeNote('테스트용으로 다섯 자 넘게');
     // ourlog(2026-11-20): 수첩 적기 뒤·정산 앞 알림 카드. 열면 그 편 게시물에 반응이 실시간처럼 붙고, 닫아야 정산
@@ -462,7 +466,7 @@ async function run() {
       f.width = fw; f.height = fh; await sleep(200);
     }
     await until(() => popupShown() && ptitle().includes('정산'));
-    log('quiz-after-accept: 맞음 → 정산, 기록 ok', ptitle().includes('정산') && W().LUNA.state.quiz && W().LUNA.state.quiz[1] === 'ok');
+    log('quiz-after-accept: 처음 판단은 놓쳤어도 적용 2/2 → 학습 결과 확인(재선택 없이도 이해 인정)', ptitle().includes('정산') && W().LUNA.state.quiz && W().LUNA.state.quiz[1] === '2/2' && W().LUNA.state.badges[0] === 'none');
     log('broke: 정산 직전 💰0이면 세아 경고 + 다음 편 보상 절반 안내, 상태 broke', txt('popup').includes('통장이 바닥났어요') && txt('popup').includes('절반') && W().LUNA.state.broke === true && W().LUNA.state.stats.money === 10);
     // 정산 팝업에서 새로 고침 → 이어 하기: EP1 시작 점수에서 다시(오답 벌점이 두 번 들어가지 않음, 2026-11-14)
     const startStats = JSON.stringify(W().LUNA.engine.newGame().stats);
@@ -474,17 +478,22 @@ async function run() {
     log('resume-from-ep-start: 새로 고침 뒤 EP1 시작 점수·오답 기록 없음·루나', JSON.stringify(W().LUNA.state.stats) === startStats && W().LUNA.state.ep === 1 && W().LUNA.state.wrongs.length === 0 && W().LUNA.state.idol === 'luna', JSON.stringify(W().LUNA.state.stats));
     log('note: 이어 하기 뒤에도 EP1 글은 남아 있음', savedNotes()[1] === '테스트용으로 다섯 자 넘게');
 
-    // 엔딩 '다시 볼 개념'(상태 주입 — 실제 플레이 아님): 선택은 다 맞혔고 퀴즈만 EP2를 놓친 경우 / 퀴즈도 다 맞힌 경우
-    const st = W().LUNA.state;
-    st.wrongs = []; st.quiz = { 1: 'ok', 2: 'missed' };
+    // 엔딩 = 회사 운영 결과 + 학습 결과(상태 주입 — 실제 플레이 아님, 2026-11-20)
+    const st = W().LUNA.state, EPS0 = (await import('/data/episodes.js')).EPISODES, keep = JSON.stringify({ w: st.wrongs, b: st.badges, q: st.quiz });
+    st.wrongs = []; st.badges = ['full', 'full', 'full', 'full', 'full', 'full']; st.quiz = { 1: '2/2', 2: '0/2', 3: '2/2', 4: '2/2', 5: '2/2', 6: '2/2' };
     W().LUNA.showEnding('unicorn');
     await until(() => active('scr-end'));
     const endTxt = () => txt('scr-end');
-    log('ending-clean-vs-quiz(주입): 놓친 EP2의 개념 요약이 보이고 "틀린 개념이 없습니다"는 없음', endTxt().includes('두 번 다 놓친 개념') && endTxt().includes((await import('/data/episodes.js')).EPISODES[1].concept.slice(0, 24)) && !endTxt().includes('틀린 개념이 없습니다'));
-    st.quiz = { 1: 'ok', 2: 'more-ok' };
-    W().LUNA.showEnding('unicorn');
+    const card = n => D().querySelector('#scr-end .rp-badge[data-ep="' + n + '"]');
+    log('ending-split: 운영 결과(점수·위기 횟수)와 학습 결과(편별 처음 판단·새 사례 적용) 따로', endTxt().includes('회사 운영 결과') && endTxt().includes('위기 점검 회의') && endTxt().includes('학습 결과')
+      && D().querySelectorAll('#scr-end .rp-badge').length === 6 && card(1).textContent.includes('처음 판단: 바로 맞힘') && card(1).textContent.includes('새 사례 적용: 확인 (2/2)') && !/법정|판결|피고|집행유예|반쪽|완전/.test(endTxt()));
+    log('ending-review: 처음엔 맞혀도 적용을 못 한 EP2는 다시 볼 개념(학습 결과는 처음 판단과 별개)', card(2).classList.contains('l-review') && endTxt().includes(EPS0[1].concept.slice(0, 24)) && !endTxt().includes('여섯 편 모두 새 사례에 적용해'));
+    st.wrongs = [1]; st.badges[0] = 'half'; st.quiz = { 1: '2/2', 2: '2/2', 3: '2/2', 4: '2/2', 5: '2/2', 6: '2/2' };
+    W().LUNA.showEnding('survive');
     await sleep(100);
-    log('ending-clean-vs-quiz(주입): 다 맞힌 경우 기존 문구만', endTxt().includes('틀린 개념이 없습니다') && !endTxt().includes('두 번 다 놓친 개념'));
+    log('ending-recovered: 처음 판단을 놓쳤어도 새 사례 2/2면 학습 인정(재선택 후 학습 인정)', endTxt().includes('여섯 편 모두 새 사례에 적용해') && endTxt().includes('처음엔 놓쳤지만 새 사례로 이해를 확인한 편')
+      && card(1).textContent.includes('피드백 뒤 바꿈') && card(1).classList.contains('l-ok'));
+    { const k = JSON.parse(keep); st.wrongs = k.w; st.badges = k.b; st.quiz = k.q; W().LUNA.showEnding('unicorn'); await sleep(100); }   // 주입 전 상태로(뒤 산출물 검사는 EP4가 아직 안 간 판)
     // 산출물 "나의 권리 수첩"
     E('endProduct').click(); await until(() => E('productSheet').classList.contains('on'));
     log('product-modal: 산출물이 떠 있는 동안 뒤 화면은 inert', E('scr-end').hasAttribute('inert') && !E('productSheet').hasAttribute('inert'));
@@ -523,14 +532,14 @@ async function run() {
           Rz.markEpStart(g);
           const right = kind === 'unicorn' || (kind === 'survive' && g.ep !== 1 && g.ep !== 4);
           if (right) Eng.chooseRight(g, g.ep, EPS[g.ep - 1].choices.right.delta);
-          else if (Eng.chooseWrongAccept(g, g.ep, EPS[g.ep - 1].choices.wrong.delta) === 'court') break;   // 최종 법정 = 그 자리에서 끝
+          else Eng.chooseWrongAccept(g, g.ep, EPS[g.ep - 1].choices.wrong.delta);   // 위기 점검 회의가 열려도 6편을 끝까지(2026-11-20)
           Eng.settle(g);
           if (g.ep === 6) break;
           Eng.nextEp(g);
         }
         return { g, end: Eng.judgeEnding(g) };
       };
-      for (const kind of ['unicorn', 'survive', 'court']) {
+      for (const kind of ['unicorn', 'survive', 'crisis']) {
         const { g, end } = finish(kind);
         W().localStorage.setItem('luna_save_v1', JSON.stringify({ schemaVersion: 1, game: g, phase: 'end' }));
         f.src = '/index.html?end=' + kind; await sleep(200);
@@ -541,7 +550,7 @@ async function run() {
         log('end-scroll: 엔딩은 맨 위부터 + 스크롤 영역이 상태바 아래에서 시작(' + kind + ')', E('scr-end').scrollTop === 0 && (E('statusBar').offsetParent === null || E('scr-end').getBoundingClientRect().top >= E('statusBar').getBoundingClientRect().bottom - 1));
         const full = g.badges.filter(b => b === 'full').length, stats = '💰 ' + g.stats.money + ' · 📈 ' + g.stats.fame + ' · 🛡️ ' + g.stats.safety;
         log('resume-end: ' + kind + ' — 새로 고쳐 이어 해도 같은 엔딩·점수·배지', end === kind && active('scr-end') && txt('scr-end').includes(STR.endings[kind].name)
-          && D().querySelector('.rp-stats') && D().querySelector('.rp-stats').textContent.trim() === stats && D().querySelectorAll('.rp-badge.b-full').length === full,
+          && D().querySelector('.rp-stats') && D().querySelector('.rp-stats').textContent.trim() === stats && [...D().querySelectorAll('.rp-badge')].filter(c => c.textContent.includes('바로 맞힘')).length === full,
           (active('scr-ep') ? '열린 화면 EP ' + txt('epHead') : '') + ' full=' + full);
         log('resume-end: ' + kind + ' — 저장 단계가 end 그대로', JSON.parse(W().localStorage.getItem('luna_save_v1')).phase === 'end');
       }
@@ -706,17 +715,20 @@ async function run() {
       E('olBack').click(); await until(() => active('scr-end'), 3000); await sleep(300);
       log('ourlog-ep6: 마지막 편 [열기] → ‹ → 엔딩, 정산 한 번(💰+10), 열린 동안엔 엔딩 없음', waited && active('scr-end') && !olOn() && !popupShown() && !noticeUp() && money() === 50 && W().LUNA.state.ep === 6,
         'money ' + money() + ' waited ' + waited + ' end ' + active('scr-end'));
-      // 최종 법정으로 끝나는 편: 카드 없이 법정 → 엔딩(안전도·법정 횟수 주입)
-      await newLuna('court');
+      // 신뢰 0 → 회사 위기 점검 회의(2026-11-20): 두 번째여도 게임은 끝나지 않고 같은 편의 적용 문제·수첩·카드로 이어진다
+      await newLuna('crisis');
       await toChoices();
-      W().LUNA.state.stats.safety = 5; W().LUNA.state.courtCount = 1;
+      W().LUNA.state.stats.safety = 5; W().LUNA.state.crisisCount = 1;
       D().querySelector('#chatChoices .choice-btn[data-k="wrong"]').click();
       await until(() => popupShown() && pbtns().some(b => b.textContent.includes('대가를 치르고')));
       pbtns().find(b => b.textContent.includes('대가를 치르고')).click();
       await until(() => active('scr-court'));
-      const noCard = !noticeUp();
-      E('courtBtn').click(); await until(() => active('scr-end'), 3000); await sleep(200);
-      log('ourlog-court: 최종 법정 EP에는 카드 없음', noCard && active('scr-end') && !noticeUp() && !popupShown());
+      const ct = txt('scr-court'), own = D().querySelector('#scr-court .rv-list[data-kind="own"]'), oth = D().querySelector('#scr-court .rv-list[data-kind="others"]');
+      log('crisis-meeting: 법정이 아니라 위기 점검 회의 — 우리 권리 관리 / 남의 권리 침해 위험을 나눠 보여 줌', ct.includes('위기 점검 회의') && ct.includes('법원의 판결이 아니라') && !/법정|피고|집행유예|판사/.test(ct)
+        && !!own && !!oth && oth.textContent.includes('저작권') && !own.textContent.includes('저작권') && D().activeElement === E('courtBtn'), ct.slice(0, 80));
+      E('courtBtn').click();
+      await until(() => popupShown() && ptitle().includes('새 사례 적용'), 3000);
+      log('crisis-continue: 회의 뒤 신뢰 30·위기 2회, 엔딩 없이 같은 편 적용 문제로 이어짐', active('scr-ep') && !active('scr-end') && W().LUNA.state.crisisCount === 2 && W().LUNA.state.stats.safety === 30 && W().LUNA.state.ending === null && ptitle().includes('1/2'));
       W().localStorage.removeItem('luna_save_v1'); W().localStorage.removeItem('luna_notes_v1'); }
     // 대비: 유리 위 글자 4.5:1 이상(다크·라이트). 흐림·채도 효과는 빼고 색만 겹쳐 계산한 근삿값
     for (const th of ['dark', 'light']) {

@@ -222,9 +222,13 @@ button.tap-hint{display:block;background:none;border:0;padding:2px 0;font-weight
 .rp-badges{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .rp-badge{background:var(--chip);border:1px solid var(--edge);border-radius:14px;padding:9px 6px;text-align:center;font-size:12.5px;display:flex;flex-direction:column;gap:2px}
 .rp-badge span{font-size:20px}
-.rp-badge.b-full{border-color:var(--gold)}
-.rp-badge.b-half{border-color:var(--gold);border-style:dashed}
-.rp-badge.b-none{opacity:.5}
+.rp-badge.l-ok{border-color:var(--gold)}
+.rp-badge.l-part{border-color:var(--gold);border-style:dashed}
+.rp-badge.l-review,.rp-badge.l-none{border-color:var(--edge)}
+.rp-learn{font-weight:700}
+.rp-note{font-size:13px;color:var(--dim);text-align:center;margin:0 0 6px}
+.rv-ok{border-color:var(--gold)}
+.crisis-note{font-size:13.5px;color:var(--dim);margin:12px 2px 0;line-height:1.6}
 .rp-badge i{font-style:normal;color:var(--dim)}
 .disclaimer{margin-top:14px;font-size:12.5px;color:var(--dim);text-align:center}
 .dogam-teaser{display:block;margin:14px 0 0;padding:12px 14px;border:1px solid var(--accent);border-radius:16px;background:var(--chip);

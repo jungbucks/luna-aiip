@@ -14,7 +14,7 @@ f.width = q.get('w') || 390; f.height = q.get('h') || 700;
 // 보안 검토 2026-11-18 A: 자동화 브라우저 + ?probe=1(run-probe.mjs가 붙임)일 때만 돈다 — 사람이 이 주소를 열어도 게임 기록을 지우지 않게
 const AUTOMATED = navigator.webdriver === true && q.get('probe') === '1';
 if (AUTOMATED) { localStorage.removeItem('luna_save_v1'); localStorage.removeItem('luna_notes_v1'); localStorage.setItem('luna_theme', theme); 
-  if (q.get('save') === '1') localStorage.setItem('luna_save_v1', JSON.stringify({ schemaVersion: 1, phase: 'ep', game: { schemaVersion: 1, idol: 'luna', ep: 2, stats: { money: 45, fame: 40, safety: 85 }, badges: ['full', null, null, null, null, null], wrongs: [], courtCount: 0, retryUsed: false, ending: null } })); }
+  if (q.get('save') === '1') localStorage.setItem('luna_save_v1', JSON.stringify({ schemaVersion: 1, phase: 'ep', game: { schemaVersion: 1, idol: 'luna', ep: 2, stats: { money: 45, fame: 40, safety: 85 }, badges: ['full', null, null, null, null, null], wrongs: [], crisisCount: 0, retryUsed: false, ending: null } })); }
 else document.body.insertAdjacentHTML('afterbegin', '<p>자동 검사 전용 페이지입니다. 아무것도 하지 않았습니다.</p>');
 const D = () => f.contentDocument, W = () => f.contentWindow, E = id => D().getElementById(id);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -30,7 +30,7 @@ async function olPlay(kind) {
   for (let i = 0; i < 40 && !(E('noteInput') && E('appNotes').classList.contains('on')); i++) {
     await sleep(150);
     const bs = [...D().querySelectorAll('#popup .pop-btn')].filter(b => !b.disabled);
-    if (popup() && bs.length) { (bs.find(b => /대가를 치르고|계속|하나 더/.test(b.textContent)) || bs[bs.length - 1]).click(); await sleep(150); }
+    if (popup() && bs.length) { (bs.find(b => /대가를 치르고|계속|다음 사례/.test(b.textContent)) || bs[bs.length - 1]).click(); await sleep(150); }
   }
   await until(() => E('appNotes').classList.contains('on') && E('noteInput')); await sleep(400);
   const i = E('noteInput'); i.value = '학습용이라도 남의 노래를 허락 없이 대량으로 쓰면 안 된다는 걸 알았다.'; i.dispatchEvent(new (W().Event)('input', { bubbles: true }));
@@ -88,7 +88,10 @@ async function run() {
   await clickPop('계속');                                                // → 퀴즈
   await until(() => popup() && D().querySelector('.pop-title').textContent.includes('O/X'));
   await until(() => D().querySelectorAll('#popup .pop-btn').length === 2 && !D().querySelectorAll('#popup .pop-btn')[1].disabled);
-  D().querySelectorAll('#popup .pop-btn')[1].click(); await sleep(150);  // ❌ (EP1 본 문제 정답 X)
+  D().querySelectorAll('#popup .pop-btn')[1].click(); await sleep(150);  // ❌ (EP1 1번 정답 X)
+  await clickPop('다음 사례');                                           // 새 사례 적용 2/2(2026-11-20 — 두 문항 모두)
+  await until(() => D().querySelectorAll('#popup .pop-btn').length === 2 && !D().querySelectorAll('#popup .pop-btn')[0].disabled);
+  D().querySelectorAll('#popup .pop-btn')[0].click(); await sleep(150);  // ⭕ (EP1 2번 정답 O)
   await clickPop('계속');                                                // → 적기
   await until(() => E('appNotes').classList.contains('on') && E('noteInput')); await sleep(600);
   if (scene === 'note') return;

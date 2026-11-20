@@ -54,7 +54,8 @@ export function clearNotes(storage = defaultStorage()) {
   return removeAndCheck(storage, NOTES_KEY);
 }
 
-/* 산출물 "나의 권리 수첩"을 붙여 넣기용 글로. items = [{ emoji, right, badge, hint, note }] */
+/* 산출물 "나의 권리 수첩"을 붙여 넣기용 글로. items = [{ emoji, right, badge(처음 판단), learn(새 사례 적용), prompt(편별 질문), hint(개념), note }].
+   교사가 '판단 기준 설명'과 '적절한 행동 제안'을 확인하도록 질문과 확인란을 함께 싣는다(자동 채점 없음) */
 export function buildProductText({ title, name, date, idol, result, stats, items }) {
   const head = [
     title,
@@ -64,9 +65,11 @@ export function buildProductText({ title, name, date, idol, result, stats, items
     `결과: ${result}  (💰 ${stats.money} · 📈 ${stats.fame} · 🛡️ ${stats.safety})`,
   ];
   const body = items.map(it => [
-    `${it.emoji} ${it.right} (${it.badge})`,
+    `${it.emoji} ${it.right} (처음 판단: ${it.badge} · 새 사례 적용: ${it.learn || '—'})`,
     '- 개념: ' + it.hint,
-    '- 내가 알게 된 것: ' + (it.note || '(아직 적지 않음)'),
+    '- 질문: ' + (it.prompt || ''),
+    '- 내 답: ' + (it.note || '(아직 적지 않음)'),
+    '- 교사 확인: [ ] 판단 기준을 설명함  [ ] 적절한 행동을 제안함',
   ].join('\n'));
   return head.join('\n') + '\n\n' + body.join('\n\n') + '\n';
 }

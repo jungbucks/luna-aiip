@@ -5,6 +5,7 @@
 
 ## 현재 상태 (2026-11-20)
 
+- **교육적 개선(2026-11-20, 교사 승인 범위)**: 법정·집행유예 → **회사 위기 점검 회의**(`engine.checkCrisis`, 신뢰 0 → 30 회복, `crisisCount`, 게임은 끝나지 않고 6편 완주). 회의는 놓친 결정을 `kind:'own'`(우리 권리 확보·관리: 특허·상표·영업비밀)과 `kind:'others'`(남의 권리 침해 위험: 저작권·초상권·퍼블리시티)로 나눠 보여 줌. 엔딩 = 운영 결과(위기·유니콘·생존) / 리포트는 **운영 결과와 학습 결과 분리**. `badges` = 처음 판단 기록(바로 맞힘·피드백 뒤 바꿈·바꾸지 않음), 학습 결과 = **새 사례 적용 O/X 두 문항 모두**(`quiz[ep]='2/2'|'1/2'|'0/2'`, `js/quiz.js learnOf`) — 재선택만으로 이해 인정 안 함, 처음 틀려도 적용하면 인정. 수첩 편별 질문(`notePrompt`)·산출물 교사 확인란. 6편 대화·선택지·결과·개념·질문 카드·O/X·ourlog 댓글 다시 씀(내용 원본 = data/*.js). 옛 저장 `courtCount`·`'court'`·옛 퀴즈 값은 불러올 때 호환. 법령 확인·미확인 목록 `docs/superpowers/specs/2026-11-20-education-improvement.md`. ⚠️ 문구 전부 교사 검수 대기. **원격에 아직 안 올림.**
 - **외부 검토 7항목 반영(2026-11-20)**: ① 제목 화면 모드 단추 = 기록 초기화 옆 글자 단추 ② 이어서 하기 = 유리 바탕+테두리(바탕이 글자색과 같던 것) ③ 선택지 다시 씀(오답에 그럴듯한 근거·정답에 대가), C = "잠깐, 확인할 게 있어.", **`hint` = C 질문 카드('~요?') / `concept` = 정답 요약(수첩·산출물·엔딩)** ④ HUD 이름표 자금/인지도/**신뢰**(화면 이름만, 키는 safety)·EP1 위젯에 뜻 한 줄, **통장 바닥**(정산 직전 💰0 → 세아 경고 + 다음 EP 정답 📈·🛡️ 절반 + 유니콘 불가, `broke`·`brokeEver`), EP3·4·5 오답 📈 감소, 리포트 인지도 한 줄 ⑤ 다시 선택하면 보낸 답장 취소선 + 시스템 줄 ⑥ 생존 엔딩 '소송'은 법정 갔을 때만, 엔딩·법정 스크롤은 상태바 아래에서·맨 위부터 ⑦ 델타 색 = 부호, 알림 배너·내레이션 카드 불투명, 팝업 ESC(단추 하나면 그 단추, 확인창은 그만두기)·Tab 가두기, 산출물 층 ESC·Tab, 장식 앱 = div aria-hidden, O/X 결과 제목 초록/주황, 반쪽 배지 첫 설명, **messages의 시스템 줄 `{sys, room}`**(EP6 코스모 담당자 나감 → 방 인원 (3)), 내레이션 단추 aria-label, 상태바 z-index 60(산출물 층 위). SPEC §6.1·6.2·6.4·6.7 개정.
 - **ourlog 완성(2026-11-20)**: 가상 SNS 앱(인스타와 비슷한 배치·베끼지 않음). 수첩 적기 뒤 "ourlog SNS 앱을 확인해 보자!" 카드(`#olNotice`, [열기]/[넘어가기] — 학생이 고름) → 열면 그 편 게시물이 맨 위에 올라오고 팬 반응(좋아요 숫자·댓글·LIVE·하트)이 실시간처럼 붙음, 닫아야 정산. 갈래(정답/오답/재선택)에 따라 반응이 다르고 홈 아이콘으로 다시 열면 정지 피드. 그림 16장 webp(`assets/ourlog/`, codex). 팬 반응 글 EP2~6은 교사 검수 대기. 설계 `docs/superpowers/specs/2026-11-20-ourlog-design.md`, 계획 `docs/superpowers/plans/2026-11-20-ourlog.md`, SPEC §7·§12.6, 그림 의뢰서 `docs/codex-art-brief-ourlog.md`.
 
@@ -52,7 +53,7 @@ data/strings.js     인트로·브릿지·법정·엔딩·리포트·퀴즈 문�
 data/quiz.js        O/X 확인 퀴즈 12문항(EP마다 본 문제+하나 더, 교사 검수 대기)
 js/quiz.js          퀴즈 판정·기록(G.quiz)·다시 볼 개념 목록(DOM 없음, verify가 검산)
 data/issues.js      도감 ISSUES 12·STATUS_META(양측 대립·상태 배지·실제 사례·출처)
-test/verify.mjs     게임 검산 132건 / verify-dogam.mjs 도감 15건(미결 카드 결론 단정·사례 칸 길이 200자/문장 80자/괄호 1개 검사 포함)
+test/verify.mjs     게임 검산 152건 / verify-dogam.mjs 도감 15건(미결 카드 결론 단정·사례 칸 길이 200자/문장 80자/괄호 1개 검사 포함)
 test/probe.html     게임 E2E / probe-dogam.html 도감 E2E 24건(`node test/run-probe.mjs test/probe-dogam.html`, 폰·넓은 화면 배치 포함)
 test/run-probe.mjs  프로브 실행기(서버 + 헤드리스 Edge + 수확) — `node test/run-probe.mjs`
 test/probe-shots.html  캡처용 프로브(원하는 장면까지 자동 진행)
@@ -80,6 +81,7 @@ _config.yml         Pages(Jekyll) 배포 범위: test·docs·CLAUDE/SPEC/ROADMAP
 - **팝업 ESC**: `showPopup({esc})` — 없으면 단추가 하나일 때만 그 단추. 고르기가 필요한 팝업(오답·O/X 문제)에는 ESC가 없다.
 - **학생이 적은 글은 `notebook.js`의 `escPlain()`으로** — `esc()`는 `{n}` 토큰을 아이돌 이름으로 바꿔 버린다.
 - **뒤로 가기는 방문 기록 한 칸 규칙**(`phone.js`): 앱이 열릴 때만 한 칸을 채우고, 프로그램이 `history.back()`을 부르지 않는다. 팝업·적기 단계에서는 무시.
+- **처음 판단 ≠ 학습 결과**: `badges`는 처음 판단 기록(운영 결과·ourlog 갈래에 씀), 학습 성취는 `quiz`(새 사례 적용) — 둘을 섞어 평가하지 말 것. 위기 점검 회의는 법적 판정이 아니다(문구에 법정·피고·집행유예·판사 금지, verify).
 - **ourlog 갈래 = 배지**: 저장 칸 없이 그 편 배지(`badges[ep-1]`)로 정한다(`ourlog-feed.js`): full→정답(right)·half→재선택(half)·none→오답(wrong), null(아직 안 한 편)이면 게시물·알림 없음. 저장에 칸을 더하지 않으니 checkSave 영향 없음.
 - **`phone.onceClosed(app, fn)`**: 열려 있는 앱에만 등록되고, 그 앱이 닫힐 때 한 번만 부른다. ourlog가 열려 있는 동안 정산을 미루는 데 쓴다(닫혀 있는 앱에 걸면 안 불림).
 - **`ART_READY`**(`data/ourlog.js`): false면 `<img>`를 만들지 않아 그림 404 요청이 없다. 지금 true(webp 16장 있음). 그림을 빼면 false로.
@@ -92,7 +94,7 @@ _config.yml         Pages(Jekyll) 배포 범위: test·docs·CLAUDE/SPEC/ROADMAP
 
 ## 검증 (수정 후 필수)
 
-1. 게임 `node test/verify.mjs`(132건) — 미달 시 배포 금지. 도감 `node test/verify-dogam.mjs`(20건) + `node test/run-probe.mjs test/probe-dogam.html`(45건). 게임 E2E 199건.
+1. 게임 `node test/verify.mjs`(152건) — 미달 시 배포 금지. 도감 `node test/verify-dogam.mjs`(20건) + `node test/run-probe.mjs test/probe-dogam.html`(45건). 게임 E2E 201건.
 2. E2E 프로브(구조·흐름 변경 시): **`node test/run-probe.mjs`** 한 줄(종료 코드 0 = 전부 PASS). 배포본만으로 도는지는 `--pages`(올라갈 파일만 서빙). 가드는 `node test/run-probe.mjs test/probe-guard.html`. 캡처는 `node test/run-probe.mjs test/probe-shots.html --shot=<png> --url="/__probe.html?scene=home&theme=light&w=1366&h=700" --size=1366,700`. 아래는 실행기가 대신 해 주는 옛 수동 절차(원리 참고용): **게임과 같은 오리진에서 서빙 필수** — file:// 프로브 + http iframe은 크로스오리진으로 조용히 죽는다(2026-07-15 실제 발생). 절차: `probe.html`을 루트에 복사 → Node 정적 서버(scratchpad) → `msedge --headless=new --user-data-dir=<임시> --virtual-time-budget=20000 --dump-dom http://localhost:PORT/...` → 수확 후 복사본 삭제. 채팅은 타이핑 인디케이터 때문에 메시지당 최대 2탭.
 
 ## 참고 문서

@@ -43,6 +43,7 @@
 .ol-tapall{flex:0 1 auto;min-width:0;padding:5px 11px;border-radius:999px;border:1px solid var(--edge);background:var(--chip);color:var(--ink);
   font-size:13.5px;font-weight:600;line-height:1.25;text-align:center}
 .ol-tapall[hidden]{display:none}
+.ol-think{margin:10px 2px 2px;padding:9px 12px;border-radius:14px;background:var(--chip);border:1px solid var(--edge);font-size:13.5px;line-height:1.5;color:var(--ink)}   /* 댓글과 별개로 확인할 권리(2026-11-20) */
 
 /* 알림 카드(수첩 적기 뒤·정산 앞): #app의 직계 자식. 위에서 내려오는 불투명 카드 + 뒤를 어둡게(그림자 퍼짐 — 뒤는 inert).
    산출물 층(40) 위, 팝업(50)·상태바(60) 아래 */

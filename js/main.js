@@ -9,7 +9,7 @@ import { showPopup, deltaLine } from './ui/popup.js';
 import { QUIZ } from '../data/quiz.js';
 import * as quiz from './quiz.js';
 import * as resume from './resume.js';
-import { renderCourt, renderEnding } from './ui/ending.js';
+import { renderCrisis, renderEnding } from './ui/ending.js';
 import { IDOLS, idolSVG, setIdol, getIdol, T, setExpression, autoExpression } from './ui/character.js';
 import { applyTheme, toggleTheme, watchSystemTheme } from './ui/theme.js';
 import * as phone from './ui/phone.js';
@@ -273,7 +273,7 @@ function retryFlow() {
   const ev = engine.chooseWrongRetry(G, G.ep, ep().choices.wrong.delta);
   store.save(G, 'ep');
   updateStatbar(); autoExpression(G);
-  if (ev) return courtScene(ev === 'court', choicesPhase);
+  if (ev) return crisisScene(choicesPhase);
   choicesPhase();   // 오답 비활성 상태로 재선택
 }
 
@@ -281,7 +281,7 @@ function acceptFlow() {
   const ev = engine.chooseWrongAccept(G, G.ep, ep().choices.wrong.delta);
   store.save(G, 'ep');
   updateStatbar(); autoExpression(G);
-  if (ev) return courtScene(ev === 'court', () => quizThen(noteStep));   // 최종 법정이면 엔딩으로 가서 퀴즈 없음
+  if (ev) return crisisScene(() => quizThen(noteStep));   // 위기 점검 회의 뒤에도 이 편을 끝까지 배운다(2026-11-20)
   quizThen(noteStep);
 }
 
@@ -293,9 +293,9 @@ function rightFlow() {
   updateStatbar();
   setExpression('happy');
   showPopup({
-    title: r.popup.title + (isRetry ? ' (반쪽 배지)' : ''),
+    title: r.popup.title + (isRetry ? STRINGS.ui.retrySuffix : ''),
     html: `<p>${esc(r.popup.body)}</p><p class="delta">${deltaLine(got)}</p>` + (halved ? `<p class="money-zero">${esc(STRINGS.brokeNote)}</p>` : '')
-      + (isRetry && G.badges.filter(b => b === 'half').length === 1 ? `<p class="money-zero">${esc(STRINGS.ui.halfNote)}</p>` : ''),   // 반쪽 배지가 처음 나올 때 한 줄(2026-11-20)
+      + (isRetry && G.badges.filter(b => b === 'half').length === 1 ? `<p class="money-zero">${esc(STRINGS.ui.halfNote)}</p>` : ''),   // 다시 생각해 고친 첫 편에서 한 줄 — 이해는 다음 적용 문제로 확인
     buttons: [{ label: '계속 →', cb: () => quizThen(noteStep) }], face: true,
   });
 }
@@ -306,31 +306,33 @@ const noteStep = () => askNote(G.ep, ourlogStep);
 /* ── ourlog 알림(2026-11-20, 스탯 무관) — 적기 뒤·정산 앞. [넘어가기]면 바로, [열기]면 ourlog 앱을 닫을 때 정산 ── */
 function ourlogStep() { ourlog.offer(G, { onDone: bridge }); }
 
-/* ── O/X 확인 퀴즈(2026-11-14, 스탯 무관) — 정산(bridge) 직전. 틀리면 하나 더, 결과는 G.quiz에(js/quiz.js) ── */
+/* ── 새 사례 적용 문제(O/X, 2026-11-14 → 2026-11-20 개편, 스탯 무관) — 정산(bridge) 직전.
+   두 문항을 모두 푼다(틀린 사람만 보는 문항 없음). 맞힌 수가 그 편의 학습 결과(G.quiz, js/quiz.js) ── */
 const QUIZ_GUARD_MS = 300;   // 팝업이 뜬 직후 연타가 다음 팝업 버튼을 누르지 않게
 function quizThen(next) {
   const set = QUIZ[G.ep], E = ep(), S = STRINGS.quiz;
-  if (!set) return next();
-  let first;
-  const ask = (item, stage) => showPopup({
-    title: S.title,
-    html: `<p class="quiz-tag">${E.rightEmoji} ${esc(E.right)}</p><p class="quiz-q">${esc(item.q)}</p>`,
-    buttons: [{ label: S.o, cb: () => answer(item, stage, true) }, { label: S.x, cb: () => answer(item, stage, false) }],
+  if (!set || !set.items || !set.items.length) return next();
+  const items = set.items;
+  let correctN = 0;
+  const ask = i => showPopup({
+    title: S.title + ' ' + (i + 1) + '/' + items.length,
+    html: `<p class="quiz-tag">${E.rightEmoji} ${esc(E.right)}</p><p class="quiz-q">${esc(items[i].q)}</p>`,
+    buttons: [{ label: S.o, cb: () => answer(i, true) }, { label: S.x, cb: () => answer(i, false) }],
     guardMs: QUIZ_GUARD_MS,
   });
-  const answer = (item, stage, v) => {
-    const correct = v === item.a;
-    if (stage === 'main') first = correct;
-    const more = stage === 'main' && !correct;
+  const answer = (i, v) => {
+    const item = items[i], correct = v === item.a;
+    if (correct) correctN++;
+    const last = i === items.length - 1;
     showPopup({
       title: correct ? S.right : S.wrong, titleCls: correct ? 'ok' : 'warn',
       html: `<p class="quiz-ans">${esc(S.answer(item.a))}</p><p>${esc(item.exp)}</p>`,
-      buttons: [more ? { label: S.more, cb: () => ask(set.more, 'more') }
-        : { label: S.cont, cb: () => { quiz.record(G, G.ep, quiz.resultOf(first, stage === 'more' ? correct : undefined)); store.save(G, 'ep'); next(); } }],
+      buttons: [last ? { label: S.cont, cb: () => { quiz.record(G, G.ep, quiz.scoreOf(correctN)); store.save(G, 'ep'); next(); } }
+        : { label: S.next, cb: () => ask(i + 1) }],
       guardMs: QUIZ_GUARD_MS,
     });
   };
-  ask(set.main, 'main');
+  ask(0);
 }
 
 /* ── 브릿지(정산) → 다음 EP / 엔딩 ── 한 EP에 한 번만(💰+10). 알림 카드·ourlog 닫기 어느 길로 두 번 와도 다음 enterEp까지 무시 */
@@ -355,19 +357,18 @@ function bridge() {
   });
 }
 
-/* ── 법정 / 엔딩 ── */
-function courtScene(isFinal, contCb) {
+/* ── 회사 위기 점검 회의 / 엔딩 ── 회의는 게임을 끝내지 않는다: 신뢰 30으로 회복하고 하던 결정으로 돌아간다 */
+function crisisScene(contCb) {
   setExpression('panic');
   show('scr-court');
-  renderCourt(G, isFinal, () => {
-    if (isFinal) { store.save(G, 'end'); return endingScene('court'); }
+  renderCrisis(G, () => {
     store.save(G, 'ep');
     updateStatbar(); autoExpression(G);
     show('scr-ep');
     contCb();
   });
   $('scr-court').scrollTop = 0;
-  focusIn($('courtBtn'));   // 키보드: 법정 화면의 단추로(팝업 단추가 사라져 초점이 갈 곳이 없었다)
+  focusIn($('courtBtn'));   // 키보드: 회의 화면의 단추로
 }
 
 function endingScene(key) {
@@ -379,7 +380,7 @@ function endingScene(key) {
       html: `<p>${esc(U.restartAsk)}</p>`,
       buttons: [{ label: U.restartNo, cls: 'ghost', cb: () => $('endRestart').focus() }, { label: U.restartYes, cls: 'danger', cb: () => resetAll('endRestart') }], esc: 0,
     }),
-    () => openProduct(STRINGS.endings[key].name, $('endProduct')));
+    () => openProduct((STRINGS.endings[key] || STRINGS.endings.survive).name, $('endProduct')));
   show('scr-end');
   $('scr-end').scrollTop = 0;                   // 늘 엔딩 맨 위부터(2026-11-20)
   focusIn($('scr-end').querySelector('h2'));   // 키보드·읽어 주기: 엔딩 제목부터(ending.js가 tabindex="-1"을 단다)

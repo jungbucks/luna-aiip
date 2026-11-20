@@ -6,6 +6,7 @@
 import { EPISODES } from '../../data/episodes.js';
 import { STRINGS } from '../../data/strings.js';
 import { esc, statsLine } from './chat.js';
+import { learnAt } from '../quiz.js';
 import { T } from './character.js';
 import { openApp, closeApp, lockApps, armBack, onSheetBack } from './phone.js';
 import { getNote, saveNote, isValid, MIN_LEN, MAX_LEN, buildProductText } from '../notes.js';
@@ -53,7 +54,7 @@ function cardHTML(e, i, state) {
   if (writing && writing.epId === e.id) {
     return `<div class="note-card" data-ep="${e.id}" data-state="write">
       <b class="note-h">${e.rightEmoji} ${esc(e.right)}</b>
-      <label class="note-prompt" for="noteInput">${esc(S.prompt)}</label>
+      <label class="note-prompt" for="noteInput">${esc(e.notePrompt || S.prompt)}</label>
       <textarea id="noteInput" rows="4" maxlength="${MAX_LEN}" placeholder="${esc(S.placeholder)}">${escPlain(getNote(e.id))}</textarea>
       <div class="note-meta"><span id="noteNeed">${esc(S.need(MIN_LEN))}</span><span id="noteCount"></span></div>
       <button type="button" class="choice-btn primary" id="noteSave">${esc(S.save)}</button>
@@ -141,6 +142,8 @@ function productData() {
       const b = state ? state.badges[i] : null;      // 아직 선택을 마치지 않은 EP는 수첩과 똑같이 개념 힌트를 가린다
       return {
         id: e.id, emoji: e.rightEmoji, right: T(e.right), badge: b == null ? '—' : badgeLabel(b),
+        learn: b == null ? '—' : (STRINGS.report.learnLabel[learnAt(state, e.id)] || STRINGS.report.learnLabel.none0),
+        prompt: T(e.notePrompt || STRINGS.ui.notes.prompt),
         hint: b == null ? STRINGS.ui.notes.locked(e.id) : T(e.concept), note: getNote(e.id),
       };
     }),
@@ -157,9 +160,11 @@ export function openProduct(endingName, opener) {
     <div class="prod-meta"><span>${data.date}</span><span>${esc(P.withIdol)}: ${escPlain(data.idol)}</span></div>
     <div class="prod-result"><b>${esc(P.result)}: ${escPlain(data.result)}</b><span>${statsLine(data.stats)}</span></div>
     ${data.items.map(it => `<div class="prod-note" data-ep="${it.id}">
-      <b>${it.emoji} ${escPlain(it.right)} <span class="prod-badge">${escPlain(it.badge)}</span></b>
+      <b>${it.emoji} ${escPlain(it.right)} <span class="prod-badge">${escPlain(STRINGS.report.firstHead)}: ${escPlain(it.badge)} · ${escPlain(STRINGS.report.learnHead)}: ${escPlain(it.learn)}</span></b>
       <p class="prod-hint">${escPlain(it.hint)}</p>
+      <p class="prod-q">${escPlain(it.prompt)}</p>
       <p class="prod-mine">${it.note ? escPlain(it.note) : `<i>${esc(P.empty)}</i>`}</p>
+      <p class="prod-check">${esc(P.teacherCheck)}</p>
     </div>`).join('')}
     <p class="disclaimer">${esc(STRINGS.report.disclaimer)}</p>`;
   $('prodStatus').textContent = '';

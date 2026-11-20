@@ -171,6 +171,8 @@
 .prod-hint{font-size:14px;line-height:1.55;color:var(--dim);margin-top:2px}
 .prod-mine{font-size:15.5px;line-height:1.6;margin-top:6px;padding-top:6px;border-top:1px dashed var(--edge);white-space:pre-wrap;overflow-wrap:anywhere}
 .prod-mine i{font-style:normal;color:var(--dim)}
+.prod-q{font-size:13.5px;font-weight:700;line-height:1.5;color:var(--accent);margin-top:8px}   /* 편별 질문(2026-11-20) — 학생 답과 구분 */
+.prod-check{font-size:12.5px;color:var(--dim);margin-top:6px}   /* 교사 확인란 */
 .prod-actions{flex-shrink:0;display:flex;flex-wrap:wrap;gap:8px;padding:8px 12px 24px;border-top:1px solid var(--edge)}
 .prod-actions .choice-btn{flex:1;text-align:center;border-radius:14px;padding:11px 8px}
 #prodStatus{flex-basis:100%;min-height:20px;text-align:center;font-size:13.5px;color:var(--dim)}
