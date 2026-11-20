@@ -7,7 +7,7 @@ import { STRINGS } from '../../data/strings.js';
 import { OURLOG, ART_READY } from '../../data/ourlog.js';
 import { feedOf, commentsFor, imageKey, followersFor, likesFor, fmtCount, variantOf } from '../ourlog-feed.js';
 import { esc } from './chat.js';
-import { idolSVG, getIdol } from './character.js';
+import { idolSVG, getIdol, IDOLS } from './character.js';
 import { openApp, isOpen, onceClosed } from './phone.js';
 
 const $ = id => document.getElementById(id);
@@ -41,9 +41,11 @@ export function initOurlog(opts) {
 function artHTML(ep, variant, post) {
   const e = EPISODES[ep - 1];
   const emoji = `<span class="ol-emoji" aria-hidden="true">${e.rightEmoji}</span>`;
-  /* ART_READY가 false면 <img>를 아예 만들지 않는다(404 요청 없음). 불러오기에 실패하면 그림만 빠지고 바탕+이모지가 남는다 */
-  const img = ART_READY
-    ? `<img src="assets/ourlog/${getIdol()}/${esc(imageKey(post, variant))}.webp" alt="" width="1080" height="1080" decoding="async" onerror="this.remove()">`
+  /* ART_READY가 false면 <img>를 아예 만들지 않는다(404 요청 없음). 아이돌 칸은 알려진 값(sol/luna)일 때만 경로에 쓴다.
+     불러오기에 실패하면 그 칸의 그림만 빠지고 바탕+이모지가 남는다 */
+  const idol = getIdol();
+  const img = ART_READY && Object.hasOwn(IDOLS, idol)
+    ? `<img src="assets/ourlog/${idol}/${esc(imageKey(post, variant))}.webp" alt="" loading="lazy" decoding="async" onerror="this.remove()">`
     : '';
   return `<div class="ol-art" data-v="${variant}">${emoji}${img}</div>`;
 }

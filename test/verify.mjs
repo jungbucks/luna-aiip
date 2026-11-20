@@ -212,6 +212,18 @@ console.log('[말투] 캐릭터 톡 — 사람이 하는 말 (2026-11-17, docs/s
     return list.filter((c, k) => !/^[a-z0-9_.]{3,20}$/.test(c.who) || ids.indexOf(c.who) !== k).map(c => ({ ep: i, who: c.who, text: v }));
   })));
   t('계정 = {N}_official 토큰', OURLOG.account.handle === '{N}_official');
+  {
+    const fsx = await import('node:fs');
+    const { ART_READY } = await import('../data/ourlog.js');
+    const keys = ['ep1', 'ep2', 'ep3', 'ep4', 'ep5', 'ep5-blur', 'ep6', 'ep6-k'];
+    t('ourlog 그림: ART_READY면 16장이 다 있고 장당 150KB·합계 2.5MB 이하', (() => {
+      if (!ART_READY) return true;
+      const files = ['sol', 'luna'].flatMap(i => keys.map(k => `assets/ourlog/${i}/${k}.webp`));
+      const sizes = files.map(f => fsx.existsSync(f) ? fsx.statSync(f).size : -1);
+      return sizes.every(s => s > 0 && s <= 150 * 1024) && sizes.reduce((a, b) => a + b, 0) <= 2.5 * 1024 * 1024;
+    })());
+    t('ourlog 그림 키 = 의뢰서 키', EPS.flatMap(i => Object.values(OURLOG.posts[i].img)).every(k => keys.includes(k)));
+  }
 }
 
 console.log('[토큰 치환] 캐릭터 이름·조사 (character.js T)');

@@ -4,7 +4,7 @@
    likes: live = 알림으로 막 열었을 때(오답이 더 터짐), later = 지난 게시물로 다시 볼 때(역풍 반영, 오답이 덜함).
    half.at = right 목록에 끼워 넣은 뒤의 자리(0부터). posts에는 EP별 글이 들어간다. */
 
-export const ART_READY = false;   // 그림(assets/ourlog) 납품 전엔 그라데이션 바탕 + 권리 이모지
+export const ART_READY = true;    // 그림(assets/ourlog) 16장 납품됨(2026-11-20). 없거나 불러오기 실패한 칸은 그라데이션 바탕 + 권리 이모지
 
 export const OURLOG = {
   account: { handle: '{N}_official', bio: '{N}의 공식 계정' },
