@@ -60,8 +60,18 @@ function sync() {
   $('scr-ep').dataset.msgopen = isOpen('messenger') ? '1' : '';
 }
 
+/* 앱이 닫힐 때 한 번 부를 것(ourlog 실시간 → 정산). 열려 있는 앱에만 걸린다 — 열리지 않은 앱에 건 콜백이
+   나중에 상관없는 닫기에서 불리지 않게(2026-11-20). 걸렸으면 true */
+const closedOnce = {};
+export function onceClosed(name, fn) {
+  if (!isOpen(name)) return false;
+  closedOnce[name] = fn;
+  return true;
+}
+
 export function openApp(name) {
   if (!LAYER[name] || isOpen(name)) return;
+  delete closedOnce[name];                         // 새로 여는 앱에 남아 있던 옛 콜백은 버린다
   stack.push(name);
   $(LAYER[name]).classList.add('on');
   sync();
@@ -81,9 +91,6 @@ export function closeApp(name, restoreFocus = true) {
   const f = closedOnce[n]; delete closedOnce[n];   // 한 번만 부르고 지운다(‹·뒤로 가기 모두 closeApp을 지난다)
   if (f) f();
 }
-
-const closedOnce = {};
-export function onceClosed(name, fn) { closedOnce[name] = fn; }
 
 /* 잠깐 붙잡기(답장을 보낸 뒤 결과가 오기까지): 뒤로 버튼·뒤로 가기를 무시하되 화면은 그대로 둔다 */
 export function holdApps(on) { held = on; }
@@ -106,7 +113,7 @@ function arm() {
 
 function onPopState() {
   armed = false;                                   // 방금 그 한 칸을 썼다
-  const popup = $('popup').classList.contains('show');
+  const popup = $('popup').classList.contains('show') || !$('olNotice').hidden;   // ourlog 알림 카드도 팝업처럼(뒤 메신저가 닫히지 않게)
   const sheet = $('productSheet');                 // 산출물 층(앱 스택 밖 — 엔딩 화면에서도 열린다)
   if (locked || held || popup) { if (stack.length || sheet.classList.contains('on')) arm(); return; }   // 무시하고 한 칸 되채움
   if (sheet.classList.contains('on')) { if (sheetCloser) sheetCloser(); else sheet.classList.remove('on'); if (stack.length) arm(); return; }

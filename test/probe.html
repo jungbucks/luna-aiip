@@ -31,6 +31,10 @@ async function writeNote(text) {           // 적기: 글 상자에 넣고 [수�
   const i = E('noteInput'); i.value = text; i.dispatchEvent(new (W().Event)('input', { bubbles: true }));
   await sleep(50); E('noteSave').click();
 }
+const noticeUp = () => { const n = E('olNotice'); return !!n && !n.hidden && n.getClientRects().length > 0; };
+async function skipOurlog() {              // 수첩 적기 뒤 ourlog 알림 카드 → [넘어가기](정산으로)
+  if (await until(noticeUp, 3000)) E('olSkip').click();
+}
 const WALL = { dark: ['#6d4bd8', '#1aa9cc', '#c0468f', '#0b0e22'], light: ['#ffd3bd', '#bfd0ff', '#d2bcff', '#eef0fb'] };   // css/style.css의 --wall 색들
 const parseColor = c => { c = c.trim(); if (c[0] === '#') { const h = c.length === 4 ? c.slice(1).replace(/./g, x => x + x) : c.slice(1); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16), 1]; } const m = c.match(/[\d.]+/g).map(Number); return [m[0], m[1], m[2], m.length > 3 ? m[3] : 1]; };
 const over = (top, bot) => [0, 1, 2].map(i => top[i] * top[3] + bot[i] * (1 - top[3])).concat(1);
@@ -318,6 +322,7 @@ async function run() {
     log('note-short: 낮은 높이(자판)에서도 버튼에 닿음 + 글 상자 16px 이상', nr.top >= 0 && nr.bottom <= 361 && parseFloat(W().getComputedStyle(E('noteInput')).fontSize) >= 16, JSON.stringify([nr.top, nr.bottom]));
     f.height = 800; await sleep(100);
     await writeNote('<b>x</b>& 학습용이어도 허락 없이 쓰면 안 된다');
+    await skipOurlog();
     await until(() => popupShown() && ptitle().includes('정산'));
     log('note: 적으면 수첩이 닫히고 정산 — 글은 별도 키에', !E('appNotes').classList.contains('on') && savedNotes()[1].startsWith('<b>x</b>&') && !W().localStorage.getItem('luna_save_v1').includes('학습용이어도'));
     log('quiz-wrong-more: 퀴즈 기록 more-ok · 스탯 그대로', W().LUNA.state.quiz && W().LUNA.state.quiz[1] === 'more-ok');
@@ -403,6 +408,38 @@ async function run() {
     await clickWhenReady(() => pbtns()[0]);
     W().LUNA.state.stats.money = 0;                                // 2026-11-20 통장 바닥: 정산 직전 💰0 주입 → 세아 경고(이어 하기 검사는 EP 시작 사본으로 돌아가므로 영향 없음)
     await writeNote('테스트용으로 다섯 자 넘게');
+    // ourlog(2026-11-20): 수첩 적기 뒤·정산 앞 알림 카드. 열면 그 편 게시물에 반응이 실시간처럼 붙고, 닫아야 정산
+    { const OLD = (await import('/data/ourlog.js')).OURLOG, OLF = await import('/js/ourlog-feed.js');
+      const post = OLD.posts[1], all = OLF.commentsFor(post, 'wrong');
+      const top = () => D().querySelector('#olBody .ol-post');               // 맨 위 게시물
+      const lis = () => top() ? top().querySelectorAll('.ol-comments li').length : -1;
+      await until(noticeUp, 3000);
+      log('ourlog-notice: 수첩 적기 뒤 카드, 초점은 [열기], 뒤 화면 inert', noticeUp() && !popupShown() && D().activeElement === E('olOpen') && E('scr-ep').inert
+        && E('olNotice').parentElement === E('app') && E('olNotice').getAttribute('role') === 'dialog' && E('olNotice').getAttribute('aria-modal') === 'true'
+        && txt('olNotice').includes('ourlog SNS 앱을 확인해 보자!') && txt('olNotice').includes('새 댓글 ' + all.length + '개'), D().activeElement && D().activeElement.outerHTML.slice(0, 60));
+      { const K = W().KeyboardEvent, tab = sh => { const e = new K('keydown', { key: 'Tab', shiftKey: sh, bubbles: true, cancelable: true }); D().activeElement.dispatchEvent(e); return e.defaultPrevented; };
+        E('olSkip').focus(); const p1 = tab(false), at1 = D().activeElement === E('olOpen');
+        const p2 = tab(true), at2 = D().activeElement === E('olSkip');
+        log('ourlog-trap: 카드가 떠 있을 때 Tab이 카드 단추에 머묾, #homeOurlog·#dockMsg inert', noticeUp() && p1 && at1 && p2 && at2 && !!E('homeOurlog').closest('[inert]') && !!E('dockMsg').closest('[inert]') && !!E('phoneWrap').closest('[inert]') && !E('olNotice').closest('[inert]')); }
+      W().history.back(); await sleep(200);
+      log('ourlog-notice: 카드가 떠 있을 때 뒤로 가기는 무시(메신저도 그대로)', noticeUp() && E('phoneWrap').classList.contains('on') && !popupShown());
+      W().__olForceMotion = true;                                           // run-probe가 움직임 줄이기를 강제한다 — 이 흐름만 재생을 켠다(ourlog.js가 읽는 검사용 표시)
+      E('olOpen').click(); E('olOpen').click();                              // 연타
+      await until(() => lis() >= 1, 3000);
+      log('ourlog-live: [열기] → 그 편 게시물이 맨 위, 갈래에 맞는 첫 댓글, LIVE 점', E('appOurlog').classList.contains('on') && !noticeUp() && top().dataset.ep === '1' && top().dataset.v === 'wrong'
+        && top().querySelector('.ol-comments').textContent.includes(all[0].text) && lis() < all.length && !E('olLive').hidden && D().activeElement === E('olBack') && !popupShown(), lis() + '/' + all.length);
+      await until(() => !!D().querySelector('#olBody .ol-heart'), 2000);
+      log('ourlog-a11y: 댓글 목록에 aria-live 없음, 떠오르는 표시·반응 아이콘은 aria-hidden', !D().querySelector('#olBody [aria-live]') && !!D().querySelector('#olBody .ol-heart')
+        && [...D().querySelectorAll('#olBody .ol-heart, #olBody .ol-ic svg')].every(h => h.getAttribute('aria-hidden') === 'true'));
+      const fame = W().LUNA.state.stats.fame;
+      E('olBody').click();
+      log('ourlog-tap: 본문을 누르면 댓글이 다 나오고 LIVE 꺼짐', lis() === all.length && E('olLive').hidden && !D().querySelector('#olBody .ol-heart')
+        && top().querySelector('.ol-likes').textContent === OLF.fmtCount(OLF.likesFor(post, 'wrong', fame, 'live')) && top().querySelector('.ol-ccount').textContent.includes(String(all.length)), lis() + '/' + all.length + ' likes ' + top().querySelector('.ol-likes').textContent);
+      await sleep(300);
+      log('ourlog-wait: 열어 둔 동안 정산은 오지 않음', !popupShown() && E('appOurlog').classList.contains('on'));
+      E('olBack').click();
+      W().__olForceMotion = false;
+    }
     await until(() => popupShown() && ptitle().includes('정산'));
     log('quiz-after-accept: 맞음 → 정산, 기록 ok', ptitle().includes('정산') && W().LUNA.state.quiz && W().LUNA.state.quiz[1] === 'ok');
     log('broke: 정산 직전 💰0이면 세아 경고 + 다음 편 보상 절반 안내, 상태 broke', txt('popup').includes('통장이 바닥났어요') && txt('popup').includes('절반') && W().LUNA.state.broke === true && W().LUNA.state.stats.money === 10);
@@ -536,6 +573,111 @@ async function run() {
       const first = D().querySelector('#chatChoices .choice-btn:not(:disabled)');
       log('kbd: 다시 선택하기(법정 뒤) — 남은 첫 선택지에 초점, 오답은 비활성', D().activeElement === first && first.dataset.k !== 'wrong' && D().querySelector('#chatChoices .choice-btn[data-k="wrong"]').disabled,
         D().activeElement && D().activeElement.outerHTML.slice(0, 60));
+      W().localStorage.removeItem('luna_save_v1'); W().localStorage.removeItem('luna_notes_v1'); }
+    // ourlog 흐름(2026-11-20, 계획의 Review Focus 1~5): 새 판(루나)으로 편을 이어 가며 ESC·연타·뒤로 가기·재생 중 닫기·다시 열기·새로 고침, 그리고 최종 법정
+    { const OLD = (await import('/data/ourlog.js')).OURLOG, OLF = await import('/js/ourlog-feed.js');
+      const money = () => W().LUNA.state.stats.money;
+      const olOn = () => E('appOurlog').classList.contains('on');
+      const posts = () => [...D().querySelectorAll('#olBody .ol-post')];
+      const lisOf = ep => { const a = D().querySelector('#olBody .ol-post[data-ep="' + ep + '"]'); return a ? a.querySelectorAll('.ol-comments li').length : -1; };
+      const settleShown = () => popupShown() && ptitle().includes('정산');
+      const errs = () => (W().__errs || []).length;
+      const newLuna = async tag => {
+        W().localStorage.removeItem('luna_save_v1'); W().localStorage.removeItem('luna_notes_v1');
+        f.src = '/index.html?ol=' + tag; await sleep(200);
+        await until(() => W().LUNA && E('btnNew') && active('scr-title'));
+        E('btnNew').click(); await until(() => active('scr-select'));
+        D().querySelector('.sel-card[data-idol="luna"]').click();
+        for (let i = 0; i < 6 && !active('scr-ep'); i++) { await until(() => active('scr-intro') || active('scr-ep'), 2000); if (active('scr-intro')) E('introCard').click(); await sleep(80); }
+        await until(() => active('scr-ep'));
+      };
+      const toChoices = async () => {
+        await throughStory(); E('notifBanner').click();
+        await until(() => E('phoneWrap').classList.contains('on'));
+        for (let i = 0; i < 80 && !D().querySelector('#chatChoices .choice-btn'); i++) { E('chatLog').click(); await sleep(70); }
+        await until(() => D().querySelector('#chatChoices .choice-btn'));
+      };
+      const toNotice = async kind => {          // 지금 편: 스토리 → 채팅 → 선택(kind) → 결과·퀴즈 → 적기 → ourlog 카드
+        await toChoices();
+        D().querySelector('#chatChoices .choice-btn[data-k="' + kind + '"]').click();
+        const writing = () => E('appNotes').classList.contains('on') && !!E('noteInput');
+        for (let i = 0; i < 12 && !writing(); i++) {
+          await until(() => writing() || active('scr-court') || (popupShown() && pbtns().length && pbtns().every(b => !b.disabled)), 4000);
+          if (writing()) break;
+          if (active('scr-court')) { E('courtBtn').click(); await sleep(150); continue; }
+          (pbtns().find(b => /대가를 치르고|계속|하나 더/.test(b.textContent)) || pbtns()[pbtns().length - 1]).click(); await sleep(150);
+        }
+        await writeNote('이번 편에서 알게 된 것을 적어 둔다');
+        return until(noticeUp, 3000);
+      };
+      const nextEp = async () => { const b = pbtns().find(x => x.textContent.includes('시작')); if (b) b.click(); await until(() => active('scr-ep') && home() === 'story'); };
+      await newLuna(1);
+      // EP1: ESC = [넘어가기]
+      await toNotice('right');
+      W().LUNA.state.stats.money = 40;
+      D().activeElement.dispatchEvent(new (W().KeyboardEvent)('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+      await until(settleShown, 3000); await sleep(150);
+      log('ourlog-esc: ESC = 넘어가기 → 정산 한 번', !noticeUp() && settleShown() && money() === 50 && !olOn(), 'money ' + money());
+      await nextEp();
+      // EP2: [넘어가기] 연타(+ 잠긴 [열기]까지 눌러 봄)
+      await toNotice('right');
+      W().LUNA.state.stats.money = 40;
+      E('olSkip').click(); E('olSkip').click(); E('olOpen').click();
+      await until(settleShown, 3000); await sleep(150);
+      log('ourlog-double: [넘어가기] 연타해도 정산 한 번', settleShown() && money() === 50 && !olOn() && !noticeUp(), 'money ' + money());
+      await nextEp();
+      // EP3: 연 채로 방문 기록 뒤로 가기(Review Focus 1). 움직임 줄이기 그대로 — 처음부터 끝 상태
+      await toNotice('right');
+      W().LUNA.state.stats.money = 40;
+      E('olOpen').click(); await until(olOn);
+      const full3 = OLF.commentsFor(OLD.posts[3], 'right').length;
+      log('ourlog-reduced: 움직임 줄이기면 처음부터 댓글이 다 나오고 LIVE 없음', posts()[0].dataset.ep === '3' && lisOf(3) === full3 && E('olLive').hidden && !D().querySelector('#olBody .ol-heart'), lisOf(3) + '/' + full3 + ' top ' + (posts()[0] && posts()[0].dataset.ep) + ' live ' + E('olLive').hidden);
+      W().history.back();
+      await until(settleShown, 3000); await sleep(200);
+      log('ourlog-close-once: 열린 채 history.back() → 앱 닫힘, 정산 한 번', !olOn() && settleShown() && money() === 50, 'money ' + money());
+      await nextEp(); await throughStory();
+      let stale = 0; W().LUNA.phone.onceClosed('ourlog', () => { stale++; });   // 열리지 않은 앱에 건 콜백(Task 3 검토 b) — 나중에 그 앱을 열고 닫아도 부르지 않는다
+      E('homeOurlog').click(); await until(olOn);
+      E('olBack').click(); await until(() => !olOn()); await sleep(200);
+      log('ourlog-close-once: 그 뒤 홈 아이콘으로 열고 닫아도 정산·옛 콜백 없음', stale === 0 && !popupShown() && money() === 50 && D().activeElement === E('homeOurlog'), 'stale ' + stale);
+      // EP4(오답): 재생 중 ‹로 닫기(Review Focus 3) → 다음 편 홈 아이콘으로 다시 열기
+      const full4 = OLF.commentsFor(OLD.posts[4], 'wrong').length;
+      await toNotice('wrong');
+      const e0 = errs();
+      W().__olForceMotion = true;
+      E('olOpen').click(); await until(() => lisOf(4) >= 1, 3000);
+      E('olBack').click(); const n4 = lisOf(4);
+      await until(settleShown, 3000); await sleep(1000);
+      log('ourlog-stop: 재생 중 ‹로 닫고 1초 뒤 댓글 수가 늘지 않음, 오류 0', n4 >= 1 && n4 < full4 && lisOf(4) === n4 && E('olLive').hidden && !D().querySelector('#olBody .ol-heart') && errs() === e0 && settleShown(), n4 + '→' + lisOf(4) + '/' + full4);
+      W().__olForceMotion = false;
+      await nextEp(); await throughStory();
+      E('homeOurlog').click(); await until(olOn);
+      { const p4 = D().querySelector('#olBody .ol-post[data-ep="4"]'), fame = W().LUNA.state.stats.fame, later = OLF.fmtCount(OLF.likesFor(OLD.posts[4], 'wrong', fame, 'later'));
+        log('ourlog-reopen: 홈 아이콘으로 다시 열면 그 게시물은 later 숫자, 댓글 다 나옴', posts()[0] === p4 && p4.dataset.v === 'wrong' && lisOf(4) === full4 && p4.querySelector('.ol-likes').textContent === later
+          && later !== OLF.fmtCount(OLF.likesFor(OLD.posts[4], 'wrong', fame, 'live')) && E('olLive').hidden, p4 ? p4.querySelector('.ol-likes').textContent + ' / ' + later : 'no post'); }
+      E('olBack').click(); await until(() => !olOn());
+      // EP5: 재생 중 새로 고침 → 이어 하기(Review Focus 5)
+      await toNotice('right');
+      W().__olForceMotion = true;
+      E('olOpen').click(); await until(() => lisOf(5) >= 1, 3000);
+      W().location.reload(); await sleep(200);
+      await until(() => W().LUNA && E('btnContinue') && E('btnContinue').style.display !== 'none');
+      E('btnContinue').click(); await until(() => active('scr-ep')); await throughStory();
+      E('homeOurlog').click(); await until(olOn);
+      { const eps = posts().map(p => p.dataset.ep).join();
+        log('ourlog-resume: 재생 중 새로 고침 → 이어 하기 → EP 시작, 홈 아이콘 피드에 지금 EP 게시물 없음', txt('epHead').includes('EP5') && W().LUNA.state.badges[4] === null && eps === '4,3,2,1' && !noticeUp(), eps); }
+      E('olBack').click(); await until(() => !olOn());
+      // 최종 법정으로 끝나는 편: 카드 없이 법정 → 엔딩(안전도·법정 횟수 주입)
+      await newLuna('court');
+      await toChoices();
+      W().LUNA.state.stats.safety = 5; W().LUNA.state.courtCount = 1;
+      D().querySelector('#chatChoices .choice-btn[data-k="wrong"]').click();
+      await until(() => popupShown() && pbtns().some(b => b.textContent.includes('대가를 치르고')));
+      pbtns().find(b => b.textContent.includes('대가를 치르고')).click();
+      await until(() => active('scr-court'));
+      const noCard = !noticeUp();
+      E('courtBtn').click(); await until(() => active('scr-end'), 3000); await sleep(200);
+      log('ourlog-court: 최종 법정 EP에는 카드 없음', noCard && active('scr-end') && !noticeUp() && !popupShown());
       W().localStorage.removeItem('luna_save_v1'); W().localStorage.removeItem('luna_notes_v1'); }
     // 대비: 유리 위 글자 4.5:1 이상(다크·라이트). 흐림·채도 효과는 빼고 색만 겹쳐 계산한 근삿값
     for (const th of ['dark', 'light']) {

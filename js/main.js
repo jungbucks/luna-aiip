@@ -15,7 +15,7 @@ import { applyTheme, toggleTheme, watchSystemTheme } from './ui/theme.js';
 import * as phone from './ui/phone.js';
 import { initSettings, openSettings } from './ui/settings.js';
 import * as notebook from './ui/notebook.js';
-import { initOurlog, openFeed } from './ui/ourlog.js';
+import * as ourlog from './ui/ourlog.js';
 import { initNotebook, openNotebook, askNote, openProduct } from './ui/notebook.js';
 import { clearNotes, loadNotes } from './notes.js';
 
@@ -71,10 +71,10 @@ function updateStatbar() {
 /* ── 타이틀 / 캐릭터 선택 / 인트로 ── */
 function boot() {
   applyTheme(); watchSystemTheme();
-  phone.initPhone({ onMessenger: openMessenger, onNotes: openNotebook, onSettings: openSettings, onOurlog: openFeed }); phone.startClock();
+  phone.initPhone({ onMessenger: openMessenger, onNotes: openNotebook, onSettings: openSettings, onOurlog: ourlog.openFeed }); phone.startClock();
   initSettings({ onReset: () => resetAll('setReset') });
   initNotebook({ getState: () => G });
-  initOurlog({ getState: () => G });
+  ourlog.initOurlog({ getState: () => G });
   $('btnTheme').onclick = toggleTheme;
   $('lockApp').textContent = STRINGS.ui.lockApp; $('lockNow').textContent = STRINGS.ui.lockNow;
   $('titleChars').innerHTML = idolSVG('sol') + idolSVG('luna');
@@ -163,6 +163,7 @@ function intro(i) {
 /* ── 에피소드 (v0.6: 홈 화면 위 스토리 씬 → 알림 대기 → 알림·메신저를 누르면 채팅 자동 재생) ── */
 let sceneIdx = 0;
 let chatStarted = false;   // 이 EP의 채팅을 이미 시작했는가(알림 연타·다시 열기에 두 번 시작하지 않게)
+let settled = false;       // 이 EP의 정산(bridge)을 이미 했는가 — 💰+10은 EP마다 한 번(ourlog 알림·앱 닫기 연타 방지)
 let choiceKeys = ['wrong', 'right', 'info'];   // 이 EP의 선택지 순서(enterEp에서 섞는다)
 
 function enterEp() {
@@ -174,6 +175,7 @@ function enterEp() {
   show('scr-ep');
   sceneIdx = 0;
   chatStarted = false;
+  settled = false;
   choiceKeys = choiceOrder((window.__rand || Math.random)());   // window.__rand = 프로브가 순서를 정해 두는 자리
   while (phone.topApp()) phone.closeApp(null, false);   // 열려 있던 앱은 닫고 홈에서 시작
   phone.clearNotify();
@@ -298,8 +300,11 @@ function rightFlow() {
   });
 }
 
-/* ── 알게 된 것 적기(v0.6, 스탯 무관) — 퀴즈 뒤·정산 앞. 권리 수첩이 열려 적어야 정산으로 넘어간다 ── */
-const noteStep = () => askNote(G.ep, bridge);
+/* ── 알게 된 것 적기(v0.6, 스탯 무관) — 퀴즈 뒤·정산 앞. 권리 수첩이 열려 적어야 다음으로 넘어간다 ── */
+const noteStep = () => askNote(G.ep, ourlogStep);
+
+/* ── ourlog 알림(2026-11-20, 스탯 무관) — 적기 뒤·정산 앞. [넘어가기]면 바로, [열기]면 ourlog 앱을 닫을 때 정산 ── */
+function ourlogStep() { ourlog.offer(G, { onDone: bridge }); }
 
 /* ── O/X 확인 퀴즈(2026-11-14, 스탯 무관) — 정산(bridge) 직전. 틀리면 하나 더, 결과는 G.quiz에(js/quiz.js) ── */
 const QUIZ_GUARD_MS = 300;   // 팝업이 뜬 직후 연타가 다음 팝업 버튼을 누르지 않게
@@ -328,8 +333,10 @@ function quizThen(next) {
   ask(set.main, 'main');
 }
 
-/* ── 브릿지(정산) → 다음 EP / 엔딩 ── */
+/* ── 브릿지(정산) → 다음 EP / 엔딩 ── 한 EP에 한 번만(💰+10). 알림 카드·ourlog 닫기 어느 길로 두 번 와도 다음 enterEp까지 무시 */
 function bridge() {
+  if (settled) return;
+  settled = true;
   const broke = engine.settle(G);   // 정산 직전 💰 0 = 통장 바닥(예전 검사는 +10 뒤에 봐서 한 번도 뜨지 않았다, 2026-11-20)
   store.save(G, 'ep');
   updateStatbar();

@@ -30,3 +30,31 @@
 .ol-comments{list-style:none;margin:0;padding:8px 2px 0;border-top:1px solid var(--bub-line);display:flex;flex-direction:column;gap:6px}
 .ol-comments li{font-size:14.5px;line-height:1.5;overflow-wrap:anywhere}
 .ol-comments b{color:var(--dim);font-weight:700;margin-right:2px}
+
+/* 실시간 재생: 그림 오른쪽 아래에서 떠오르는 별(반응 아이콘과 같은 모양 — 둥근 하트 대신). 장식이라 aria-hidden.
+   움직임 줄이기면 재생 자체를 하지 않는다(ourlog.js) */
+.ol-heart{position:absolute;right:14px;bottom:12px;width:26px;height:26px;color:#fff;pointer-events:none;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.35));animation:olFloat 1.3s ease-out forwards}
+.ol-heart svg{width:100%;height:100%;fill:currentColor;stroke:none}
+@keyframes olFloat{from{opacity:0;transform:translate(0,0) scale(.6)}20%{opacity:1}to{opacity:0;transform:translate(var(--dx,-10px),-150px) scale(1.15)}}
+.ol-live i{animation:olBlink 1.2s ease-in-out infinite}
+@keyframes olBlink{50%{opacity:.35}}
+.ol-tapall{display:block;margin:2px 2px 0;font-size:13.5px;color:var(--dim)}
+.ol-tapall[hidden]{display:none}
+
+/* 알림 카드(수첩 적기 뒤·정산 앞): #app의 직계 자식. 위에서 내려오는 불투명 카드 + 뒤를 어둡게(그림자 퍼짐 — 뒤는 inert).
+   산출물 층(40) 위, 팝업(50)·상태바(60) 아래 */
+#olNotice{position:absolute;top:calc(var(--sb) + 8px);left:10px;right:10px;z-index:45;max-width:420px;margin:0 auto;
+  background:var(--solid);color:var(--ink);border-radius:26px;padding:14px 14px 12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.3),0 0 0 200vmax var(--scrim);animation:olDrop .42s cubic-bezier(.2,.9,.25,1.15) both}
+#olNotice[hidden]{display:none}
+@keyframes olDrop{from{opacity:0;transform:translateY(-120%)}}
+.oln-head{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--dim)}
+.oln-ico{width:34px;height:34px}
+.oln-ico svg{width:18px;height:18px}
+.oln-text{margin:10px 2px 2px;font-size:16.5px;font-weight:800;line-height:1.45}
+.oln-count{margin:0 2px;font-size:15px;color:var(--dim)}
+.oln-btns{display:flex;gap:8px;margin-top:12px}
+.oln-btn{flex:1;padding:12px 10px;border-radius:16px;font-size:16px;font-weight:800;border:none;background:var(--cta);color:var(--cta-ink)}   /* 팝업 단추와 같은 모양(class는 따로 — 팝업 검사와 섞이지 않게) */
+.oln-btn.ghost{background:var(--btn);color:var(--ink);border:1px solid var(--edge)}
+.oln-btn:disabled{opacity:.55;cursor:default}

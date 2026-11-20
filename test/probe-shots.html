@@ -58,7 +58,9 @@ async function run() {
   await until(() => E('appNotes').classList.contains('on') && E('noteInput')); await sleep(600);
   if (scene === 'note') return;
   const i = E('noteInput'); i.value = '학습용이라도 남의 노래를 허락 없이 대량으로 쓰면 안 된다는 걸 알았다.'; i.dispatchEvent(new (W().Event)('input', { bubbles: true }));
-  await sleep(60); E('noteSave').click(); await until(popup); await sleep(200);
+  await sleep(60); E('noteSave').click();
+  if (await until(() => E('olNotice') && !E('olNotice').hidden, 3000)) E('olSkip').click();   // ourlog 알림 카드는 넘어간다(정산 쪽 장면들)
+  await until(popup); await sleep(200);
   if (scene === 'end' || scene === 'product') {
     await clickPop('시작');                                             // 정산 팝업 닫기(EP2로) — 그 뒤 엔딩을 바로 그린다
     W().LUNA.showEnding('unicorn');

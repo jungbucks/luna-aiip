@@ -160,6 +160,14 @@ window.__errs=[];addEventListener('error',function(e){__errs.push(e.message)});a
     </div>
   </section>
 
+  <!-- ourlog 알림 카드: 수첩 적기 뒤·정산 앞(js/ui/ourlog.js offer). #app의 직계 자식 — 떠 있는 동안 다른 자식은 inert -->
+  <div id="olNotice" role="dialog" aria-modal="true" aria-labelledby="olNText" aria-describedby="olNCount" hidden>
+    <div class="oln-head"><span class="ico ico-ourlog oln-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15.5 4.5a8 8 0 1 0 4 10.5 6.5 6.5 0 0 1-4-10.5z"/><path d="M17.5 3v3M16 4.5h3"/></svg></span><span id="olNTitle"></span></div>
+    <p class="oln-text" id="olNText"></p>
+    <p class="oln-count" id="olNCount"></p>
+    <div class="oln-btns"><button type="button" class="oln-btn" id="olOpen"></button><button type="button" class="oln-btn ghost" id="olSkip"></button></div>
+  </div>
+
   <!-- 팝업 오버레이 -->
   <div id="popup"><div class="pop-card glass2">
     <div class="pop-face"></div>
