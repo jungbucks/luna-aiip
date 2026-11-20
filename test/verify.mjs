@@ -181,6 +181,35 @@ console.log('[말투] 캐릭터 톡 — 사람이 하는 말 (2026-11-17, docs/s
     story.filter(m => m.text.includes('!') || (['장면', '인트로'].includes(m.who) && (m.text.split('\n').length > 3 || m.text.split('\n').some(l => len(l) > 30)))));
   const C = await import('../js/ui/chat.js');
   t('선택지 순서: 오답·정답 자리가 섞이고 확인은 늘 맨 끝', C.choiceOrder(0.1).join() === 'wrong,right,info' && C.choiceOrder(0.9).join() === 'right,wrong,info');
+
+  console.log('[ourlog] 피드 계산·글 (docs/superpowers/specs/2026-11-20-ourlog-design.md)');
+  const F = await import('../js/ourlog-feed.js');
+  const { OURLOG } = await import('../data/ourlog.js');
+  const EPS = [1];                                    // Task 2에서 [1,2,3,4,5,6]
+  t('variantOf: full→right, half→half, none→wrong, null→null',
+    F.variantOf('full') === 'right' && F.variantOf('half') === 'half' && F.variantOf('none') === 'wrong' && F.variantOf(null) === null);
+  const p = OURLOG.posts[1];
+  const half = F.commentsFor(p, 'half');
+  t('commentsFor half: right에 끼워 넣고 원본은 그대로', half.length === p.comments.right.length + p.comments.half.length
+    && p.comments.half.every(h => half[h.at].text === h.text) && F.commentsFor(p, 'right').length === p.comments.right.length);
+  t('좋아요: 실시간은 오답이 더, 나중엔 오답이 덜(6편 배율)', EPS.every(i => {
+    const L = OURLOG.posts[i].likes; return L.live.wrong > L.live.right && L.later.wrong < L.later.right; }));
+  t('좋아요·팔로워: 정수, 📈와 같은 방향', [0, 20, 50, 100].every(f => Number.isInteger(F.followersFor(f)) && Number.isInteger(F.likesFor(p, 'wrong', f, 'live')))
+    && F.followersFor(80) > F.followersFor(20) && F.likesFor(p, 'right', 80, 'later') > F.likesFor(p, 'right', 20, 'later')
+    && F.likesFor(p, 'wrong', 50, 'live') > F.likesFor(p, 'right', 50, 'live') && F.likesFor(p, 'wrong', 50, 'later') < F.likesFor(p, 'right', 50, 'later'));
+  t('fmtCount: 1,234 / 2.4만 / 8만', F.fmtCount(1234) === '1,234' && F.fmtCount(24000) === '2.4만' && F.fmtCount(80000) === '8만');
+  const g = E.newGame(); g.badges = ['full', 'none', 'half', null, null, null];
+  t('feedOf: 배지 있는 EP만, 최신 먼저', JSON.stringify(F.feedOf(g)) === JSON.stringify([{ ep: 3, variant: 'half' }, { ep: 2, variant: 'wrong' }, { ep: 1, variant: 'right' }]));
+  t('imageKey: half는 right 그림', F.imageKey(p, 'half') === p.img.right);
+  const lines = EPS.flatMap(i => ['right', 'wrong', 'half'].map(v => ({ i, v, list: F.commentsFor(OURLOG.posts[i], v) })));
+  none('댓글: 편·갈래마다 8~10개(half는 끼운 뒤)', lines.filter(x => x.list.length < 8 || x.list.length > 10).map(x => ({ ep: x.i, who: x.v, text: String(x.list.length) })));
+  none('댓글: 40자 이하, 유행어 없음, 이름 하드코딩 없음', lines.flatMap(x => x.list.map(c => ({ ep: x.i, who: c.who, text: c.text })))
+    .filter(c => [...c.text].length > 40 || SLANG.some(s => c.text.includes(s)) || /솔|루나|SOL|LUNA/.test(c.text)));
+  none('아이디: 영문 소문자 3~20자, 한 화면(half·wrong 목록) 안에서 겹치지 않음', EPS.flatMap(i => ['half', 'wrong'].flatMap(v => {
+    const list = F.commentsFor(OURLOG.posts[i], v), ids = list.map(c => c.who);
+    return list.filter((c, k) => !/^[a-z0-9_.]{3,20}$/.test(c.who) || ids.indexOf(c.who) !== k).map(c => ({ ep: i, who: c.who, text: v }));
+  })));
+  t('계정 = {N}_official 토큰', OURLOG.account.handle === '{N}_official');
 }
 
 console.log('[토큰 치환] 캐릭터 이름·조사 (character.js T)');
