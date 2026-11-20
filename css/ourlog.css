@@ -45,7 +45,8 @@
 /* 알림 카드(수첩 적기 뒤·정산 앞): #app의 직계 자식. 위에서 내려오는 불투명 카드 + 뒤를 어둡게(그림자 퍼짐 — 뒤는 inert).
    산출물 층(40) 위, 팝업(50)·상태바(60) 아래 */
 #olNotice{position:absolute;top:calc(var(--sb) + 8px);left:10px;right:10px;z-index:45;max-width:420px;margin:0 auto;
-  background:var(--solid);color:var(--ink);border-radius:26px;padding:14px 14px 12px;
+  background:linear-gradient(var(--solid),var(--solid)),var(--app-bg);   /* --solid(0.94)만으로는 뒤 메신저 글자가 비쳤다 — 불투명한 앱 바탕 위에 얹는다. 흐림 없음 */
+  color:var(--ink);border-radius:26px;padding:14px 14px 12px;
   box-shadow:0 10px 30px rgba(0,0,0,.3),0 0 0 200vmax var(--scrim);animation:olDrop .42s cubic-bezier(.2,.9,.25,1.15) both}
 #olNotice[hidden]{display:none}
 @keyframes olDrop{from{opacity:0;transform:translateY(-120%)}}

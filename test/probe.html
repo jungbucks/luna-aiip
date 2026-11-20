@@ -417,6 +417,8 @@ async function run() {
       log('ourlog-notice: 수첩 적기 뒤 카드, 초점은 [열기], 뒤 화면 inert', noticeUp() && !popupShown() && D().activeElement === E('olOpen') && E('scr-ep').inert
         && E('olNotice').parentElement === E('app') && E('olNotice').getAttribute('role') === 'dialog' && E('olNotice').getAttribute('aria-modal') === 'true'
         && txt('olNotice').includes('ourlog SNS 앱을 확인해 보자!') && txt('olNotice').includes('새 댓글 ' + all.length + '개'), D().activeElement && D().activeElement.outerHTML.slice(0, 60));
+      { const cs = W().getComputedStyle(E('olNotice')), a = parseColor(cs.backgroundColor)[3];   // 뒤 메신저(방 이름·점수 알약)가 비치지 않게 — 알림 배너·내레이션 카드와 같은 규칙, 0.94(--solid)로도 비쳐서 완전 불투명으로
+        log('opaque: ourlog 알림 카드 바탕은 불투명(--solid를 불투명 바탕 위에), 흐림 없음', a >= 0.9 && a === 1 && ['none', ''].includes(cs.backdropFilter || '') && ['none', ''].includes(cs.webkitBackdropFilter || ''), 'alpha ' + a + ' ' + cs.backgroundColor); }
       { const K = W().KeyboardEvent, tab = sh => { const e = new K('keydown', { key: 'Tab', shiftKey: sh, bubbles: true, cancelable: true }); D().activeElement.dispatchEvent(e); return e.defaultPrevented; };
         E('olSkip').focus(); const p1 = tab(false), at1 = D().activeElement === E('olOpen');
         const p2 = tab(true), at2 = D().activeElement === E('olSkip');
