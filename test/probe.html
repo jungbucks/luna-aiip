@@ -159,6 +159,7 @@ async function run() {
     log('스토리 씬 무대 표시', D().getElementById('storyStage').classList.contains('on'));
     log('씬 텍스트 토큰 치환', txt('storyText').includes('솔') || !txt('storyText').includes('{n'));
     log('home: 스토리 동안 홈이 깔려 있고 앱은 안 눌림', home() === 'story' && !!E('homeScreen') && (E('dockNotes').click(), !E('appNotes').classList.contains('on')));
+    log('ourlog-icon: 홈에 ourlog 단추(장식 아님), 스토리 중엔 안 열림', E('homeOurlog').tagName === 'BUTTON' && (E('homeOurlog').click(), !E('appOurlog').classList.contains('on')));
     log('kbd: 스토리 장면의 [다음] 단추에 초점', focusedBtnIn('storyStage'), D().activeElement && D().activeElement.outerHTML.slice(0, 60));
     log('a11y: 내레이션 단추 이름에 진행 수 (1/n)', /^눌러서 계속 \(1\/\d\)$/.test(E('storyNext').getAttribute('aria-label') || ''), E('storyNext').getAttribute('aria-label'));
     log('opaque: 내레이션 카드 바탕은 불투명(--solid)', parseColor(W().getComputedStyle(D().querySelector('.story-card')).backgroundColor)[3] >= 0.9);
@@ -174,8 +175,14 @@ async function run() {
     log('notify: 알림 대기 — 메신저는 아직 닫힘', home() === 'notify' && !E('phoneWrap').classList.contains('on'));
     log('notify: 미리보기 = 첫 메시지, 이름 토큰 풀림', E('notifBanner').textContent.includes('솔 프로젝트') && E('notifBanner').textContent.includes(FIRST.who + ': ' + FIRST.text) && !/\{[nN]/.test(E('notifBanner').textContent));
     log('notify: 메신저 아이콘에 숫자', E('msgBadge').offsetParent !== null);
-    for (const id of ['appCity', 'appCal', 'dockCall']) E(id).click();
-    log('decor: 장식 앱 3개는 아무 층도 열지 않음 + 단추가 아닌 aria-hidden div', !D().querySelector('.applayer.on') && ['appCity', 'appCal', 'dockCall'].every(id => E(id).tagName === 'DIV' && E(id).getAttribute('aria-hidden') === 'true' && W().getComputedStyle(E(id)).cursor === 'default'));
+    for (const id of ['appCal', 'dockCall']) E(id).click();
+    log('decor: 장식 앱 2개는 아무 층도 열지 않음 + 단추가 아닌 aria-hidden div', !D().querySelector('.applayer.on') && ['appCal', 'dockCall'].every(id => E(id).tagName === 'DIV' && E(id).getAttribute('aria-hidden') === 'true' && W().getComputedStyle(E(id)).cursor === 'default'));
+    {
+      const OL = (await import('/data/strings.js')).STRINGS.ui.ourlog;
+      log('ourlog-feed: 선택 전엔 빈 피드 문구', (E('homeOurlog').click(), E('appOurlog').classList.contains('on')) && E('olBody').textContent.includes(OL.empty), E('olBody').textContent.slice(0, 40));
+      E('olBack').click();
+      log('ourlog-back: ‹로 닫으면 홈, 초점은 ourlog 아이콘', !E('appOurlog').classList.contains('on') && D().activeElement === E('homeOurlog'));
+    }
     log('decor: 달력에 오늘 날짜', E('calDay').textContent === String(new Date().getDate()));
     E('dockNotes').click();
     await until(() => E('appNotes').classList.contains('on'));

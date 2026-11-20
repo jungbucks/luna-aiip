@@ -3,8 +3,8 @@
 import { STRINGS } from '../../data/strings.js';
 
 const $ = id => document.getElementById(id);
-const LAYER = { messenger: 'phoneWrap', notes: 'appNotes', settings: 'appSettings' };
-const DOCK = { messenger: 'dockMsg', notes: 'dockNotes', settings: 'dockSettings' };
+const LAYER = { messenger: 'phoneWrap', notes: 'appNotes', settings: 'appSettings', ourlog: 'appOurlog' };
+const DOCK = { messenger: 'dockMsg', notes: 'dockNotes', settings: 'dockSettings', ourlog: 'homeOurlog' };
 
 /* ── 시계·날짜: 분이 바뀔 때마다 ── */
 export function startClock() {
@@ -78,7 +78,12 @@ export function closeApp(name, restoreFocus = true) {
   $(LAYER[n]).classList.remove('on');
   sync();
   if (restoreFocus && !stack.length) $(DOCK[n]).focus({ preventScroll: true });
+  const f = closedOnce[n]; delete closedOnce[n];   // 한 번만 부르고 지운다(‹·뒤로 가기 모두 closeApp을 지난다)
+  if (f) f();
 }
+
+const closedOnce = {};
+export function onceClosed(name, fn) { closedOnce[name] = fn; }
 
 /* 잠깐 붙잡기(답장을 보낸 뒤 결과가 오기까지): 뒤로 버튼·뒤로 가기를 무시하되 화면은 그대로 둔다 */
 export function holdApps(on) { held = on; }
@@ -109,9 +114,9 @@ function onPopState() {
 }
 
 /* ── 초기화 ── 독 아이콘 클릭을 거는 곳은 여기 하나뿐 */
-export function initPhone({ onMessenger, onNotes, onSettings }) {
+export function initPhone({ onMessenger, onNotes, onSettings, onOurlog }) {
   const A = STRINGS.ui.apps;
-  const label = { appCity: A.city, appCal: A.cal, dockCall: A.call, dockMsg: A.msg, dockNotes: A.notes, dockSettings: A.settings };
+  const label = { homeOurlog: A.ourlog, appCal: A.cal, dockCall: A.call, dockMsg: A.msg, dockNotes: A.notes, dockSettings: A.settings };
   Object.keys(label).forEach(id => {
     const el = $(id);
     el.querySelector('.app-name').textContent = label[id];
@@ -123,6 +128,7 @@ export function initPhone({ onMessenger, onNotes, onSettings }) {
   $('notifBanner').onclick = guarded(onMessenger);
   $('dockMsg').onclick = guarded(onMessenger);
   $('dockNotes').onclick = guarded(onNotes || (() => openApp('notes')));
+  $('homeOurlog').onclick = guarded(onOurlog || (() => openApp('ourlog')));
   $('dockSettings').onclick = guarded(onSettings || (() => openApp('settings')));
 
   document.querySelectorAll('.app-back').forEach(b => { b.onclick = () => { if (!locked && !held) closeApp(); }; });

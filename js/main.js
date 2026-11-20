@@ -15,6 +15,7 @@ import { applyTheme, toggleTheme, watchSystemTheme } from './ui/theme.js';
 import * as phone from './ui/phone.js';
 import { initSettings, openSettings } from './ui/settings.js';
 import * as notebook from './ui/notebook.js';
+import { initOurlog, openFeed } from './ui/ourlog.js';
 import { initNotebook, openNotebook, askNote, openProduct } from './ui/notebook.js';
 import { clearNotes, loadNotes } from './notes.js';
 
@@ -70,9 +71,10 @@ function updateStatbar() {
 /* ── 타이틀 / 캐릭터 선택 / 인트로 ── */
 function boot() {
   applyTheme(); watchSystemTheme();
-  phone.initPhone({ onMessenger: openMessenger, onNotes: openNotebook, onSettings: openSettings }); phone.startClock();
+  phone.initPhone({ onMessenger: openMessenger, onNotes: openNotebook, onSettings: openSettings, onOurlog: openFeed }); phone.startClock();
   initSettings({ onReset: () => resetAll('setReset') });
   initNotebook({ getState: () => G });
+  initOurlog({ getState: () => G });
   $('btnTheme').onclick = toggleTheme;
   $('lockApp').textContent = STRINGS.ui.lockApp; $('lockNow').textContent = STRINGS.ui.lockNow;
   $('titleChars').innerHTML = idolSVG('sol') + idolSVG('luna');

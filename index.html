@@ -13,6 +13,7 @@ document.documentElement.dataset.theme=p;
 window.__errs=[];addEventListener('error',function(e){__errs.push(e.message)});addEventListener('unhandledrejection',function(e){__errs.push(String(e.reason))});})();</script>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/phone.css">
+<link rel="stylesheet" href="css/ourlog.css">
 <link rel="modulepreload" href="js/main.js">
 <link rel="modulepreload" href="js/engine.js">
 <link rel="modulepreload" href="js/state.js">
@@ -25,6 +26,8 @@ window.__errs=[];addEventListener('error',function(e){__errs.push(e.message)});a
 <link rel="modulepreload" href="js/ui/settings.js">
 <link rel="modulepreload" href="js/ui/notebook.js">
 <link rel="modulepreload" href="js/notes.js">
+<link rel="modulepreload" href="js/ui/ourlog.js">
+<link rel="modulepreload" href="js/ourlog-feed.js">
 <link rel="modulepreload" href="data/episodes.js">
 <link rel="modulepreload" href="data/strings.js">
 </head>
@@ -91,7 +94,7 @@ window.__errs=[];addEventListener('error',function(e){__errs.push(e.message)});a
         <p class="stat-help" id="statHelp"></p>
       </div>
       <div class="app-grid">
-        <div class="app app-decor" id="appCity" aria-hidden="true"><span class="ico ico-city"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V9l5-3v14M9 20V4l6 3v13M15 20v-9l5 2v7M3 20h18"/></svg></span><span class="app-name"></span></div>
+        <button type="button" class="app" id="homeOurlog"><span class="ico ico-ourlog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 4.5a8 8 0 1 0 4 10.5 6.5 6.5 0 0 1-4-10.5z"/><path d="M17.5 3v3M16 4.5h3"/></svg></span><span class="app-name"></span></button>
         <div class="app app-decor" id="appCal" aria-hidden="true"><span class="ico ico-cal"><i id="calDow"></i><b id="calDay"></b></span><span class="app-name"></span></div>
       </div>
       <div class="ep-char-row"><div class="idol-char" id="epChar"></div></div>
@@ -129,6 +132,11 @@ window.__errs=[];addEventListener('error',function(e){__errs.push(e.message)});a
     <div id="appNotes" class="applayer">
       <div class="app-head"><button type="button" class="app-back" id="notesBack">‹</button><span class="app-title" id="notesTitle"></span></div>
       <div class="app-body" id="notesList"></div>
+    </div>
+    <!-- ourlog 앱 -->
+    <div id="appOurlog" class="applayer">
+      <div class="app-head"><button type="button" class="app-back" id="olBack">‹</button><span class="ol-logo" id="olLogo"></span><span class="ol-live" id="olLive" hidden><i aria-hidden="true"></i><span id="olLiveText"></span></span></div>
+      <div class="app-body" id="olBody"></div>
     </div>
     <!-- 설정 앱 -->
     <div id="appSettings" class="applayer">

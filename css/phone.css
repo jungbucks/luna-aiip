@@ -25,7 +25,7 @@
 .ico-msg{background:linear-gradient(45deg,#f9a03f 4%,#ee2a7b 50%,#6a2bd9 96%)}
 .ico-notes{background:linear-gradient(160deg,#fde047,#f5b301);color:#5a3b00}
 .ico-set{background:linear-gradient(160deg,#aeb4c0,#6b7280)}
-.ico-city{background:linear-gradient(160deg,#7cc4ff,#2f6fe4)}
+.ico-ourlog{background:#3b2fa8}   /* 단색 남보라 + 선 아이콘(그라데이션 카메라 금지) */
 .ico-cal{background:#fff;border:1px solid rgba(26,28,58,.14);flex-direction:column;line-height:1;gap:1px}
 .ico-cal i{font-style:normal;font-size:11px;font-weight:800;color:#e53935}
 .ico-cal b{font-size:22px;font-weight:800;color:#16182f}

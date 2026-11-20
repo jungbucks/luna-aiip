@@ -1,0 +1,32 @@
+/* ourlog 앱 — 불투명 --app-bg 위. 흐림 없음(스크롤되는 면). 인스타 닮기 금지: 글자 로고, 별·네모 선 아이콘 */
+#appOurlog{transform-origin:12% 20%}
+.ol-logo{font-size:19px;font-weight:800;letter-spacing:-.02em;color:var(--accent);flex:1}
+.ol-live{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:800;color:var(--ink)}
+.ol-live[hidden]{display:none}
+.ol-live i{width:8px;height:8px;border-radius:50%;background:var(--bad);display:block}
+#olBody{padding:10px 14px 26px}
+.ol-ava{position:relative;width:46px;height:46px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--chip);border:1px solid var(--bub-line)}
+.ol-ava .idol-svg{width:150%;max-width:none;margin:-4% 0 0 -25%;animation:none;display:block}
+.ol-ava-s{width:32px;height:32px}
+.ol-acct{display:flex;align-items:center;gap:12px;padding:6px 2px 14px}
+.ol-acct-t{display:flex;flex-direction:column;line-height:1.35}
+.ol-acct-t b{font-size:15.5px}
+.ol-acct-t span{font-size:14px;color:var(--dim)}
+.ol-empty{margin:40px 0;text-align:center;color:var(--dim);font-size:15px}
+.ol-post{background:var(--bub);border:1px solid var(--bub-line);border-radius:18px;padding:10px 10px 12px;margin-bottom:14px}
+.ol-who{display:flex;align-items:center;gap:8px;font-size:14.5px;margin-bottom:8px}
+.ol-who b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ol-time{font-size:13px;color:var(--dim)}
+.ol-art{position:relative;aspect-ratio:1/1;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(150deg,#3b2fa8,#1f7a8c)}
+.ol-art[data-v="wrong"]{background:linear-gradient(150deg,#8a3b2f,#4a2a7a)}
+.ol-art[data-v="half"]{background:linear-gradient(150deg,#5a3fb0,#a8730a)}
+.ol-emoji{font-size:84px;line-height:1}
+.ol-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.ol-react{display:flex;gap:18px;align-items:center;margin:10px 2px 4px;font-size:14.5px;font-variant-numeric:tabular-nums}
+.ol-ic{display:inline-flex;align-items:center;gap:6px}
+.ol-ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ol-cap{margin:4px 2px 8px;font-size:15px;line-height:1.55}
+.ol-comments{list-style:none;margin:0;padding:8px 2px 0;border-top:1px solid var(--bub-line);display:flex;flex-direction:column;gap:6px}
+.ol-comments li{font-size:14.5px;line-height:1.5;overflow-wrap:anywhere}
+.ol-comments b{color:var(--dim);font-weight:700;margin-right:2px}
