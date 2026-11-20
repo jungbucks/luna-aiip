@@ -35,13 +35,17 @@ function endReview(state) {
   const parts = [];
   if (wrongEps.length) parts.push(reviewList(state));
   if (missed.length) parts.push(`<p class="rv-sub">${esc(STRINGS.quiz.reviewHead)}</p>` + EPISODES.filter(e => missed.includes(e.id))
-    .map(e => `<div class="rv-item"><b>${e.rightEmoji} ${esc(e.right)}</b> — ${esc(e.hint)}</div>`).join(''));
+    .map(e => `<div class="rv-item"><b>${e.rightEmoji} ${esc(e.right)}</b> — ${esc(e.concept)}</div>`).join(''));
   return parts.join('');
 }
 
 export function renderEnding(state, endingKey, restartCb, productCb) {
   const e = STRINGS.endings[endingKey];
   const r = STRINGS.report;
+  // 생존 엔딩: 법정에 간 적이 없으면 '소송'을 말하지 않고, 통장이 바닥났던 판이면 한 줄 더(2026-11-20)
+  const body = endingKey === 'survive'
+    ? (state.courtCount ? e.body : e.bodyNoCourt) + (state.brokeEver ? '\n' + e.debtLine : '')
+    : e.body;
   const badges = EPISODES.map((ep, i) => {
     const b = state.badges[i];
     const cls = b === 'full' ? 'b-full' : b === 'half' ? 'b-half' : 'b-none';
@@ -52,9 +56,10 @@ export function renderEnding(state, endingKey, restartCb, productCb) {
     <div class="end-card">
       <div class="end-emoji">${e.emoji}</div>
       <h2 tabindex="-1">${esc(e.name)}</h2>
-      <p class="end-body">${esc(e.body).replace(/\n/g, '<br>')}</p>
+      <p class="end-body">${esc(body).replace(/\n/g, '<br>')}</p>
       <h3>${esc(r.head)}</h3>
       <div class="rp-stats">${statsLine(state.stats)}</div>
+      <p class="rp-fame">${esc(STRINGS.fameLine(state.stats.fame))}</p>
       <div class="rp-badges">${badges}</div>
       <h3>${esc(r.reviewHead)}</h3>
       <div class="rv-list">${endReview(state)}</div>

@@ -54,7 +54,9 @@ console.log('[경로 C] 오답 EP1·EP4(대가 진행) + 나머지 정답 → �
   const st = E.newGame();
   for (let i = 1; i <= 6; i++) (i === 1 || i === 4) ? playWrongAccept(st) : playRight(st);
   const end = E.judgeEnding(st);
-  t('최종 스탯 10/75/65', st.stats.money === 10 && st.stats.fame === 75 && st.stats.safety === 65, fmt(st));
+  // 2026-11-20: EP4 오답 📈-5, EP4 끝 💰0 → 통장 바닥 → EP5 정답 보상 📈·🛡️ 절반(+5/+5), EP6 끝 💰0도 바닥(엔딩용)
+  t('최종 스탯 10/65/60', st.stats.money === 10 && st.stats.fame === 65 && st.stats.safety === 60, fmt(st));
+  t('통장 바닥을 겪음(brokeEver)', st.brokeEver === true);
   t('완전 배지 4 + none 2', st.badges.filter(b => b === 'full').length === 4 && st.badges.filter(b => b === 'none').length === 2);
   t('법정 씬 0회', st.courtCount === 0);
   t('엔딩 = survive', end === 'survive', end);
@@ -75,6 +77,22 @@ console.log('[경로 D] EP1 오답→[다시 선택]→정답 + 나머지 정답
   t('반쪽이 유니콘 차단 → survive', end === 'survive', end);
 }
 
+console.log('[통장 바닥] 정산 직전 💰0 → 다음 EP 정답 보상 절반·유니콘 불가 (SPEC §6.1-2, 2026-11-20)');
+{
+  const st = E.newGame();
+  st.stats.money = 0;
+  t('정산 직전 💰0 → settle이 true, 정산 뒤 💰10', E.settle(st) === true && st.broke && st.brokeEver && st.stats.money === 10);
+  E.nextEp(st);
+  const d = E.rightDeltaFor(st, { money: -15, fame: 15, safety: 15 });
+  t('바닥난 다음 EP: 📈·🛡️ 상승분 절반(trunc), 💰 비용은 그대로', d.money === -15 && d.fame === 7 && d.safety === 7, JSON.stringify(d));
+  t('바닥난 다음 EP: 감점은 줄이지 않음', E.rightDeltaFor(st, { money: 0, fame: -4, safety: 0 }).fame === -4);
+  t('다음 정산에서 💰>0이면 보상은 원래대로', E.settle(st) === false && !st.broke && st.brokeEver
+    && JSON.stringify(E.rightDeltaFor(st, { money: -15, fame: 15, safety: 15 })) === JSON.stringify({ money: -15, fame: 15, safety: 15 }));
+  const u = E.newGame(); u.badges = u.badges.map(() => 'full'); u.stats.safety = 100; u.ep = 6;
+  t('완전 배지 6 + 🛡️100이어도 바닥난 적 있으면 유니콘 불가', E.judgeEnding({ ...u, brokeEver: true }) === 'survive' && E.judgeEnding({ ...u, ending: null }) === 'unicorn');
+  t('newGame: broke·brokeEver false', E.newGame().broke === false && E.newGame().brokeEver === false);
+}
+
 console.log('[데이터 정합] episodes.js');
 {
   t('EP 6개', EPISODES.length === 6);
@@ -84,15 +102,15 @@ console.log('[데이터 정합] episodes.js');
   t('마지막 씬은 폰 등장 예고(📱)', EPISODES.every(e => e.scenes[e.scenes.length - 1].emoji === '📱'));
   t('스키마 필수 필드', EPISODES.every(e =>
     e.id && e.title && e.right && e.roomName && e.intro && Array.isArray(e.messages) && e.messages.length > 0 &&
-    e.hint && e.choices?.wrong?.label && e.choices?.wrong?.delta && e.choices?.wrong?.popup?.title &&
+    e.hint && e.concept && e.choices?.wrong?.label && e.choices?.wrong?.delta && e.choices?.wrong?.popup?.title &&
     e.choices?.right?.label && e.choices?.right?.delta && e.choices?.right?.popup?.title && e.choices?.info?.label));
   t('SPEC §6.2 델타 일치', JSON.stringify(EPISODES.map(e => [e.choices.wrong.delta, e.choices.right.delta])) ===
     JSON.stringify([
       [{ money: -30, safety: -25, fame: 5 }, { money: -15, safety: 15, fame: 20 }],
       [{ money: -20, safety: -20, fame: 10 }, { money: -10, safety: 15, fame: 10 }],
-      [{ money: -25, safety: -25, fame: 0 }, { money: -10, safety: 10, fame: 15 }],
-      [{ money: -30, safety: -30, fame: 0 }, { money: -10, safety: 15, fame: 5 }],
-      [{ money: -20, safety: -25, fame: 10 }, { money: -5, safety: 10, fame: 10 }],
+      [{ money: -25, safety: -25, fame: -10 }, { money: -10, safety: 10, fame: 15 }],
+      [{ money: -30, safety: -30, fame: -5 }, { money: -10, safety: 15, fame: 5 }],
+      [{ money: -20, safety: -25, fame: -10 }, { money: -5, safety: 10, fame: 10 }],
       [{ money: -25, safety: -25, fame: 15 }, { money: -15, safety: 15, fame: 15 }],
     ]));
 }
@@ -136,11 +154,17 @@ console.log('[말투] 캐릭터 톡 — 사람이 하는 말 (2026-11-17, docs/s
   // 결과 알림·개념 카드: 훈계조("~한 셈입니다", "~는 필수!")와 경보 이모지 없이, 일어난 일 → 비유 → 배운 것
   const pops = EPISODES.flatMap(e => [
     ['오답 제목', e.choices.wrong.popup.title], ['비유', e.choices.wrong.popup.analogy], ['배운 것', e.choices.wrong.popup.lesson],
-    ['정답 제목', e.choices.right.popup.title], ['정답 본문', e.choices.right.popup.body], ['개념 카드', e.hint],
+    ['정답 제목', e.choices.right.popup.title], ['정답 본문', e.choices.right.popup.body], ['개념 요약', e.concept], ['질문 카드', e.hint],
   ].map(([who, text]) => ({ ep: e.id, who, text })));
   none('알림: 느낌표·경보 이모지(🚨✨)·"셈입니다/격입니다"·유행어 없음', pops.filter(m => /[!🚨✨]|셈입니다|격입니다/u.test(m.text) || SLANG.some(s => m.text.includes(s))));
-  none('알림: 비유는 "~와 같아요."로, 배운 것·정답 본문은 "~다."로, 개념 카드는 "~요."로 끝남', pops.filter(m =>
-    (m.who === '비유' && !m.text.endsWith('같아요.')) || (['배운 것', '정답 본문'].includes(m.who) && !m.text.endsWith('다.')) || (m.who === '개념 카드' && !m.text.endsWith('요.'))));
+  none('알림: 비유는 "~와 같아요."로, 배운 것·정답 본문은 "~다."로, 개념 요약은 "~요."로, 질문 카드는 "~요?"로 끝남', pops.filter(m =>
+    (m.who === '비유' && !m.text.endsWith('같아요.')) || (['배운 것', '정답 본문'].includes(m.who) && !m.text.endsWith('다.')) || (m.who === '개념 요약' && !m.text.endsWith('요.')) || (m.who === '질문 카드' && !m.text.endsWith('요?'))));
+  // 2026-11-20: 선택지를 문장 모양만 보고 고르지 않게 — C는 권리 이름 없이 한 문장, 정답 쪽 "번거로워도/늦어져도/돈이 더 들어도" 틀 금지, 질문 카드는 정답 요약을 그대로 옮기지 않음
+  none('선택지: C는 6편 모두 "잠깐, 확인할 게 있어."', EPISODES.filter(e => e.choices.info.label !== '잠깐, 확인할 게 있어.').map(e => ({ ep: e.id, who: '선택지 info', text: e.choices.info.label })));
+  none('선택지: 정답에 "번거로워도·늦어져도·돈이 더 들어도·시간이 걸려도" 틀 없음, 오답에 "그냥·바로" 시작 없음',
+    EPISODES.filter(e => /번거로워도|늦어져도|돈이 더 들어도|시간이 걸려도/.test(e.choices.right.label) || /^(그냥|바로)/.test(e.choices.wrong.label))
+      .map(e => ({ ep: e.id, who: '선택지', text: e.choices.wrong.label + ' ↔ ' + e.choices.right.label })));
+  none('질문 카드: 개념 요약과 다른 글이고 물음표가 있음', EPISODES.filter(e => e.hint === e.concept || !e.hint.includes('?')).map(e => ({ ep: e.id, who: '질문 카드', text: e.hint })));
   t('알림: 정답 제목 = "(권리) 배지를 얻었다 (배지 그림)"', EPISODES.every(e => e.choices.right.popup.title === `${e.right === '퍼블리시티권' ? '퍼블리시티' : e.right} 배지를 얻었다 ${e.rightEmoji}`));
   // 스토리 장면·편 소개·인트로·엔딩: 명언풍·느낌표 없이 있었던 일을 담담하게. 장면은 세 줄까지
   const story = EPISODES.flatMap(e => [...e.scenes.map(s => ({ ep: e.id, who: '장면', text: s.text })), { ep: e.id, who: '편 소개', text: e.intro }])
@@ -334,7 +358,7 @@ console.log('[저장 불러오기] 타입·범위·허용값 검사 (보안 검�
   t('load: 숫자 범위 밖·소수·문자 숫자 → 거부', [x => { x.stats.fame = 101; }, x => { x.stats.safety = -1; }, x => { x.stats.money = 1.5; }, x => { x.stats.money = '50'; },
     x => { x.ep = 7; }, x => { x.ep = 0; }, x => { x.courtCount = 3; }, x => { x.wrongs = [9]; }, x => { x.wrongs = ['1']; }].every(f => bad(f) === null));
   t('load: 모양이 틀린 칸 → 거부', [x => { x.badges = x.badges.slice(0, 5); }, x => { x.badges = 'full'; }, x => { x.stats = null; }, x => { x.idol = '<b>'; },
-    x => { x.retryUsed = 'yes'; }, x => { x.ending = 'win'; }, x => { x.quiz = { 1: '<i>' }; }, x => { x.quiz = { 9: 'ok' }; }, x => { x.epStart.stats.money = '<b>'; }].every(f => bad(f) === null));
+    x => { x.retryUsed = 'yes'; }, x => { x.broke = 'yes'; }, x => { x.brokeEver = 1; }, x => { x.ending = 'win'; }, x => { x.quiz = { 1: '<i>' }; }, x => { x.quiz = { 9: 'ok' }; }, x => { x.epStart.stats.money = '<b>'; }].every(f => bad(f) === null));
   t('load: 단계 값이 이상하면 거부', load(g, '<b>') === null && S.load(mem(JSON.stringify({ schemaVersion: 1, game: null, phase: 'ep' }))) === null);
   t('load: 모르는 칸은 버리고 불러옴', (r => !!r && !('evil' in r.game) && !('evil' in r.game.stats))(bad(x => { x.evil = '<b>'; x.stats.evil = 1; })));
   t('load: 깨진 JSON → null', S.load(mem('{깨짐')) === null);

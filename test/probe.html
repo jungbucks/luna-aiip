@@ -63,6 +63,8 @@ async function run() {
     const before = html().dataset.theme;
     D().getElementById('btnTheme').click();
     log('theme: 버튼으로 전환 + 저장', html().dataset.theme !== before && W().localStorage.getItem('luna_theme') === html().dataset.theme);
+    log('theme: 모드 단추는 글자 단추(바꿀 모드) + 읽어 주기 이름', E('btnTheme').textContent === (html().dataset.theme === 'dark' ? '☀️ 라이트 모드' : '🌙 다크 모드') && /모드로 바꾸기$/.test(E('btnTheme').getAttribute('aria-label')));
+    log('theme: 모드 단추가 기록 초기화 옆 — 위쪽에 떠 있지 않음', E('btnTheme').parentElement === E('btnReset').parentElement && W().getComputedStyle(E('btnTheme')).position === 'static');
     log('theme: 주소창 색도 바뀜', D().querySelector('meta[name="theme-color"]').content === (html().dataset.theme === 'dark' ? '#0b0e22' : '#eef0fb'));
     log('font: Pretendard 선언', [...D().fonts].some(ff => ff.family.replace(/["']/g, '') === 'Pretendard'));
     log('no-gradient-text: 제목에 글자 그라데이션 없음', W().getComputedStyle(D().querySelector('.title-logo')).webkitTextFillColor !== 'rgba(0, 0, 0, 0)');
@@ -151,6 +153,7 @@ async function run() {
     await press();
     await until(() => active('scr-ep'));
     log('EP1 진입', active('scr-ep'));
+    log('stat: 점수 이름표(자금·인지도·신뢰) + EP1에만 뜻 설명', [...D().querySelectorAll('.stat-nums .st-l')].map(x => x.textContent).join() === '자금,인지도,신뢰' && txt('statHelp').includes('87만 원') && E('statHelp').offsetParent !== null);
 
     // v0.4 스토리 씬: 무대가 먼저 뜨고, 탭으로 넘기면 폰이 슬라이드업
     log('스토리 씬 무대 표시', D().getElementById('storyStage').classList.contains('on'));
@@ -255,7 +258,7 @@ async function run() {
     log('me-bubble: 누르자마자 선택지가 사라지고 규칙은 아직', !D().querySelector('#chatChoices .choice-btn') && W().LUNA.state.stats.money === money0);
     await until(popupShown);
     log('정답 팝업(배지를 얻었다)', D().querySelector('.pop-title').textContent.includes('저작권 배지를 얻었다'));
-    log('me-bubble: 내 말풍선 1개(앞의 "B. " 없이)', D().querySelectorAll('#chatLog .msg.me').length === 1 && D().querySelector('#chatLog .msg.me').textContent.includes('허락받은 음원을 구해 보자') && !/[ABC]. /.test(D().querySelector('#chatLog .msg.me').textContent));
+    log('me-bubble: 내 말풍선 1개(앞의 "B. " 없이)', D().querySelectorAll('#chatLog .msg.me').length === 1 && D().querySelector('#chatLog .msg.me').textContent.includes((await import('/data/episodes.js')).EPISODES[0].choices.right.label.slice(0, 12)) && !/[ABC]. /.test(D().querySelector('#chatLog .msg.me').textContent));
     const d = W().LUNA.state, exp = W().LUNA.engine.newGame().stats;   // EP1 정답 한 번의 변화량과 정확히 같은지
     log('pick-double: 연타해도 한 번만 적용', d.stats.money === exp.money - 15 && d.stats.fame === exp.fame + 20 && d.stats.safety === exp.safety + 15, JSON.stringify(d.stats));
     log('pop-face: 정답 알림창에 지금 표정의 아이돌', D().querySelector('.pop-face img.idol-svg').dataset.expr === 'happy');
@@ -381,9 +384,11 @@ async function run() {
     await clickWhenReady(() => pbtns()[1]);                        // ❌ (맞음)
     await until(() => popupShown() && ptitle().includes('맞았어요'));
     await clickWhenReady(() => pbtns()[0]);
+    W().LUNA.state.stats.money = 0;                                // 2026-11-20 통장 바닥: 정산 직전 💰0 주입 → 세아 경고(이어 하기 검사는 EP 시작 사본으로 돌아가므로 영향 없음)
     await writeNote('테스트용으로 다섯 자 넘게');
     await until(() => popupShown() && ptitle().includes('정산'));
     log('quiz-after-accept: 맞음 → 정산, 기록 ok', ptitle().includes('정산') && W().LUNA.state.quiz && W().LUNA.state.quiz[1] === 'ok');
+    log('broke: 정산 직전 💰0이면 세아 경고 + 다음 편 보상 절반 안내, 상태 broke', txt('popup').includes('통장이 바닥났어요') && txt('popup').includes('절반') && W().LUNA.state.broke === true && W().LUNA.state.stats.money === 10);
     // 정산 팝업에서 새로 고침 → 이어 하기: EP1 시작 점수에서 다시(오답 벌점이 두 번 들어가지 않음, 2026-11-14)
     const startStats = JSON.stringify(W().LUNA.engine.newGame().stats);
     f.src = '/index.html?r=3';
@@ -400,7 +405,7 @@ async function run() {
     W().LUNA.showEnding('unicorn');
     await until(() => active('scr-end'));
     const endTxt = () => txt('scr-end');
-    log('ending-clean-vs-quiz(주입): 놓친 EP2의 개념 요약이 보이고 "틀린 개념이 없습니다"는 없음', endTxt().includes('두 번 다 놓친 개념') && endTxt().includes((await import('/data/episodes.js')).EPISODES[1].hint.slice(0, 24)) && !endTxt().includes('틀린 개념이 없습니다'));
+    log('ending-clean-vs-quiz(주입): 놓친 EP2의 개념 요약이 보이고 "틀린 개념이 없습니다"는 없음', endTxt().includes('두 번 다 놓친 개념') && endTxt().includes((await import('/data/episodes.js')).EPISODES[1].concept.slice(0, 24)) && !endTxt().includes('틀린 개념이 없습니다'));
     st.quiz = { 1: 'ok', 2: 'more-ok' };
     W().LUNA.showEnding('unicorn');
     await sleep(100);
@@ -514,6 +519,9 @@ async function run() {
     for (const th of ['dark', 'light']) {
       W().localStorage.setItem('luna_theme', th); f.src = '/index.html?c=' + th; await sleep(200);
       await until(() => W().LUNA && E('btnNew') && D().documentElement.dataset.theme === th);
+      { const ghost = W().getComputedStyle(E('btnContinue')), ink = parseColor(ghost.color), bg = parseColor(ghost.backgroundColor);   // 2026-11-20: 이어서 하기 = 유리 바탕 + 본문색 글자 → 배경화면 색마다 4.5:1
+        const worst = Math.min(...WALL[th].map(w => { const b = over(bg, parseColor(w)); return ratio(over(ink, b), b); }));
+        log('contrast: ' + th + ' 이어서 하기 글자 4.5:1 이상(바탕이 글자색과 다름)', ghost.color !== ghost.backgroundColor && worst >= 4.5, worst.toFixed(2)); }
       const c = minContrast(th);
       log('contrast: ' + th + ' 유리 위 글자 최소 대비 4.5:1 이상', c.min >= 4.5, c.min.toFixed(2) + ' (' + c.where + ')');
     }

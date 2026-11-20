@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!-- probe-shots.html — 캡처용 프로브. 게임을 iframe에 띄워 원하는 장면까지 자동으로 진행한 뒤 멈춘다.
      실행: node test/run-probe.mjs test/probe-shots.html --shot=<png> --url="/__probe.html?scene=home&theme=light&w=1366&h=700" --size=1366,740
+     save=1 = 타이틀을 저장이 있는 상태로(이어서 하기 단추 보임)
      scene = lock | select | story | home | chat | wrong | hint | popup | note | notes | product | end     theme = dark | light     w,h = iframe 크기 -->
 <meta charset="utf-8">
 <style>html,body{margin:0;background:#888}iframe{border:0;display:block}</style>
@@ -12,7 +13,8 @@ const f = document.getElementById('f');
 f.width = q.get('w') || 390; f.height = q.get('h') || 700;
 // 보안 검토 2026-11-18 A: 자동화 브라우저 + ?probe=1(run-probe.mjs가 붙임)일 때만 돈다 — 사람이 이 주소를 열어도 게임 기록을 지우지 않게
 const AUTOMATED = navigator.webdriver === true && q.get('probe') === '1';
-if (AUTOMATED) { localStorage.removeItem('luna_save_v1'); localStorage.removeItem('luna_notes_v1'); localStorage.setItem('luna_theme', theme); }
+if (AUTOMATED) { localStorage.removeItem('luna_save_v1'); localStorage.removeItem('luna_notes_v1'); localStorage.setItem('luna_theme', theme); 
+  if (q.get('save') === '1') localStorage.setItem('luna_save_v1', JSON.stringify({ schemaVersion: 1, phase: 'ep', game: { schemaVersion: 1, idol: 'luna', ep: 2, stats: { money: 45, fame: 40, safety: 85 }, badges: ['full', null, null, null, null, null], wrongs: [], courtCount: 0, retryUsed: false, ending: null } })); }
 else document.body.insertAdjacentHTML('afterbegin', '<p>자동 검사 전용 페이지입니다. 아무것도 하지 않았습니다.</p>');
 const D = () => f.contentDocument, W = () => f.contentWindow, E = id => D().getElementById(id);
 const sleep = ms => new Promise(r => setTimeout(r, ms));

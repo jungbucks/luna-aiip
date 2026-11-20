@@ -56,7 +56,7 @@ function cardHTML(e, i, state) {
   const mustWrite = !!(writing && writing.done);   // 필수 적기 중에는 다른 카드를 고칠 수 없다 — 고치기가 필수 진행을 덮어 갇히던 것(2026-11-17 검토)
   return `<div class="note-card" data-ep="${e.id}" data-state="open">
     <b class="note-h">${e.rightEmoji} ${esc(e.right)} <span class="note-badge ${badgeCls(badge)}">${esc(badgeLabel(badge))}</span></b>
-    <p class="note-hint">${esc(e.hint)}</p>
+    <p class="note-hint">${esc(e.concept)}</p>
     ${note ? `<div class="note-mine"><span class="note-mine-l">${esc(S.mine)}</span><p>${escPlain(note)}</p></div>` : ''}
     ${mustWrite ? '' : `<button type="button" class="note-edit" data-ep="${e.id}">${esc(note ? S.edit : S.save)}</button>`}
   </div>`;
@@ -130,7 +130,7 @@ function productData() {
       const b = state ? state.badges[i] : null;      // 아직 선택을 마치지 않은 EP는 수첩과 똑같이 개념 힌트를 가린다
       return {
         id: e.id, emoji: e.rightEmoji, right: T(e.right), badge: b == null ? '—' : badgeLabel(b),
-        hint: b == null ? STRINGS.ui.notes.locked(e.id) : T(e.hint), note: getNote(e.id),
+        hint: b == null ? STRINGS.ui.notes.locked(e.id) : T(e.concept), note: getNote(e.id),
       };
     }),
   };

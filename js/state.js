@@ -47,6 +47,7 @@ function checkGame(g, withStart) {
   need(intIn(g.courtCount, 0, 2));
   need(typeof g.retryUsed === 'boolean');
   need(ENDINGS.includes(g.ending));
+  need(['broke', 'brokeEver'].every(k => g[k] === undefined || typeof g[k] === 'boolean'));   // 2026-11-20 — 옛 저장에는 없다
   const out = {
     ...(g.schemaVersion === undefined ? {} : { schemaVersion: SCHEMA }),
     idol: g.idol, ep: g.ep,
@@ -54,6 +55,7 @@ function checkGame(g, withStart) {
     badges: [...g.badges], wrongs: [...new Set(g.wrongs)],
     courtCount: g.courtCount, retryUsed: g.retryUsed, ending: g.ending,
   };
+  ['broke', 'brokeEver'].forEach(k => { if (g[k] !== undefined) out[k] = g[k]; });
   if (g.quiz !== undefined) {
     need(isObj(g.quiz) && Object.keys(g.quiz).every(k => /^[1-6]$/.test(k) && QUIZ.includes(g.quiz[k])));
     out.quiz = { ...g.quiz };

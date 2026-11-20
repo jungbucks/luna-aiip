@@ -56,9 +56,11 @@ window.__errs=[];addEventListener('error',function(e){__errs.push(e.message)});a
       </div>
     </div>
     <button class="title-btn" id="btnNew">새로 시작</button>
-    <button class="title-btn ghost glass" id="btnContinue">이어서 하기</button>
-    <button class="title-reset" id="btnReset">기록 초기화</button>
-    <button class="round-btn glass" id="btnTheme"></button>
+    <button class="title-btn ghost" id="btnContinue">이어서 하기</button>
+    <div class="title-links">
+      <button class="title-reset" id="btnReset">기록 초기화</button>
+      <button class="title-reset" id="btnTheme"></button>
+    </div>
   </section>
 
   <!-- 캐릭터 선택 -->
@@ -81,11 +83,12 @@ window.__errs=[];addEventListener('error',function(e){__errs.push(e.message)});a
       <div class="statbar home-widget glass">
         <div id="epHead"></div>
         <div class="stat-nums">
-          <span>💰 <span id="stMoney">50</span></span>
-          <span>📈 <span id="stFame">20</span></span>
-          <span class="safety">🛡️ <span id="stSafety">70</span></span>
+          <span>💰<i class="st-l">자금</i> <span id="stMoney">50</span></span>
+          <span>📈<i class="st-l">인지도</i> <span id="stFame">20</span></span>
+          <span class="safety">🛡️<i class="st-l">신뢰</i> <span id="stSafety">70</span></span>
         </div>
         <div id="badgeRow"></div>
+        <p class="stat-help" id="statHelp"></p>
       </div>
       <div class="app-grid">
         <button type="button" class="app app-decor" id="appCity"><span class="ico ico-city"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V9l5-3v14M9 20V4l6 3v13M15 20v-9l5 2v7M3 20h18"/></svg></span><span class="app-name"></span></button>

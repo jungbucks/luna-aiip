@@ -93,9 +93,9 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .title-sub{color:var(--dim);font-size:13.5px;line-height:1.45;margin-top:1px}
 .title-btn{width:100%;margin-top:10px;padding:13px;border:none;border-radius:999px;font-size:16.5px;font-weight:800;flex-shrink:0;
   background:var(--cta);color:var(--cta-ink)}
-.title-btn.ghost{margin-top:8px;padding:12px;font-size:16px;font-weight:600;color:var(--ink)}
-.title-reset{background:none;border:none;color:var(--dim);font-size:13px;text-decoration:underline;margin:4px 0 auto;padding:8px 12px;flex-shrink:0}
-.round-btn{position:absolute;right:14px;top:8px;width:44px;height:44px;border-radius:50%;font-size:19px;display:flex;align-items:center;justify-content:center}
+.title-btn.ghost{margin-top:8px;padding:11px;font-size:16px;font-weight:600;background:var(--glass);border:1.5px solid var(--ink);color:var(--ink)}   /* 2026-11-20: 예전엔 .title-btn의 --cta 바탕이 남아 글자색과 같았다. 완전 투명은 다크 배경화면의 밝은 청록 위에서 2.8:1이라 유리 바탕(본문 글자 4.5:1 보장 토큰)을 깐다 */
+.title-links{display:flex;justify-content:center;flex-wrap:wrap;gap:2px 10px;margin:4px 0 auto;flex-shrink:0}
+.title-reset{background:none;border:none;color:var(--dim);font-size:13px;text-decoration:underline;padding:8px 12px}
 
 /* ── 캐릭터 선택 ── */
 #scr-select{align-items:center;text-align:center;padding:24px 18px;gap:8px}
@@ -212,6 +212,7 @@ button.tap-hint{display:block;background:none;border:0;padding:2px 0;font-weight
 .court-card .choice-btn,.end-card .choice-btn{margin-top:12px}
 .end-body{text-align:center;color:var(--dim);font-size:15.5px}
 .rp-stats{text-align:center;font-weight:800;font-size:17px;margin-bottom:6px}
+.rp-fame{text-align:center;font-size:14px;color:var(--dim);margin:0 0 8px}
 .rp-badges{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .rp-badge{background:var(--chip);border:1px solid var(--edge);border-radius:14px;padding:9px 6px;text-align:center;font-size:12.5px;display:flex;flex-direction:column;gap:2px}
 .rp-badge span{font-size:20px}

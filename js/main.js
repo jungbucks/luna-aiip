@@ -168,6 +168,7 @@ function enterEp() {
   updateStatbar();
   autoExpression(G);
   $('epHead').textContent = T(`EP${G.ep} 「${ep().title}」 — ${ep().rightEmoji} ${ep().right}`);
+  $('statHelp').textContent = G.ep === 1 ? STRINGS.statHelp : '';   // 점수 이름표의 뜻은 첫 편에서 한 번(2026-11-20)
   show('scr-ep');
   sceneIdx = 0;
   chatStarted = false;
@@ -241,7 +242,7 @@ const focusIn = el => { if (el) el.focus({ preventScroll: true }); };
 
 function showHint() {
   showPopup({
-    title: '💡 ' + ep().right + ' 개념 카드',
+    title: '💡 생각해 볼 것',   // 질문 카드(2026-11-20) — 정답 요약(concept)은 선택 뒤 수첩에서
     html: `<p>${esc(ep().hint)}</p>`,
     buttons: [{ label: '↩ 다시 고민하기', cb: () => focusIn($('chatChoices').querySelector('.choice-btn[data-k="info"]')) }],   // 연 단추로 초점을 돌려준다
   });
@@ -279,15 +280,15 @@ function acceptFlow() {
 }
 
 function rightFlow() {
-  const isRetry = G.retryUsed;
-  engine.chooseRight(G, G.ep, ep().choices.right.delta);
+  const isRetry = G.retryUsed, r = ep().choices.right;
+  const got = engine.rightDeltaFor(G, r.delta), halved = !!G.broke;   // 통장이 바닥난 다음 편이면 보상 절반(engine) — 실제로 들어온 값을 보여 준다
+  engine.chooseRight(G, G.ep, r.delta);
   store.save(G, 'ep');
   updateStatbar();
   setExpression('happy');
-  const r = ep().choices.right;
   showPopup({
     title: r.popup.title + (isRetry ? ' (반쪽 배지)' : ''),
-    html: `<p>${esc(r.popup.body)}</p><p class="delta good">${deltaLine(r.delta)}</p>`,
+    html: `<p>${esc(r.popup.body)}</p><p class="delta good">${deltaLine(got)}</p>` + (halved ? `<p class="money-zero">${esc(STRINGS.brokeNote)}</p>` : ''),
     buttons: [{ label: '계속 →', cb: () => quizThen(noteStep) }], face: true,
   });
 }
@@ -324,7 +325,7 @@ function quizThen(next) {
 
 /* ── 브릿지(정산) → 다음 EP / 엔딩 ── */
 function bridge() {
-  engine.settle(G);
+  const broke = engine.settle(G);   // 정산 직전 💰 0 = 통장 바닥(예전 검사는 +10 뒤에 봐서 한 번도 뜨지 않았다, 2026-11-20)
   store.save(G, 'ep');
   updateStatbar();
   if (G.ep === 6) {
@@ -333,7 +334,8 @@ function bridge() {
     return endingScene(end);
   }
   const next = EPISODES[G.ep];   // 다음 EP (0-index라 현재 ep가 곧 다음)
-  const zero = G.stats.money === 0 ? `<p class="money-zero">${esc(STRINGS.moneyZero)}</p>` : '';
+  const B = STRINGS.broke;
+  const zero = broke ? `<p class="money-zero"><b>${esc(B.who)}</b>: ${esc(B.text)}</p><p class="money-zero">${esc(B.rule)}</p>` : '';
   showPopup({
     title: STRINGS.bridgeSettle,
     html: `${zero}<p>${esc(STRINGS.bridgeNext(next)).replace(/\n/g, '<br>')}</p>`,

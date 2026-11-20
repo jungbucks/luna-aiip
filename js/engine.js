@@ -28,6 +28,8 @@ export function newGame() {
     courtCount: 0,                           // 안전도 0 도달 횟수
     retryUsed: false,                        // 현재 EP에서 재선택 사용 여부
     ending: null,                            // null | 'court' | 'unicorn' | 'survive'
+    broke: false,                            // 지난 정산 직전 💰가 0이었나 — 이번 EP 정답 보상(📈·🛡️ 상승분) 절반 (§6.1-2, 2026-11-20)
+    brokeEver: false,                        // 한 번이라도 통장이 바닥났나 — 유니콘 불가·생존 엔딩 문구
   };
 }
 
@@ -70,16 +72,27 @@ export function chooseWrongRetry(state, ep, wrongDelta) {
   return checkCourt(state);
 }
 
+/* 정답 보상 — 통장이 바닥난 다음 EP에서는 📈·🛡️ 상승분이 절반(trunc). 💰 비용은 그대로 (§6.1-2) */
+export function rightDeltaFor(state, d) {
+  const half = v => (state.broke && v > 0 ? Math.trunc(v / 2) : v);
+  return { money: d.money || 0, fame: half(d.fame || 0), safety: half(d.safety || 0) };
+}
+
 /* 정답 — 첫 선택이면 완전 배지, 재선택 경유면 반쪽 배지 (§6.5) */
 export function chooseRight(state, ep, rightDelta) {
   state.badges[ep - 1] = state.retryUsed ? 'half' : 'full';
-  applyDelta(state, rightDelta);
+  applyDelta(state, rightDeltaFor(state, rightDelta));
   return checkCourt(state);   // 정답은 안전도 상승이라 실질 무해하지만 판정 시점 일관성 유지
 }
 
-/* 월간 정산 — 브릿지에서 (§6.1) */
+/* 월간 정산 — 브릿지에서 (§6.1). 정산 직전 💰가 0이면 '통장 바닥'(다음 EP 정답 보상 절반, §6.1-2).
+   반환: 이번 정산에서 통장이 바닥났었나(true면 화면이 경고를 띄운다) */
 export function settle(state) {
+  const broke = state.stats.money === 0;
+  state.broke = broke;
+  if (broke) state.brokeEver = true;
   applyDelta(state, { money: SETTLE_MONEY });
+  return broke;
 }
 
 export function nextEp(state) {
@@ -91,6 +104,6 @@ export function nextEp(state) {
 export function judgeEnding(state) {
   if (state.ending === 'court') return 'court';
   const fullCount = state.badges.filter(b => b === 'full').length;
-  state.ending = (fullCount === 6 && state.stats.safety >= UNICORN_SAFETY) ? 'unicorn' : 'survive';
+  state.ending = (fullCount === 6 && state.stats.safety >= UNICORN_SAFETY && !state.brokeEver) ? 'unicorn' : 'survive';
   return state.ending;
 }

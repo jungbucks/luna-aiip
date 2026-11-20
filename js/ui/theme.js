@@ -37,7 +37,7 @@ export function applyTheme(force) {
   const btn = document.getElementById('btnTheme');
   if (btn) {
     btn.setAttribute('aria-label', theme === 'dark' ? STRINGS.ui.themeToLight : STRINGS.ui.themeToDark);
-    btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+    btn.textContent = theme === 'dark' ? STRINGS.ui.themeBtnLight : STRINGS.ui.themeBtnDark;   // 바꿀 모드를 글자로(2026-11-20 — 떠 있는 둥근 단추가 상태바에 겹쳤다)
   }
 }
 
