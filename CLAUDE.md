@@ -60,7 +60,7 @@ _config.yml         Pages(Jekyll) 배포 범위: test·docs·CLAUDE/SPEC/ROADMAP
 - engine.js는 규칙 단일 원천(수치 변경 금지). main.js는 계산 금지(engine 위임).
 - 이어하기 복원 = 현재 EP 시작 지점부터(채팅 중간 저장 안 함 — 의도된 단순화). **EP에 들어설 때 `G.epStart` 사본을 저장하고 이어 하기는 그 사본에서 다시**(`js/resume.js`, 2026-11-14) — 예전엔 선택·퀴즈·정산 중 새로 고치면 점수가 두 번 들어갔다. 사본 없는 옛 저장은 예전처럼. **끝난 판(저장 단계 `end`)은 사본으로 되돌리지 않고 그 엔딩·리포트를 그대로**(`resume.resumePoint`, 2026-11-18 — 예전엔 EP6 시작으로 돌아가 마지막 배지가 사라졌다).
 - **타이틀의 새로 시작·기록 초기화는 기록(게임·적은 글)이 있을 때만 확인창**(`main.js askWipe`, 기존 팝업 재사용) — 승인한 뒤에만 지운다. 처음 온 사람은 묻지 않는다. **지운 뒤 키마다 남았는지 확인**(`state.clear()`·`clearNotes()`가 true/false, `main.js wipeThen`, 보안 검토 2026-11-18 B): 하나라도 남으면 남은 기록과 [다시 지우기]를 보여 주고 새 판·새로 고침은 하지 않는다.
-- **키보드만으로 끝까지**: 인트로·스토리의 "눌러서 계속"은 `<button>`(`#introNext`·`#storyNext`)이고 장면이 바뀔 때마다 초점을 받는다. 스토리가 끝나면 초점은 알림 배너로. 클릭은 카드·무대가 받으므로 keydown 처리기를 따로 달지 말 것(두 번 넘어간다).
+- **키보드만으로 끝까지**: 인트로·스토리의 "눌러서 계속"은 `<button>`(`#introNext`·`#storyNext`)이고 장면이 바뀔 때마다 초점을 받는다. 스토리가 끝나면 초점은 알림 배너로. 클릭은 카드·무대가 받으므로 keydown 처리기를 따로 달지 말 것(두 번 넘어간다). **팝업·법정이 닫히며 초점이 사라지면 되돌린다**(2026-11-20, `main.js focusLost()`): 개념 카드 → [확인] 단추, 다시 선택하기 → 남은 첫 선택지, 법정 → 법정 단추, 엔딩 → 제목(`tabindex=-1`).
 
 - **배포는 게임·도감과 그 자산만**(보안 검토 2026-11-18 A): Pages는 Jekyll 기본 빌드(.nojekyll 없음, 배포 전 SPEC.html·test/probe-shots.html이 공개돼 있었다). 루트에 파일·폴더를 더하면 `_config.yml` exclude에 넣거나 `test/pages-files.mjs` ALLOWED에 넣는다 — verify [배포]가 막는다. `_`·`.`로 시작하는 이름은 Jekyll이 안 올린다.
 - **테스트 페이지는 자동화 브라우저 + `?probe=1`에서만 저장을 만진다**(`navigator.webdriver` 검사). `run-probe.mjs`가 `--enable-automation`·`?probe=1`·새 임시 프로필을 붙인다. 저장을 만지는 테스트 페이지를 새로 만들면 같은 가드를 넣고 probe-guard에 추가.
@@ -75,7 +75,7 @@ _config.yml         Pages(Jekyll) 배포 범위: test·docs·CLAUDE/SPEC/ROADMAP
 
 ## 검증 (수정 후 필수)
 
-1. 게임 `node test/verify.mjs`(104건) — 미달 시 배포 금지. 도감 `node test/verify-dogam.mjs`(20건) + `node test/run-probe.mjs test/probe-dogam.html`(45건). 게임 E2E 145건.
+1. 게임 `node test/verify.mjs`(104건) — 미달 시 배포 금지. 도감 `node test/verify-dogam.mjs`(20건) + `node test/run-probe.mjs test/probe-dogam.html`(45건). 게임 E2E 151건.
 2. E2E 프로브(구조·흐름 변경 시): **`node test/run-probe.mjs`** 한 줄(종료 코드 0 = 전부 PASS). 배포본만으로 도는지는 `--pages`(올라갈 파일만 서빙). 가드는 `node test/run-probe.mjs test/probe-guard.html`. 캡처는 `node test/run-probe.mjs test/probe-shots.html --shot=<png> --url="/__probe.html?scene=home&theme=light&w=1366&h=700" --size=1366,700`. 아래는 실행기가 대신 해 주는 옛 수동 절차(원리 참고용): **게임과 같은 오리진에서 서빙 필수** — file:// 프로브 + http iframe은 크로스오리진으로 조용히 죽는다(2026-07-15 실제 발생). 절차: `probe.html`을 루트에 복사 → Node 정적 서버(scratchpad) → `msedge --headless=new --user-data-dir=<임시> --virtual-time-budget=20000 --dump-dom http://localhost:PORT/...` → 수확 후 복사본 삭제. 채팅은 타이핑 인디케이터 때문에 메시지당 최대 2탭.
 
 ## 참고 문서

@@ -228,13 +228,22 @@ function choicesPhase() {
   };
   // 오답·정답은 겉모습이 같고 자리만 편마다 다르다(순서는 EP에 들어설 때 한 번 정해 다시 선택 때도 그대로)
   showChoices('뭐라고 답할까?', choiceKeys.map((k, i) => ({ ...byKey[k], key: k, label: 'ABC'[i] + '. ' + byKey[k].text })));
+  if (focusLost()) focusIn($('chatChoices').querySelector('.choice-btn:not(:disabled)'));   // [다시 선택하기]로 팝업이 닫히면 초점이 갈 곳이 없었다
 }
+
+/* 키보드 초점이 사라졌는가 — 팝업·법정 화면이 닫히며 초점 있던 단추가 안 보이게 된 경우(2026-11-20 검토).
+   보이는 곳(메신저 뒤로 단추 등)에 초점이 있으면 건드리지 않는다 */
+function focusLost() {
+  const a = document.activeElement;
+  return !a || a === document.body || !a.isConnected || a.getClientRects().length === 0;
+}
+const focusIn = el => { if (el) el.focus({ preventScroll: true }); };
 
 function showHint() {
   showPopup({
     title: '💡 ' + ep().right + ' 개념 카드',
     html: `<p>${esc(ep().hint)}</p>`,
-    buttons: [{ label: '↩ 다시 고민하기', cb: () => {} }],
+    buttons: [{ label: '↩ 다시 고민하기', cb: () => focusIn($('chatChoices').querySelector('.choice-btn[data-k="info"]')) }],   // 연 단추로 초점을 돌려준다
   });
 }
 
@@ -343,6 +352,7 @@ function courtScene(isFinal, contCb) {
     show('scr-ep');
     contCb();
   });
+  focusIn($('courtBtn'));   // 키보드: 법정 화면의 단추로(팝업 단추가 사라져 초점이 갈 곳이 없었다)
 }
 
 function endingScene(key) {
@@ -356,6 +366,7 @@ function endingScene(key) {
     }),
     () => openProduct(STRINGS.endings[key].name, $('endProduct')));
   show('scr-end');
+  focusIn($('scr-end').querySelector('h2'));   // 키보드·읽어 주기: 엔딩 제목부터(ending.js가 tabindex="-1"을 단다)
 }
 
 /* ── 부트 ── */

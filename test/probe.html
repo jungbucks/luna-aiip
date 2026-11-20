@@ -240,6 +240,7 @@ async function run() {
     await until(popupShown);
     log('me-bubble: C는 내 말풍선을 만들지 않음', D().querySelectorAll('#chatLog .msg.me').length === 0 && !D().querySelector('.pop-face img'));
     D().querySelector('.pop-btn').click(); await sleep(100);
+    log('kbd: 개념 카드를 닫으면 [확인] 단추로 초점이 돌아옴', D().activeElement === E('chatChoices').querySelector('.choice-btn[data-k="info"]'), D().activeElement && D().activeElement.outerHTML.slice(0, 60));
     const money0 = W().LUNA.state.stats.money;
     log('조사 자동 치환(솔이 직접 곡을)', txt('chatLog').includes('솔이 직접 곡을 쓸 수 있어요'));
     log('화면에 토큰 잔여 없음', !/\{[nN]/.test(D().body.textContent));
@@ -453,6 +454,7 @@ async function run() {
         await until(() => W().LUNA && E('btnContinue') && E('btnContinue').style.display !== 'none');
         E('btnContinue').click();
         await until(() => active('scr-end'), 3000);
+        log('kbd: 엔딩 화면이 뜨면 엔딩 제목에 초점(' + kind + ')', D().activeElement === E('scr-end').querySelector('h2'), D().activeElement && D().activeElement.outerHTML.slice(0, 60));
         const full = g.badges.filter(b => b === 'full').length, stats = '💰 ' + g.stats.money + ' · 📈 ' + g.stats.fame + ' · 🛡️ ' + g.stats.safety;
         log('resume-end: ' + kind + ' — 새로 고쳐 이어 해도 같은 엔딩·점수·배지', end === kind && active('scr-end') && txt('scr-end').includes(STR.endings[kind].name)
           && D().querySelector('.rp-stats') && D().querySelector('.rp-stats').textContent.trim() === stats && D().querySelectorAll('.rp-badge.b-full').length === full,
@@ -484,6 +486,30 @@ async function run() {
           nb ? nb.className : 'no badge');
         W().LUNA.notebook.closeProduct(); }
       W().localStorage.removeItem('luna_save_v1'); }
+    // 2026-11-20 키보드 초점: [다시 선택하기]로 법정(집행유예)이 열리면 법정 단추에, 돌아오면 남은 선택지에 초점
+    //   (안전도를 5로 주입 — 실제 플레이에서는 재선택으로 첫 법정이 열리기 어렵지만, 팝업이 닫히며 초점을 잃는 같은 길을 한 번에 본다)
+    { f.src = '/index.html?kbd=court'; await sleep(200);
+      await until(() => W().LUNA && E('btnNew') && active('scr-title'));
+      E('btnNew').click(); await until(() => active('scr-select') || popupShown());
+      if (popupShown()) { pbtns().find(b => b.textContent.includes('지우')).click(); await until(() => active('scr-select')); }
+      D().querySelector('.sel-card[data-idol="luna"]').click();
+      for (let i = 0; i < 6 && !active('scr-ep'); i++) { await until(() => active('scr-intro') || active('scr-ep'), 2000); if (active('scr-intro')) E('introCard').click(); await sleep(80); }
+      await throughStory(); E('notifBanner').click();
+      await until(() => E('phoneWrap').classList.contains('on'));
+      for (let i = 0; i < 40 && !D().querySelector('#chatChoices .choice-btn'); i++) { E('chatLog').click(); await sleep(70); }
+      await until(() => D().querySelector('#chatChoices .choice-btn'));
+      W().LUNA.state.stats.safety = 5;
+      D().querySelector('#chatChoices .choice-btn[data-k="wrong"]').click();
+      await until(() => popupShown() && pbtns().some(b => b.textContent.includes('다시 선택하기')));
+      pbtns().find(b => b.textContent.includes('다시 선택하기')).click();
+      await until(() => active('scr-court'));
+      log('kbd: 법정 화면이 뜨면 법정 단추에 초점', D().activeElement === E('courtBtn'), D().activeElement && D().activeElement.outerHTML.slice(0, 60));
+      E('courtBtn').click();
+      await until(() => active('scr-ep') && D().querySelector('#chatChoices .choice-btn'));
+      const first = D().querySelector('#chatChoices .choice-btn:not(:disabled)');
+      log('kbd: 다시 선택하기(법정 뒤) — 남은 첫 선택지에 초점, 오답은 비활성', D().activeElement === first && first.dataset.k !== 'wrong' && D().querySelector('#chatChoices .choice-btn[data-k="wrong"]').disabled,
+        D().activeElement && D().activeElement.outerHTML.slice(0, 60));
+      W().localStorage.removeItem('luna_save_v1'); W().localStorage.removeItem('luna_notes_v1'); }
     // 대비: 유리 위 글자 4.5:1 이상(다크·라이트). 흐림·채도 효과는 빼고 색만 겹쳐 계산한 근삿값
     for (const th of ['dark', 'light']) {
       W().localStorage.setItem('luna_theme', th); f.src = '/index.html?c=' + th; await sleep(200);

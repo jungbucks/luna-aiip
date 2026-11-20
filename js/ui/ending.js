@@ -51,7 +51,7 @@ export function renderEnding(state, endingKey, restartCb, productCb) {
   el.innerHTML = `
     <div class="end-card">
       <div class="end-emoji">${e.emoji}</div>
-      <h2>${esc(e.name)}</h2>
+      <h2 tabindex="-1">${esc(e.name)}</h2>
       <p class="end-body">${esc(e.body).replace(/\n/g, '<br>')}</p>
       <h3>${esc(r.head)}</h3>
       <div class="rp-stats">${statsLine(state.stats)}</div>
