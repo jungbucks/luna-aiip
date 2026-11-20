@@ -4,7 +4,7 @@ import * as engine from './engine.js';
 import * as store from './state.js';
 import { EPISODES } from '../data/episodes.js';
 import { STRINGS } from '../data/strings.js';
-import { startChat, advance, showChoices, choiceOrder, esc, setComposer, sendMine } from './ui/chat.js';
+import { startChat, advance, showChoices, choiceOrder, esc, setComposer, sendMine, undoLastMine } from './ui/chat.js';
 import { showPopup, deltaLine } from './ui/popup.js';
 import { QUIZ } from '../data/quiz.js';
 import * as quiz from './quiz.js';
@@ -101,7 +101,7 @@ function askWipe(btnId, title, ask, no, yes, onYes) {
   showPopup({
     title,
     html: `<p>${esc(ask)}</p>`,
-    buttons: [{ label: no, cls: 'ghost', cb: () => $(btnId).focus() }, { label: yes, cls: 'danger', cb: onYes }],
+    buttons: [{ label: no, cls: 'ghost', cb: () => $(btnId).focus() }, { label: yes, cls: 'danger', cb: onYes }], esc: 0,
   });
 }
 
@@ -116,7 +116,7 @@ function wipeThen(then, backId) {
     title: W.title,
     html: `<p>${esc(W.ask)}</p><ul class="wipe-left">${left.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`,
     buttons: [{ label: W.no, cls: 'ghost', cb: () => { const b = $(backId); if (b && b.offsetParent !== null) b.focus(); } },
-      { label: W.retry, cls: 'danger', cb: () => wipeThen(then, backId) }],
+      { label: W.retry, cls: 'danger', cb: () => wipeThen(then, backId) }], esc: 0,
   });
 }
 
@@ -188,6 +188,7 @@ function renderScene() {
   $('storyEmoji').textContent = s.emoji;
   $('storyText').innerHTML = esc(T(s.text)).replace(/\n/g, '<br>');
   $('storyIdx').textContent = (sceneIdx + 1) + '/' + scenes.length;
+  $('storyNext').setAttribute('aria-label', '눌러서 계속 (' + (sceneIdx + 1) + '/' + scenes.length + ')');   // 읽어 주기 이름이 '()'로 비던 것(2026-11-20)
   $('storyNext').focus({ preventScroll: true });   // 키보드: 다음 장면 단추(click은 무대가 받는다 — 한 번에 한 장면)
 }
 
@@ -257,13 +258,14 @@ function showWrongPopup() {
   showPopup({
     title: w.popup.title,
     html: `<p class="analogy">${esc(w.popup.analogy)}</p>
-      <p class="delta bad">${deltaLine(w.delta)}</p>
+      <p class="delta">${deltaLine(w.delta)}</p>
       <p class="lesson">📚 배운 것: ${esc(w.popup.lesson)}</p>`,
     buttons, face: true,
   });
 }
 
 function retryFlow() {
+  undoLastMine(STRINGS.ui.rethink);
   const ev = engine.chooseWrongRetry(G, G.ep, ep().choices.wrong.delta);
   store.save(G, 'ep');
   updateStatbar(); autoExpression(G);
@@ -288,7 +290,8 @@ function rightFlow() {
   setExpression('happy');
   showPopup({
     title: r.popup.title + (isRetry ? ' (반쪽 배지)' : ''),
-    html: `<p>${esc(r.popup.body)}</p><p class="delta good">${deltaLine(got)}</p>` + (halved ? `<p class="money-zero">${esc(STRINGS.brokeNote)}</p>` : ''),
+    html: `<p>${esc(r.popup.body)}</p><p class="delta">${deltaLine(got)}</p>` + (halved ? `<p class="money-zero">${esc(STRINGS.brokeNote)}</p>` : '')
+      + (isRetry && G.badges.filter(b => b === 'half').length === 1 ? `<p class="money-zero">${esc(STRINGS.ui.halfNote)}</p>` : ''),   // 반쪽 배지가 처음 나올 때 한 줄(2026-11-20)
     buttons: [{ label: '계속 →', cb: () => quizThen(noteStep) }], face: true,
   });
 }
@@ -313,7 +316,7 @@ function quizThen(next) {
     if (stage === 'main') first = correct;
     const more = stage === 'main' && !correct;
     showPopup({
-      title: correct ? S.right : S.wrong,
+      title: correct ? S.right : S.wrong, titleCls: correct ? 'ok' : 'warn',
       html: `<p class="quiz-ans">${esc(S.answer(item.a))}</p><p>${esc(item.exp)}</p>`,
       buttons: [more ? { label: S.more, cb: () => ask(set.more, 'more') }
         : { label: S.cont, cb: () => { quiz.record(G, G.ep, quiz.resultOf(first, stage === 'more' ? correct : undefined)); store.save(G, 'ep'); next(); } }],
@@ -354,6 +357,7 @@ function courtScene(isFinal, contCb) {
     show('scr-ep');
     contCb();
   });
+  $('scr-court').scrollTop = 0;
   focusIn($('courtBtn'));   // 키보드: 법정 화면의 단추로(팝업 단추가 사라져 초점이 갈 곳이 없었다)
 }
 
@@ -364,10 +368,11 @@ function endingScene(key) {
     () => showPopup({                                  // 다시 하기 전에 한 번 묻는다 — 적은 글도 지워지므로
       title: U.restartTitle,
       html: `<p>${esc(U.restartAsk)}</p>`,
-      buttons: [{ label: U.restartNo, cls: 'ghost' }, { label: U.restartYes, cls: 'danger', cb: () => resetAll('endRestart') }],
+      buttons: [{ label: U.restartNo, cls: 'ghost', cb: () => $('endRestart').focus() }, { label: U.restartYes, cls: 'danger', cb: () => resetAll('endRestart') }], esc: 0,
     }),
     () => openProduct(STRINGS.endings[key].name, $('endProduct')));
   show('scr-end');
+  $('scr-end').scrollTop = 0;                   // 늘 엔딩 맨 위부터(2026-11-20)
   focusIn($('scr-end').querySelector('h2'));   // 키보드·읽어 주기: 엔딩 제목부터(ending.js가 tabindex="-1"을 단다)
 }
 

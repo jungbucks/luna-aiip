@@ -93,6 +93,13 @@ console.log('[통장 바닥] 정산 직전 💰0 → 다음 EP 정답 보상 절
   t('newGame: broke·brokeEver false', E.newGame().broke === false && E.newGame().brokeEver === false);
 }
 
+console.log('[시스템 줄] 방 나가기 (2026-11-20)');
+{
+  const sys = EPISODES.flatMap(e => e.messages.filter(m => m.sys).map(m => ({ ep: e.id, ...m })));
+  t('EP6: 코스모 담당자가 나가면 시스템 줄 + 방 인원 (4)→(3)', EPISODES[5].roomName.endsWith('(4)') && sys.some(m => m.ep === 6 && m.sys.includes('코스모 담당자') && m.room.endsWith('(3)')));
+  t('시스템 줄은 첫 줄·마지막 줄이 아니고 who·text가 없음', EPISODES.every(e => !e.messages[0].sys && !e.messages[e.messages.length - 1].sys) && sys.every(m => !m.who && !m.text));
+}
+
 console.log('[데이터 정합] episodes.js');
 {
   t('EP 6개', EPISODES.length === 6);
@@ -117,7 +124,8 @@ console.log('[데이터 정합] episodes.js');
 
 console.log('[말투] 캐릭터 톡 — 사람이 하는 말 (2026-11-17, docs/superpowers/specs/2026-11-17-chat-dialogue-design.md)');
 {
-  const all = EPISODES.flatMap(e => e.messages.map(m => ({ ep: e.id, ...m })));
+  const talk = e => e.messages.filter(m => !m.sys);   // 시스템 줄(누가 나감)은 말풍선이 아니다
+  const all = EPISODES.flatMap(e => talk(e).map(m => ({ ep: e.id, ...m })));
   const none = (name, list) => {   // 걸린 줄을 보여 주고 판정
     if (list.length) console.log('    ↳ ' + list.slice(0, 5).map(m => `EP${m.ep} ${m.who}: ${m.text}`).join(' / '));
     t(name, list.length === 0);
@@ -132,13 +140,13 @@ console.log('[말투] 캐릭터 톡 — 사람이 하는 말 (2026-11-17, docs/s
   const isEumseum = t0 => { const w = words(t0).pop() || ''; return /[임음함됨남봄]$/.test(w) && !NOUN.has(w); };   // "~임/~음/~함" 끝맺음
   const SEA = '마케터 세아', JUNHO = '개발자 준호';
 
-  t('한 편 10~16줄', EPISODES.every(e => e.messages.length >= 10 && e.messages.length <= 16));
+  t('한 편 10~16줄', EPISODES.every(e => talk(e).length >= 10 && talk(e).length <= 16));
   none('말풍선 45자 이하 + 첫 줄(알림 미리보기) 30자 이하', all.filter(m => len(m.text) > 45).concat(EPISODES.map(e => ({ ep: e.id, ...e.messages[0] })).filter(m => len(m.text) > 30)));
   none('유행어 없음(개이득·~각·ㄱㄱ·ㅇㅇ·ㄷㄷ·콜?)', all.filter(m => SLANG.some(s => m.text.includes(s)) || words(m.text).some(isGak)));
   none('"~임/~음" 끝맺음 없음', all.filter(m => isEumseum(m.text)));
   none('느낌표·물음표 연달아 쓰지 않음', all.filter(m => /[!?]{2,}/.test(m.text)));
   t('ㅋㅋ는 한 편에 두 번까지, 이모지는 하나까지', EPISODES.every(e =>
-    e.messages.filter(m => m.text.includes('ㅋㅋ')).length <= 2 && e.messages.filter(m => EMOJI.test(m.text)).length <= 1));
+    talk(e).filter(m => m.text.includes('ㅋㅋ')).length <= 2 && talk(e).filter(m => EMOJI.test(m.text)).length <= 1));
   none('세아는 온점(또는 물음표·말줄임표·ㅋㅋ·이모지)으로 끝맺고, 준호는 온점을 찍지 않음',
     all.filter(m => (m.who === SEA && !/(?:[.?…]|ㅋㅋ|\p{Extended_Pictographic}️?)$/u.test(m.text)) || (m.who === JUNHO && m.text.endsWith('.'))));
   t('마지막 줄(결정 넘기기)은 6편이 서로 다름', new Set(EPISODES.map(e => e.messages[e.messages.length - 1].text)).size === EPISODES.length);
@@ -275,7 +283,7 @@ console.log('[모드] 다크/라이트 결정 (theme.js)');
 console.log('[메신저] 프로필 색 (chat.js avatarTone)');
 {
   const C = await import('../js/ui/chat.js');
-  const senders = [...new Set(EPISODES.flatMap(e => e.messages.map(m => m.who)))];
+  const senders = [...new Set(EPISODES.flatMap(e => e.messages.filter(m => !m.sys).map(m => m.who)))];
   t('avatar: 데이터의 보낸이는 서로 다른 색', new Set(senders.map(C.avatarTone)).size === senders.length);
   t('avatar: 색 번호는 0~' + (C.AVATAR_TONES - 1), [...senders, '처음 보는 사람', ''].every(w => Number.isInteger(C.avatarTone(w)) && C.avatarTone(w) >= 0 && C.avatarTone(w) < C.AVATAR_TONES));
   t('avatar: 같은 이름은 늘 같은 색, 처음 보는 이름은 고정 번호와 안 겹침', C.avatarTone('팬 하늘') === C.avatarTone('팬 하늘') && C.avatarTone('팬 하늘') >= 4);

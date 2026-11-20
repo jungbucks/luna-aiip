@@ -34,6 +34,17 @@ export function initNotebook(opts) {
   onSheetBack(closeProduct);                 // 폰의 뒤로 가기로 닫힐 때도 같은 길로(잠금 해제·초점 복원)
   $('btnPrint').onclick = () => window.print();
   $('btnCopy').onclick = copyProduct;
+  document.addEventListener('keydown', e => {   // 산출물 층도 모달: ESC로 닫고, Tab은 층 안에서만(2026-11-20)
+    const sheet = $('productSheet');
+    if (!sheet.classList.contains('on')) return;
+    if (e.key === 'Escape') { e.preventDefault(); closeProduct(); return; }
+    if (e.key !== 'Tab') return;
+    const f = [...sheet.querySelectorAll('button:not(:disabled), a[href], input, textarea')].filter(x => x.offsetParent !== null);
+    if (!f.length) return;
+    const i = f.indexOf(document.activeElement);
+    if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && (i === -1 || i === f.length - 1)) { e.preventDefault(); f[0].focus(); }
+  });
 }
 
 /* ── 목록 ── */

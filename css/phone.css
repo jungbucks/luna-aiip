@@ -15,6 +15,7 @@
 
 /* 앱 아이콘: 둥근 원 + 선 그림. 색은 다크·라이트에서 같다 */
 .app-grid{display:grid;grid-template-columns:repeat(4,1fr);margin:12px 14px 0;flex-shrink:0;position:relative;z-index:1}
+.app-decor{cursor:default}
 .app{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;padding:0;position:relative;
   font-size:12.5px;font-weight:600;color:var(--ink)}
 .ico{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;
@@ -51,6 +52,7 @@
 
 /* 알림 배너 */
 #notifBanner{position:absolute;top:calc(var(--sb) + 4px);left:10px;right:10px;z-index:6;border-radius:24px;padding:11px 13px;
+  background:var(--solid);   /* 2026-11-20: 뒤 위젯 글자·아이돌이 비치지 않게 */
   display:flex;gap:10px;align-items:center;text-align:left;color:var(--ink);
   transform:translateY(-140%);opacity:0;visibility:hidden;transition:transform .5s cubic-bezier(.2,.9,.25,1.15),opacity .25s,visibility 0s .5s}
 #notifBanner.in{transform:none;opacity:1;visibility:visible;transition-delay:0s}
@@ -109,6 +111,8 @@
 .msg.me{justify-content:flex-end}
 .msg.me .body{max-width:86%}
 .msg.me .bubble{background:var(--me);color:var(--me-ink);border-color:transparent}
+.msg.me.undone .bubble{background:transparent;color:var(--dim);border:1px dashed var(--bub-line);text-decoration:line-through}   /* 다시 선택한 답장 */
+.msg-sys{align-self:center;flex-shrink:0;font-size:12.5px;color:var(--dim);background:var(--bub);border:1px solid var(--bub-line);border-radius:999px;padding:2px 12px;margin:6px 0}
 /* 선택지: 입력창 바로 위에 올라오는 판. 바깥 26 = 버튼 14 + 여백 12 */
 #phoneWrap #chatChoices{margin:4px 10px 4px;padding:12px;border-radius:26px;background:var(--bub);border:1px solid var(--bub-line);animation:cardUp .3s cubic-bezier(.2,.9,.25,1) both}
 #phoneWrap #chatChoices:empty{display:none}

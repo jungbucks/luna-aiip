@@ -1,5 +1,6 @@
 /* [데이터] EP1~6 시나리오 — 엔진·UI는 이 데이터만 읽는다 (SPEC §8).
    스키마: {id,title,right,rightEmoji,roomName,intro,scenes[{emoji,text}],messages[{who,text}],concept,hint,
+   messages에는 시스템 줄 {sys, room?}도 들어갈 수 있다(누가 나감 — room은 바뀐 방 이름·인원, 2026-11-20).
    concept: 그 권리의 개념 요약('~요.') — 수첩·산출물·엔딩 복습에 쓴다. hint: C 선택지 카드 — 답을 말하지 않고 판단 기준을 묻는 질문('~요?', 2026-11-20)
    scenes(v0.4): 채팅 전에 탭으로 넘기는 스토리 씬 2~3장 — 마지막 씬은 "단톡방이 울린다"류로 폰 등장을 예고.
            choices:{wrong:{label,delta,popup:{title,analogy,lesson}},   ← label은 '대표가 단톡에 보내는 답장'(결정 + 이유, 온점). 화면 순서는 편마다 섞인다
@@ -289,6 +290,7 @@ export const EPISODES = [
       { who: '코스모 담당자', text: '{n}의 디자인을 배우 K 씨와 닮게 바꿔 주셨으면 합니다.' },
       { who: '코스모 담당자', text: 'K 씨 광고비의 10분의 1로 비슷한 분위기를 낼 수 있어서요.' },
       { who: '코스모 담당자', text: '편하게 의논하시도록 저는 잠시 방에서 나가 있겠습니다.' },
+      { sys: '코스모 담당자님이 나갔습니다.', room: '{n} 프로젝트 (3)' },   // 시스템 줄 — 말풍선 아님(verify 말투 규칙에서 빠진다)
       { who: '마케터 세아', text: '계약 금액이 우리 1년 매출만큼이에요.' },
       { who: '개발자 준호', text: '닮게 그리는 것뿐이잖아요' },
       { who: '개발자 준호', text: '이름을 쓰는 것도 아니고요' },

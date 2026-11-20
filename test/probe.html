@@ -160,6 +160,8 @@ async function run() {
     log('씬 텍스트 토큰 치환', txt('storyText').includes('솔') || !txt('storyText').includes('{n'));
     log('home: 스토리 동안 홈이 깔려 있고 앱은 안 눌림', home() === 'story' && !!E('homeScreen') && (E('dockNotes').click(), !E('appNotes').classList.contains('on')));
     log('kbd: 스토리 장면의 [다음] 단추에 초점', focusedBtnIn('storyStage'), D().activeElement && D().activeElement.outerHTML.slice(0, 60));
+    log('a11y: 내레이션 단추 이름에 진행 수 (1/n)', /^눌러서 계속 \(1\/\d\)$/.test(E('storyNext').getAttribute('aria-label') || ''), E('storyNext').getAttribute('aria-label'));
+    log('opaque: 내레이션 카드 바탕은 불투명(--solid)', parseColor(W().getComputedStyle(D().querySelector('.story-card')).backgroundColor)[3] >= 0.9);
     for (let guard = 0; guard < 8 && home() !== 'notify'; guard++) {
       const before = txt('storyIdx');
       await press();
@@ -173,7 +175,7 @@ async function run() {
     log('notify: 미리보기 = 첫 메시지, 이름 토큰 풀림', E('notifBanner').textContent.includes('솔 프로젝트') && E('notifBanner').textContent.includes(FIRST.who + ': ' + FIRST.text) && !/\{[nN]/.test(E('notifBanner').textContent));
     log('notify: 메신저 아이콘에 숫자', E('msgBadge').offsetParent !== null);
     for (const id of ['appCity', 'appCal', 'dockCall']) E(id).click();
-    log('decor: 장식 앱 3개는 아무 층도 열지 않음', !D().querySelector('.applayer.on') && E('appCity').getAttribute('aria-label').includes('(장식)'));
+    log('decor: 장식 앱 3개는 아무 층도 열지 않음 + 단추가 아닌 aria-hidden div', !D().querySelector('.applayer.on') && ['appCity', 'appCal', 'dockCall'].every(id => E(id).tagName === 'DIV' && E(id).getAttribute('aria-hidden') === 'true' && W().getComputedStyle(E(id)).cursor === 'default'));
     log('decor: 달력에 오늘 날짜', E('calDay').textContent === String(new Date().getDate()));
     E('dockNotes').click();
     await until(() => E('appNotes').classList.contains('on'));
@@ -242,7 +244,9 @@ async function run() {
     E('chatChoices').querySelector('.choice-btn[data-k="info"]').click();   // 확인: 개념 카드
     await until(popupShown);
     log('me-bubble: C는 내 말풍선을 만들지 않음', D().querySelectorAll('#chatLog .msg.me').length === 0 && !D().querySelector('.pop-face img'));
-    D().querySelector('.pop-btn').click(); await sleep(100);
+    log('hint-card: 제목에 권리 이름 없음 + 질문형(물음표)', !txt('popup').includes('저작권 개념') && D().querySelector('.pop-body').textContent.includes('?'));
+    D().dispatchEvent(new (W().KeyboardEvent)('keydown', { key: 'Escape', bubbles: true })); await sleep(100);   // 2026-11-20: ESC = 다시 고민하기
+    log('esc: 개념 카드는 ESC로 닫힘', !popupShown());
     log('kbd: 개념 카드를 닫으면 [확인] 단추로 초점이 돌아옴', D().activeElement === E('chatChoices').querySelector('.choice-btn[data-k="info"]'), D().activeElement && D().activeElement.outerHTML.slice(0, 60));
     const money0 = W().LUNA.state.stats.money;
     log('조사 자동 치환(솔이 직접 곡을)', txt('chatLog').includes('솔이 직접 곡을 쓸 수 있어요'));
@@ -258,6 +262,11 @@ async function run() {
     log('me-bubble: 누르자마자 선택지가 사라지고 규칙은 아직', !D().querySelector('#chatChoices .choice-btn') && W().LUNA.state.stats.money === money0);
     await until(popupShown);
     log('정답 팝업(배지를 얻었다)', D().querySelector('.pop-title').textContent.includes('저작권 배지를 얻었다'));
+    { const dl = [...D().querySelectorAll('#popup .delta .dl')];   // EP1 정답 💰-15 📈+20 🛡️+15 — 색은 부호 기준
+      log('delta-color: 수치 색은 부호 기준(-는 빨강, +는 초록)', dl.length === 3 && dl.every(x => x.classList.contains(x.textContent.includes('-') ? 'down' : 'up'))
+        && W().getComputedStyle(dl.find(x => x.classList.contains('down'))).color !== W().getComputedStyle(dl.find(x => x.classList.contains('up'))).color); }
+    { const tab = new (W().KeyboardEvent)('keydown', { key: 'Tab', bubbles: true, cancelable: true }); D().querySelector('#popup .pop-btn').focus(); D().dispatchEvent(tab);
+      log('trap: 팝업이 떠 있는 동안 Tab은 팝업 단추에 머묾', tab.defaultPrevented && E('popup').contains(D().activeElement)); }
     log('me-bubble: 내 말풍선 1개(앞의 "B. " 없이)', D().querySelectorAll('#chatLog .msg.me').length === 1 && D().querySelector('#chatLog .msg.me').textContent.includes((await import('/data/episodes.js')).EPISODES[0].choices.right.label.slice(0, 12)) && !/[ABC]. /.test(D().querySelector('#chatLog .msg.me').textContent));
     const d = W().LUNA.state, exp = W().LUNA.engine.newGame().stats;   // EP1 정답 한 번의 변화량과 정확히 같은지
     log('pick-double: 연타해도 한 번만 적용', d.stats.money === exp.money - 15 && d.stats.fame === exp.fame + 20 && d.stats.safety === exp.safety + 15, JSON.stringify(d.stats));
@@ -289,6 +298,7 @@ async function run() {
     await clickWhenReady(() => pbtns()[1]);                        // ❌ (맞음)
     await until(() => popupShown() && ptitle().includes('맞았어요'));
     log('quiz-wrong-more: 둘째 문제 맞음 → 맞았어요', ptitle().includes('맞았어요') && txt('popup').includes('정답: X'));
+    log('quiz-color: 맞았어요는 초록(.ok) 제목', D().querySelector('.pop-title').classList.contains('ok'));
     await clickWhenReady(() => pbtns()[0]);                        // 계속 → 적기 → 브릿지
     await until(() => E('appNotes').classList.contains('on') && !!E('noteInput'));
     log('note: 퀴즈 뒤 수첩이 쓰기 상태로 열림(정산은 아직)', !popupShown() && D().querySelector('.note-card[data-state="write"]').dataset.ep === '1');
@@ -413,6 +423,9 @@ async function run() {
     // 산출물 "나의 권리 수첩"
     E('endProduct').click(); await until(() => E('productSheet').classList.contains('on'));
     log('product-modal: 산출물이 떠 있는 동안 뒤 화면은 inert', E('scr-end').hasAttribute('inert') && !E('productSheet').hasAttribute('inert'));
+    { const w0 = f.width, h0 = f.height; f.width = 1366; f.height = 700; await sleep(150);   // 상태바는 기기 틀 모드에서만 있다
+      log('statusbar: 기기 틀 모드에서 상태바가 산출물 층보다 위(권리 수첩 화면에서도 보임)', E('statusBar').offsetParent !== null && +W().getComputedStyle(E('statusBar')).zIndex > +W().getComputedStyle(E('productSheet')).zIndex);
+      f.width = w0; f.height = h0; await sleep(150); }
     log('product: 6칸 + 내 글 + 못 간 EP는 빈칸', D().querySelectorAll('.prod-note').length === 6 && D().querySelector('.prod-note[data-ep="1"]').textContent.includes('테스트용으로') && D().querySelector('.prod-note[data-ep="4"]').textContent.includes('(아직 적지 않음)'));
     log('product: 아직 안 간 EP의 개념 힌트는 산출물에도 안 보임', D().querySelector('.prod-note[data-ep="4"]').textContent.includes('EP4에서 만나요') && !D().querySelector('.prod-note[data-ep="4"] .prod-badge').textContent.includes('미획득'));
     E('prodName').value = '10101 테스트';
@@ -460,6 +473,7 @@ async function run() {
         E('btnContinue').click();
         await until(() => active('scr-end'), 3000);
         log('kbd: 엔딩 화면이 뜨면 엔딩 제목에 초점(' + kind + ')', D().activeElement === E('scr-end').querySelector('h2'), D().activeElement && D().activeElement.outerHTML.slice(0, 60));
+        log('end-scroll: 엔딩은 맨 위부터 + 스크롤 영역이 상태바 아래에서 시작(' + kind + ')', E('scr-end').scrollTop === 0 && (E('statusBar').offsetParent === null || E('scr-end').getBoundingClientRect().top >= E('statusBar').getBoundingClientRect().bottom - 1));
         const full = g.badges.filter(b => b === 'full').length, stats = '💰 ' + g.stats.money + ' · 📈 ' + g.stats.fame + ' · 🛡️ ' + g.stats.safety;
         log('resume-end: ' + kind + ' — 새로 고쳐 이어 해도 같은 엔딩·점수·배지', end === kind && active('scr-end') && txt('scr-end').includes(STR.endings[kind].name)
           && D().querySelector('.rp-stats') && D().querySelector('.rp-stats').textContent.trim() === stats && D().querySelectorAll('.rp-badge.b-full').length === full,
@@ -511,6 +525,7 @@ async function run() {
       log('kbd: 법정 화면이 뜨면 법정 단추에 초점', D().activeElement === E('courtBtn'), D().activeElement && D().activeElement.outerHTML.slice(0, 60));
       E('courtBtn').click();
       await until(() => active('scr-ep') && D().querySelector('#chatChoices .choice-btn'));
+      log('retry-bubble: 다시 선택하면 보낸 답장은 취소선 + "대표가 다시 생각했다" 줄', D().querySelectorAll('#chatLog .msg.me.undone').length === 1 && [...D().querySelectorAll('#chatLog .msg-sys')].some(x => x.textContent === '대표가 다시 생각했다'));
       const first = D().querySelector('#chatChoices .choice-btn:not(:disabled)');
       log('kbd: 다시 선택하기(법정 뒤) — 남은 첫 선택지에 초점, 오답은 비활성', D().activeElement === first && first.dataset.k !== 'wrong' && D().querySelector('#chatChoices .choice-btn[data-k="wrong"]').disabled,
         D().activeElement && D().activeElement.outerHTML.slice(0, 60));

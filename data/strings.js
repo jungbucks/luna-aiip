@@ -72,7 +72,7 @@ export const STRINGS = {
     themeToDark: '다크 모드로 바꾸기', themeToLight: '라이트 모드로 바꾸기', themeBtnDark: '🌙 다크 모드', themeBtnLight: '☀️ 라이트 모드',
     notifyHint: '새 메시지가 왔어요 — 눌러서 열기',
     apps: { city: '윤리시티', cal: '달력', call: '통화', msg: '메신저', notes: '권리 수첩', settings: '설정' },
-    decorSuffix: ' (장식)', back: '홈으로', today: '오늘',
+    decorSuffix: ' (장식)', back: '홈으로', today: '오늘', rethink: '대표가 다시 생각했다', halfNote: '다시 선택해서 얻은 배지는 반쪽 배지예요. 처음부터 맞히면 완전 배지예요.',
     composer: { playing: '탭하면 빨리 감기', choose: '위에서 답장을 골라 주세요', idle: '메시지 입력' },
     notes: {
       title: '권리 수첩', locked: n => `EP${n}에서 만나요`,

@@ -2,16 +2,36 @@
 import { esc } from './chat.js';
 import { idolSVG, getIdol, getExpression } from './character.js';
 
+/* 수치 색은 결과(정답/오답)가 아니라 부호로: +는 초록, -는 빨강(2026-11-20) */
 export function deltaLine(delta) {
-  const part = (emoji, v) => (v ? `${emoji} ${v > 0 ? '+' : ''}${v}` : '');
+  const part = (emoji, v) => (v ? `<span class="dl ${v > 0 ? 'up' : 'down'}">${emoji} ${v > 0 ? '+' : ''}${v}</span>` : '');
   return [part('💰', delta.money), part('📈', delta.fame), part('🛡️', delta.safety)].filter(Boolean).join('  ');
 }
 
-/* opts: {title, html, buttons:[{label, cls, cb}], guardMs, face} — face: 정답·오답 결과에만 아이돌 얼굴 */
+/* ESC·Tab(2026-11-20): 떠 있는 동안 Tab은 팝업 안에서만 돌고, ESC는 escBtn(닫기에 해당하는 단추)을 누른다.
+   escBtn = opts.esc 번째 단추, 없으면 단추가 하나일 때 그 단추. 고르기가 필요한 팝업(오답·O/X 문제)에는 없다 */
+let escBtn = null, keysOn = false;
+function onKey(e) {
+  const ov = document.getElementById('popup');
+  if (!ov || !ov.classList.contains('show')) return;
+  if (e.key === 'Escape') {
+    if (escBtn && escBtn.isConnected && !escBtn.disabled) { e.preventDefault(); escBtn.click(); }
+  } else if (e.key === 'Tab') {
+    const f = [...ov.querySelectorAll('button:not(:disabled), a[href], input, textarea')];
+    if (!f.length) { e.preventDefault(); return; }
+    const i = f.indexOf(document.activeElement);
+    if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && (i === -1 || i === f.length - 1)) { e.preventDefault(); f[0].focus(); }
+  }
+}
+
+/* opts: {title, titleCls, html, buttons:[{label, cls, cb}], esc, guardMs, face} — face: 정답·오답 결과에만 아이돌 얼굴 */
 export function showPopup(opts) {
+  if (!keysOn) { document.addEventListener('keydown', onKey); keysOn = true; }
   const ov = document.getElementById('popup');
   ov.querySelector('.pop-face').innerHTML = opts.face ? idolSVG(getIdol(), getExpression()) : '';
   ov.querySelector('.pop-title').innerHTML = esc(opts.title);
+  ov.querySelector('.pop-title').className = 'pop-title' + (opts.titleCls ? ' ' + opts.titleCls : '');
   ov.querySelector('.pop-body').innerHTML = opts.html;   // 호출측에서 esc 처리된 조각만 전달
   const btns = ov.querySelector('.pop-btns');
   btns.innerHTML = '';
@@ -23,6 +43,7 @@ export function showPopup(opts) {
     if (opts.guardMs) { el.disabled = true; setTimeout(() => { el.disabled = false; }, opts.guardMs); }
     btns.appendChild(el);
   });
+  escBtn = opts.esc != null ? btns.children[opts.esc] : (opts.buttons.length === 1 ? btns.firstElementChild : null);
   ov.classList.add('show');
   setBackInert(true);
   // 첫 버튼에 초점(잠금이 있으면 풀린 뒤) — 이 팝업이 아직 떠 있고 버튼이 그대로일 때만
@@ -31,6 +52,7 @@ export function showPopup(opts) {
 }
 
 export function hidePopup() {
+  escBtn = null;
   document.getElementById('popup').classList.remove('show');
   setBackInert(false);
 }

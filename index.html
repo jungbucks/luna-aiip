@@ -91,13 +91,13 @@ window.__errs=[];addEventListener('error',function(e){__errs.push(e.message)});a
         <p class="stat-help" id="statHelp"></p>
       </div>
       <div class="app-grid">
-        <button type="button" class="app app-decor" id="appCity"><span class="ico ico-city"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V9l5-3v14M9 20V4l6 3v13M15 20v-9l5 2v7M3 20h18"/></svg></span><span class="app-name"></span></button>
-        <button type="button" class="app app-decor" id="appCal"><span class="ico ico-cal"><i id="calDow"></i><b id="calDay"></b></span><span class="app-name"></span></button>
+        <div class="app app-decor" id="appCity" aria-hidden="true"><span class="ico ico-city"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V9l5-3v14M9 20V4l6 3v13M15 20v-9l5 2v7M3 20h18"/></svg></span><span class="app-name"></span></div>
+        <div class="app app-decor" id="appCal" aria-hidden="true"><span class="ico ico-cal"><i id="calDow"></i><b id="calDay"></b></span><span class="app-name"></span></div>
       </div>
       <div class="ep-char-row"><div class="idol-char" id="epChar"></div></div>
       <div id="homeHint" role="status"></div>
       <div class="dock glass">
-        <button type="button" class="app app-decor" id="dockCall"><span class="ico ico-call"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3.5h3l1.5 4-2 1.5a12 12 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2 2A16 16 0 0 1 4.5 5.5a2 2 0 0 1 2-2z"/></svg></span><span class="app-name"></span></button>
+        <div class="app app-decor" id="dockCall" aria-hidden="true"><span class="ico ico-call"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3.5h3l1.5 4-2 1.5a12 12 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2 2A16 16 0 0 1 4.5 5.5a2 2 0 0 1 2-2z"/></svg></span><span class="app-name"></span></div>
         <button type="button" class="app" id="dockMsg"><span class="ico ico-msg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 3.5V16A2.5 2.5 0 0 1 4 13.5z"/></svg></span><span class="bdg" id="msgBadge" aria-hidden="true">1</span><span class="app-name"></span></button>
         <button type="button" class="app" id="dockNotes"><span class="ico ico-notes"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3.5" width="13" height="17" rx="2.5"/><path d="M9.5 8h6M9.5 12h6M4 7.5h2M4 12h2M4 16.5h2"/></svg></span><span class="app-name"></span></button>
         <button type="button" class="app" id="dockSettings"><span class="ico ico-set"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/></svg></span><span class="app-name"></span></button>

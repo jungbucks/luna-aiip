@@ -3,7 +3,10 @@
 지식재산권 6종 학습 선택형 스토리 웹게임(고교 수업용) + 자매 페이지 도감(`dogam.html`, AI 지재권 쟁점 12건).
 바닐라 ES 모듈, 빌드 없음. 스펙 `SPEC.md`(v3) · 계획 `ROADMAP.md`(10항목).
 
-## 현재 상태 (2026-11-17)
+## 현재 상태 (2026-11-20)
+
+- **외부 검토 7항목 반영(2026-11-20)**: ① 제목 화면 모드 단추 = 기록 초기화 옆 글자 단추 ② 이어서 하기 = 유리 바탕+테두리(바탕이 글자색과 같던 것) ③ 선택지 다시 씀(오답에 그럴듯한 근거·정답에 대가), C = "잠깐, 확인할 게 있어.", **`hint` = C 질문 카드('~요?') / `concept` = 정답 요약(수첩·산출물·엔딩)** ④ HUD 이름표 자금/인지도/**신뢰**(화면 이름만, 키는 safety)·EP1 위젯에 뜻 한 줄, **통장 바닥**(정산 직전 💰0 → 세아 경고 + 다음 EP 정답 📈·🛡️ 절반 + 유니콘 불가, `broke`·`brokeEver`), EP3·4·5 오답 📈 감소, 리포트 인지도 한 줄 ⑤ 다시 선택하면 보낸 답장 취소선 + 시스템 줄 ⑥ 생존 엔딩 '소송'은 법정 갔을 때만, 엔딩·법정 스크롤은 상태바 아래에서·맨 위부터 ⑦ 델타 색 = 부호, 알림 배너·내레이션 카드 불투명, 팝업 ESC(단추 하나면 그 단추, 확인창은 그만두기)·Tab 가두기, 산출물 층 ESC·Tab, 장식 앱 = div aria-hidden, O/X 결과 제목 초록/주황, 반쪽 배지 첫 설명, **messages의 시스템 줄 `{sys, room}`**(EP6 코스모 담당자 나감 → 방 인원 (3)), 내레이션 단추 aria-label, 상태바 z-index 60(산출물 층 위). SPEC §6.1·6.2·6.4·6.7 개정.
+- **다음 = ourlog**(가상 SNS 앱, 인스타와 비슷한 배치·베끼지 않음): 브레인스토밍에서 정한 것 — 수첩 적기 뒤 "ourlog SNS 앱을 확인해 보자!" 알림(열지 넘길지 학생이), A 피드형 + B의 실시간 연출(LIVE·떠오르는 하트), 선택(정답/오답/재선택)에 따라 팬 반응이 다름, 📈가 좋아요·팔로워 숫자, 그림은 codex. 설계 문서는 아직(시안 `.superpowers/brainstorm/`).
 
 - **캐릭터 톡 다시 씀(2026-11-17)**: EP1~6 `messages` 전부 — 대표에겐 존댓말·둘끼리 반말, **세아는 온점 / 준호는 온점 없이 짧게 끊어**, 유행어·"~임/~음" 금지, 편마다 상황→유혹→의심(질문만)→결정 넘기기. SPEC §5의 "수정 금지"는 교사가 해제. 규칙은 verify [말투] 15건이 지킨다. **스토리 장면·편 소개·인트로·법정·엔딩 문구도 다시 씀**(명언풍·느낌표 없음. 인트로에 "대표 = 동아리 회장, 준호·세아 = 후배" — 존댓말의 까닭). EP2 오답 사건은 "경쟁사가 글을 보고 비슷한 제품"으로 바꿈(법 정확성). **결과 알림·개념 카드도 다시 씀**(제목은 담담하게, 비유 "~와 같아요.", 배운 것 "~다."). **선택지도 다시 씀**: 대표의 답장(결정 + 이유 두 문장), 오답·정답 자리는 편마다 섞이고(`chat.js choiceOrder`, 프로브는 `window.__rand`·`data-k`로 고름) 겉모습은 같다. 메신저 프로필은 글자 대신 **색 바탕 + 얼굴 없는 사람 모양**(`chat.js avatarTone`, `phone.css .ava[data-c]`). 설계 `docs/superpowers/specs/2026-11-17-chat-dialogue-design.md`. **글 다듬기(ROADMAP #12) 끝 — O/X 퀴즈 문장 손질·타이틀 부제·단추 문구(새로 시작/이어서 하기/뭐라고 답할까?)까지. 다음 = 교사가 해 보고 판단(선택지가 뻔하면 B안: 그럴듯한 오답 하나 더 · EP2 오답 사건 변경 승인) · O/X 12문항 검수.** 원격 main에 올림(2026-11-17, 교사 지시 — github.com/jungbucks/luna-aiip).
 
@@ -67,6 +70,8 @@ _config.yml         Pages(Jekyll) 배포 범위: test·docs·CLAUDE/SPEC/ROADMAP
 - **새 층은 `#app`의 자손이어야 한다** — 팝업이 떠 있는 동안 `popup.js`가 `#app`의 직계 자식(팝업 제외)에 `inert`를 건다. 밖에 두면 팝업 뒤에서 눌려 점수가 두 번 들어가는 옛 결함이 돌아온다.
 - **저장 키 셋은 서로 별개**: `luna_save_v1`(게임) · `luna_notes_v1`(적은 글) · `luna_theme`(모드). 기록 초기화·처음부터는 게임+글을 지우고 모드는 남긴다. 적은 글은 점수·배지·엔딩과 무관.
 - **불러온 저장은 믿지 않는다**(보안 검토 2026-11-18 C): `state.load()`가 `checkSave()`로 알려진 칸만 검사해 새 객체로 옮기고 하나라도 어긋나면 null(이어 하기 숨김, 모르는 칸은 버림). 저장에 칸을 새로 더하면 `checkSave`에도 넣을 것 — 안 넣으면 그 칸이 불러올 때 사라진다. 점수는 화면에 `chat.js statsLine()/num()`(정수만 숫자, 아니면 '-'), 배지 class는 `notebook.js badgeCls()` 허용값만.
+- **시스템 줄**: `messages`에 `{sys, room?}`를 넣으면 말풍선이 아니라 가운데 줄로 나오고 방 이름(인원)이 바뀐다. verify 말투 규칙은 시스템 줄을 뺀 `talk(e)`로 센다 — 첫 줄·마지막 줄에는 두지 않는다.
+- **팝업 ESC**: `showPopup({esc})` — 없으면 단추가 하나일 때만 그 단추. 고르기가 필요한 팝업(오답·O/X 문제)에는 ESC가 없다.
 - **학생이 적은 글은 `notebook.js`의 `escPlain()`으로** — `esc()`는 `{n}` 토큰을 아이돌 이름으로 바꿔 버린다.
 - **뒤로 가기는 방문 기록 한 칸 규칙**(`phone.js`): 앱이 열릴 때만 한 칸을 채우고, 프로그램이 `history.back()`을 부르지 않는다. 팝업·적기 단계에서는 무시.
 - **흐림(`backdrop-filter`)은 배경화면 위에 떠 있고 스크롤되지 않는 면에만.** 메신저 안·수첩 목록·리포트에는 쓰지 않는다(저사양 폰, v0.3.1의 교훈).
@@ -75,7 +80,7 @@ _config.yml         Pages(Jekyll) 배포 범위: test·docs·CLAUDE/SPEC/ROADMAP
 
 ## 검증 (수정 후 필수)
 
-1. 게임 `node test/verify.mjs`(104건) — 미달 시 배포 금지. 도감 `node test/verify-dogam.mjs`(20건) + `node test/run-probe.mjs test/probe-dogam.html`(45건). 게임 E2E 151건.
+1. 게임 `node test/verify.mjs`(116건) — 미달 시 배포 금지. 도감 `node test/verify-dogam.mjs`(20건) + `node test/run-probe.mjs test/probe-dogam.html`(45건). 게임 E2E 169건.
 2. E2E 프로브(구조·흐름 변경 시): **`node test/run-probe.mjs`** 한 줄(종료 코드 0 = 전부 PASS). 배포본만으로 도는지는 `--pages`(올라갈 파일만 서빙). 가드는 `node test/run-probe.mjs test/probe-guard.html`. 캡처는 `node test/run-probe.mjs test/probe-shots.html --shot=<png> --url="/__probe.html?scene=home&theme=light&w=1366&h=700" --size=1366,700`. 아래는 실행기가 대신 해 주는 옛 수동 절차(원리 참고용): **게임과 같은 오리진에서 서빙 필수** — file:// 프로브 + http iframe은 크로스오리진으로 조용히 죽는다(2026-07-15 실제 발생). 절차: `probe.html`을 루트에 복사 → Node 정적 서버(scratchpad) → `msedge --headless=new --user-data-dir=<임시> --virtual-time-budget=20000 --dump-dom http://localhost:PORT/...` → 수확 후 복사본 삭제. 채팅은 타이핑 인디케이터 때문에 메시지당 최대 2탭.
 
 ## 참고 문서

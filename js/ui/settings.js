@@ -27,7 +27,7 @@ function render() {
   $('setReset').onclick = () => showPopup({
     title: S.reset,
     html: `<p>${esc(S.resetAsk)}</p>`,
-    buttons: [{ label: S.resetNo, cls: 'ghost' }, { label: S.resetYes, cls: 'danger', cb: onReset }],
+    buttons: [{ label: S.resetNo, cls: 'ghost', cb: () => $('setReset').focus() }, { label: S.resetYes, cls: 'danger', cb: onReset }], esc: 0,
   });
 }
 

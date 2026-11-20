@@ -56,6 +56,14 @@ export function advance() {
   if (typingEl) { finalizeMsg(); return; }        // 탭 = 타이핑 스킵, 즉시 출력
   if (idx >= msgs.length) return;
   const m = msgs[idx];
+  if (m.sys) {                                    // 시스템 줄(누가 나감 등) — 타이핑 없이 가운데에, 방 이름(인원)도 바꾼다(2026-11-20)
+    idx++;
+    sysLine(m.sys);
+    if (m.room) document.getElementById('chatRoom').textContent = T(m.room);
+    if (idx >= msgs.length) onDone && onDone();
+    else autoTimer = setTimeout(advance, AUTO_GAP);
+    return;
+  }
   const cont = idx > 0 && msgs[idx - 1].who === m.who;   // 같은 사람이 이어 말하면 이름·프로필 생략
   typingEl = document.createElement('div');
   typingEl.className = 'msg show typing' + (cont ? ' cont' : '');
@@ -104,6 +112,24 @@ export function showChoices(title, choices) {
   });
   setComposer('choose');
   toBottom();
+}
+
+/* 가운데 시스템 줄 — 방 나가기, 다시 생각하기 */
+export function sysLine(text) {
+  if (!logEl) return;
+  const el = document.createElement('div');
+  el.className = 'msg-sys';
+  el.textContent = T(text);
+  logEl.appendChild(el);
+  toBottom();
+}
+
+/* [다시 선택하기]: 방금 보낸 답장을 취소선으로 두고 시스템 줄을 단다(2026-11-20 — 오답 말풍선이 그대로 남아 있었다) */
+export function undoLastMine(note) {
+  if (!logEl) return;
+  const last = [...logEl.querySelectorAll('.msg.me:not(.undone)')].pop();
+  if (last) last.classList.add('undone');
+  sysLine(note);
 }
 
 /* 내 답장 말풍선(오른쪽) — 고른 선택지 문구 */

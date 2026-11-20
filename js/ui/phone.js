@@ -115,7 +115,7 @@ export function initPhone({ onMessenger, onNotes, onSettings }) {
   Object.keys(label).forEach(id => {
     const el = $(id);
     el.querySelector('.app-name').textContent = label[id];
-    if (el.classList.contains('app-decor')) el.setAttribute('aria-label', label[id] + STRINGS.ui.decorSuffix);
+    // 장식 앱은 div + aria-hidden(2026-11-20) — 읽어 주기·Tab에서 빠진다. 눌러도 흔들리기만
   });
   document.querySelectorAll('.app-back').forEach(b => b.setAttribute('aria-label', STRINGS.ui.back));
 
