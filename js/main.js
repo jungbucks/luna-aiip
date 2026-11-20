@@ -175,9 +175,9 @@ function enterEp() {
   show('scr-ep');
   sceneIdx = 0;
   chatStarted = false;
-  settled = false;
   choiceKeys = choiceOrder((window.__rand || Math.random)());   // window.__rand = 프로브가 순서를 정해 두는 자리
   while (phone.topApp()) phone.closeApp(null, false);   // 열려 있던 앱은 닫고 홈에서 시작
+  settled = false;   // 앱을 다 닫은 뒤에 — 그 사이 남아 있던 onceClosed(지난 편 ourlog 정산)가 불려도 새 편을 정산하지 않게
   phone.clearNotify();
   phone.setHome('story');
   renderScene();

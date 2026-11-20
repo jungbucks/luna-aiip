@@ -216,13 +216,16 @@ console.log('[말투] 캐릭터 톡 — 사람이 하는 말 (2026-11-17, docs/s
     const fsx = await import('node:fs');
     const { ART_READY } = await import('../data/ourlog.js');
     const keys = ['ep1', 'ep2', 'ep3', 'ep4', 'ep5', 'ep5-blur', 'ep6', 'ep6-k'];
+    const { fileURLToPath } = await import('node:url');
     t('ourlog 그림: ART_READY면 16장이 다 있고 장당 150KB·합계 2.5MB 이하', (() => {
       if (!ART_READY) return true;
-      const files = ['sol', 'luna'].flatMap(i => keys.map(k => `assets/ourlog/${i}/${k}.webp`));
+      const files = ['sol', 'luna'].flatMap(i => keys.map(k => fileURLToPath(new URL(`../assets/ourlog/${i}/${k}.webp`, import.meta.url))));   // 레포 기준(어느 폴더에서 실행해도)
       const sizes = files.map(f => fsx.existsSync(f) ? fsx.statSync(f).size : -1);
       return sizes.every(s => s > 0 && s <= 150 * 1024) && sizes.reduce((a, b) => a + b, 0) <= 2.5 * 1024 * 1024;
     })());
     t('ourlog 그림 키 = 의뢰서 키', EPS.flatMap(i => Object.values(OURLOG.posts[i].img)).every(k => keys.includes(k)));
+    t('ourlog 그림 설명(alt): 8키 모두 1~30자, 이름 하드코딩 없음, 키 밖 설명 없음', keys.every(k => typeof OURLOG.alt[k] === 'string' && [...OURLOG.alt[k]].length >= 1 && [...OURLOG.alt[k]].length <= 30
+      && !/솔|루나|SOL|LUNA/.test(OURLOG.alt[k])) && Object.keys(OURLOG.alt).every(k => keys.includes(k)), JSON.stringify(OURLOG.alt));
   }
 }
 

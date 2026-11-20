@@ -23,9 +23,9 @@
 ## 구조 (전부 바닐라 ES 모듈)
 
 ```
-index.html          폰 껍데기(.device > #app) + 화면 6개(scr-title/select/intro/ep/court/end) + 산출물 층 + 팝업. scr-ep 안에 홈 화면·알림 배너·스토리 무대·앱 층 3개
+index.html          폰 껍데기(.device > #app) + 화면 6개(scr-title/select/intro/ep/court/end) + 산출물 층 + ourlog 알림 카드(`#olNotice`, #app 직계 자식) + 팝업. scr-ep 안에 홈 화면·알림 배너·스토리 무대·앱 층 4개(메신저·권리 수첩·설정·ourlog)
 css/style.css       색 토큰(다크/라이트)·글꼴·폰 껍데기·유리 면·잠금화면·선택·인트로·법정·엔딩·팝업. 본문 15px+
-css/phone.css       홈 화면·앱 층(메신저·권리 수첩·설정)·적기·산출물·인쇄용
+css/phone.css       홈 화면·앱 층(메신저·권리 수첩·설정)·적기·산출물·인쇄용 — ourlog 앱·알림 카드는 css/ourlog.css
 assets/fonts/       Pretendard 서브셋 woff2 3종(400·600·800) + LICENSE.txt (외부 CDN 없음)
 css/dogam.css       도감 스타일(게임 팔레트 공유)
 js/engine.js        규칙 단일 원천(SPEC §6). DOM 없음, 수치 변경 금지
@@ -38,7 +38,7 @@ js/ui/character.js  PNG 경로·표정 전환 + T() 토큰 치환. 계약: .idol
 js/ui/theme.js      다크/라이트 모드(키 luna_theme — 게임 기록과 별개)
 js/ui/phone.js      시계, 홈 상태(story/notify/idle), 앱 열기·닫기, 뒤로 가기, 장식 앱. 독 아이콘 클릭은 여기서만 건다
 js/ui/settings.js   설정 앱(모드·기록 초기화)
-js/ourlog-feed.js    ourlog 피드 계산(좋아요·댓글 갈래별 선택, DOM 없음, verify가 검산)
+js/ourlog-feed.js   ourlog 피드 계산(좋아요·댓글 갈래별 선택, DOM 없음, verify가 검산)
 js/ui/ourlog.js     ourlog 앱 층·알림 카드·실시간 재생(initOurlog·openFeed·renderFeed·offer·openLive)
 data/ourlog.js      ourlog 게시물·댓글·ART_READY
 css/ourlog.css      ourlog 앱·카드 스타일
@@ -52,7 +52,7 @@ data/strings.js     인트로·브릿지·법정·엔딩·리포트·퀴즈 문�
 data/quiz.js        O/X 확인 퀴즈 12문항(EP마다 본 문제+하나 더, 교사 검수 대기)
 js/quiz.js          퀴즈 판정·기록(G.quiz)·다시 볼 개념 목록(DOM 없음, verify가 검산)
 data/issues.js      도감 ISSUES 12·STATUS_META(양측 대립·상태 배지·실제 사례·출처)
-test/verify.mjs     게임 검산 131건(배포 4·기록 지우기 6·저장 불러오기 11·퀴즈 8·이어 하기 11·모드 6·프로필 3·수첩 12·말투·선택지·알림·장면 15 포함) / verify-dogam.mjs 도감 15건(미결 카드 결론 단정·사례 칸 길이 200자/문장 80자/괄호 1개 검사 포함)
+test/verify.mjs     게임 검산 132건 / verify-dogam.mjs 도감 15건(미결 카드 결론 단정·사례 칸 길이 200자/문장 80자/괄호 1개 검사 포함)
 test/probe.html     게임 E2E / probe-dogam.html 도감 E2E 24건(`node test/run-probe.mjs test/probe-dogam.html`, 폰·넓은 화면 배치 포함)
 test/run-probe.mjs  프로브 실행기(서버 + 헤드리스 Edge + 수확) — `node test/run-probe.mjs`
 test/probe-shots.html  캡처용 프로브(원하는 장면까지 자동 진행)
@@ -80,18 +80,19 @@ _config.yml         Pages(Jekyll) 배포 범위: test·docs·CLAUDE/SPEC/ROADMAP
 - **팝업 ESC**: `showPopup({esc})` — 없으면 단추가 하나일 때만 그 단추. 고르기가 필요한 팝업(오답·O/X 문제)에는 ESC가 없다.
 - **학생이 적은 글은 `notebook.js`의 `escPlain()`으로** — `esc()`는 `{n}` 토큰을 아이돌 이름으로 바꿔 버린다.
 - **뒤로 가기는 방문 기록 한 칸 규칙**(`phone.js`): 앱이 열릴 때만 한 칸을 채우고, 프로그램이 `history.back()`을 부르지 않는다. 팝업·적기 단계에서는 무시.
-- **ourlog 갈래 = 배지**: 저장 칸 없이 그 편 배지(`badges[ep-1]`: full/half/null)로 정하고(`ourlog-feed.js`), 재선택은 반쪽 배지 갈래. 저장에 칸을 더하지 않으니 checkSave 영향 없음.
+- **ourlog 갈래 = 배지**: 저장 칸 없이 그 편 배지(`badges[ep-1]`)로 정한다(`ourlog-feed.js`): full→정답(right)·half→재선택(half)·none→오답(wrong), null(아직 안 한 편)이면 게시물·알림 없음. 저장에 칸을 더하지 않으니 checkSave 영향 없음.
 - **`phone.onceClosed(app, fn)`**: 열려 있는 앱에만 등록되고, 그 앱이 닫힐 때 한 번만 부른다. ourlog가 열려 있는 동안 정산을 미루는 데 쓴다(닫혀 있는 앱에 걸면 안 불림).
 - **`ART_READY`**(`data/ourlog.js`): false면 `<img>`를 만들지 않아 그림 404 요청이 없다. 지금 true(webp 16장 있음). 그림을 빼면 false로.
 - **`main.js settled`**: ourlog를 열고 닫는 길이 여럿(열기·넘어가기·ESC·뒤로 가기)이라 정산 팝업이 한 번만 뜨게 막는 표시. 새 길을 더하면 settled를 거칠 것.
 - **`window.__olForceMotion`은 검사 전용**: 헤드리스가 강제하는 움직임 줄이기를 ourlog에서만 끄는 표시(test/probe.html만 씀). 게임 코드에서 켜지 말 것. 캡처 장면 `olnotice·ollive·olfeed`(probe-shots)는 움직임 줄이기라 ollive가 끝 상태로 나온다.
+- **ourlog 실시간 재생 = 본문이 새 댓글을 따라 내려간다**(`ourlog.js follow`, 2026-11-20 최종 검토 I1 — 기기 틀 600px에선 첫 댓글부터 화면 밖이었다): `#olBody`만 움직이고(scrollIntoView 금지 — 기기 틀까지 움직인다) 화면 좌표 차이를 본문 배율로 나눠 앱 층 scale() 전환 중에도 맞춘다. 학생이 재생 중에 본문을 움직이면 더 따라가지 않고, 맨 아래로 오면 다시 따라간다. "눌러서 댓글 모두 보기"는 머리줄의 `<button id="olTapAll">`(LIVE 옆 — 본문이 내려가도 보임). 게시물 시간은 맨 위만 "방금", 지난 게시물은 편 이름(`ui.ourlog.epTime`).
 - **흐림(`backdrop-filter`)은 배경화면 위에 떠 있고 스크롤되지 않는 면에만.** 메신저 안·수첩 목록·리포트에는 쓰지 않는다(저사양 폰, v0.3.1의 교훈).
 - **아이폰 그대로 금지** — 다이내믹 아일랜드·광택 사각 아이콘 등. 지재권을 가르치는 게임이다.
 - **헤드리스에서는 CSS 전환이 멈춰 있다** — 앱 층이 scale(.1)·opacity 0인 채라 배치 검사가 거짓 통과한다. `run-probe.mjs`가 "움직임 줄이기"를 강제해 끝 상태로 그린다(`--motion`으로 끔). 실제 전환 모습은 눈으로 확인.
 
 ## 검증 (수정 후 필수)
 
-1. 게임 `node test/verify.mjs`(131건) — 미달 시 배포 금지. 도감 `node test/verify-dogam.mjs`(20건) + `node test/run-probe.mjs test/probe-dogam.html`(45건). 게임 E2E 189건.
+1. 게임 `node test/verify.mjs`(132건) — 미달 시 배포 금지. 도감 `node test/verify-dogam.mjs`(20건) + `node test/run-probe.mjs test/probe-dogam.html`(45건). 게임 E2E 199건.
 2. E2E 프로브(구조·흐름 변경 시): **`node test/run-probe.mjs`** 한 줄(종료 코드 0 = 전부 PASS). 배포본만으로 도는지는 `--pages`(올라갈 파일만 서빙). 가드는 `node test/run-probe.mjs test/probe-guard.html`. 캡처는 `node test/run-probe.mjs test/probe-shots.html --shot=<png> --url="/__probe.html?scene=home&theme=light&w=1366&h=700" --size=1366,700`. 아래는 실행기가 대신 해 주는 옛 수동 절차(원리 참고용): **게임과 같은 오리진에서 서빙 필수** — file:// 프로브 + http iframe은 크로스오리진으로 조용히 죽는다(2026-07-15 실제 발생). 절차: `probe.html`을 루트에 복사 → Node 정적 서버(scratchpad) → `msedge --headless=new --user-data-dir=<임시> --virtual-time-budget=20000 --dump-dom http://localhost:PORT/...` → 수확 후 복사본 삭제. 채팅은 타이핑 인디케이터 때문에 메시지당 최대 2탭.
 
 ## 참고 문서

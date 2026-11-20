@@ -52,7 +52,7 @@
 
 /* 알림 배너 */
 #notifBanner{position:absolute;top:calc(var(--sb) + 4px);left:10px;right:10px;z-index:6;border-radius:24px;padding:11px 13px;
-  background:var(--solid);   /* 2026-11-20: 뒤 위젯 글자·아이돌이 비치지 않게 */
+  background:linear-gradient(var(--solid),var(--solid)),var(--app-bg);   /* 2026-11-20: 뒤 위젯 글자·아이돌이 비치지 않게 — --solid(다크 0.94)만으로는 비쳐서 불투명한 앱 바탕 위에(#olNotice와 같게) */
   display:flex;gap:10px;align-items:center;text-align:left;color:var(--ink);
   transform:translateY(-140%);opacity:0;visibility:hidden;transition:transform .5s cubic-bezier(.2,.9,.25,1.15),opacity .25s,visibility 0s .5s}
 #notifBanner.in{transform:none;opacity:1;visibility:visible;transition-delay:0s}

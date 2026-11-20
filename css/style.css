@@ -10,6 +10,7 @@
 
 /* ── 색 토큰: <html data-theme>는 index.html의 인라인 스크립트가 항상 채운다 ── */
 [data-theme="dark"]{
+  color-scheme:dark;   /* 기본 스크롤바·글 상자도 모드를 따른다(다크에서 흰 스크롤바가 뜨던 것) */
   --wall:radial-gradient(120% 80% at 12% 8%,#6d4bd8 0%,transparent 56%),radial-gradient(90% 70% at 92% 30%,#1aa9cc 0%,transparent 56%),radial-gradient(110% 80% at 50% 108%,#c0468f 0%,transparent 60%),#0b0e22;
   --out:#06070d; --bezel:#44464f;
   --ink:#fff; --dim:rgba(255,255,255,.78);
@@ -22,6 +23,7 @@
   --app-bg:#0d0f1f; --bub:#242849; --bub-line:rgba(255,255,255,.09); --me:#7c5cf0; --me-ink:#fff;
 }
 [data-theme="light"]{
+  color-scheme:light;
   --wall:radial-gradient(110% 70% at 8% 0%,#ffd3bd 0%,transparent 60%),radial-gradient(90% 70% at 96% 18%,#bfd0ff 0%,transparent 60%),radial-gradient(120% 80% at 50% 110%,#d2bcff 0%,transparent 62%),#eef0fb;
   --out:#dcdfea; --bezel:#b9bcc9;
   --ink:#1a1c3a; --dim:rgba(26,28,58,.72);
@@ -144,7 +146,7 @@ button.tap-hint{display:block;background:none;border:0;padding:2px 0;font-weight
 .story-stage{flex:1;min-height:0;display:none;flex-direction:column;justify-content:flex-end;cursor:pointer}
 .story-stage.on{display:flex;animation:scrIn .35s ease both}
 .story-card{margin:0 14px 26px;border-radius:26px;padding:16px 18px 14px;text-align:left;animation:cardUp .4s cubic-bezier(.2,.9,.25,1) both}
-.story-card.glass2{background:var(--solid)}   /* 2026-11-20: 뒤 위젯 글자·아이돌이 비치지 않게 */
+.story-card.glass2{background:linear-gradient(var(--solid),var(--solid)),var(--app-bg)}   /* 2026-11-20: 뒤 위젯 글자·아이돌이 비치지 않게 — --solid(다크 0.94)만으로는 비쳐서 불투명한 앱 바탕 위에 얹는다(#olNotice와 같게) */
 @keyframes cardUp{from{opacity:0;transform:translateY(26px)}}
 .story-emoji{font-size:30px;line-height:1}
 .story-text{font-size:16.5px;font-weight:600;line-height:1.75;margin-top:8px}

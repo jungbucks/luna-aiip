@@ -39,7 +39,9 @@
 @keyframes olFloat{from{opacity:0;transform:translate(0,0) scale(.6)}20%{opacity:1}to{opacity:0;transform:translate(var(--dx,-10px),-150px) scale(1.15)}}
 .ol-live i{animation:olBlink 1.2s ease-in-out infinite}
 @keyframes olBlink{50%{opacity:.35}}
-.ol-tapall{display:block;margin:2px 2px 0;font-size:13.5px;color:var(--dim)}
+/* 머리줄의 "눌러서 댓글 모두 보기" — 본문이 새 댓글을 따라 내려가도 늘 보이는 자리. 좁은 폰에선 두 줄로 */
+.ol-tapall{flex:0 1 auto;min-width:0;padding:5px 11px;border-radius:999px;border:1px solid var(--edge);background:var(--chip);color:var(--ink);
+  font-size:13.5px;font-weight:600;line-height:1.25;text-align:center}
 .ol-tapall[hidden]{display:none}
 
 /* 알림 카드(수첩 적기 뒤·정산 앞): #app의 직계 자식. 위에서 내려오는 불투명 카드 + 뒤를 어둡게(그림자 퍼짐 — 뒤는 inert).

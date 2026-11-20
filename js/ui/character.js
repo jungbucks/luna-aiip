@@ -30,11 +30,12 @@ function assetPath(idol, expr) {
   return `assets/characters/${idol}-${expr}.png`;
 }
 
-export function idolSVG(key, expr = 'neutral') {
+/* decorative: 옆에 이름·아이디가 있어 그림이 장식일 때(alt="") — ourlog 프로필 사진 */
+export function idolSVG(key, expr = 'neutral', { decorative = false } = {}) {
   const k = IDOLS[key] ? key : current;
   const e = EXPRESSIONS.has(expr) ? expr : 'neutral';
   return `<img class="idol-svg" data-idol="${k}" data-expr="${e}"
-    src="${assetPath(k, e)}" alt="${IDOLS[k].name}" width="512" height="512" decoding="async">`;
+    src="${assetPath(k, e)}" alt="${decorative ? '' : IDOLS[k].name}" width="512" height="512" decoding="async">`;
 }
 
 /* 정답·배지 = happy / 오답 = shock / 법정·안전도<30 = panic / 그 외 neutral */
