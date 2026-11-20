@@ -185,7 +185,7 @@ console.log('[말투] 캐릭터 톡 — 사람이 하는 말 (2026-11-17, docs/s
   console.log('[ourlog] 피드 계산·글 (docs/superpowers/specs/2026-11-20-ourlog-design.md)');
   const F = await import('../js/ourlog-feed.js');
   const { OURLOG } = await import('../data/ourlog.js');
-  const EPS = [1];                                    // Task 2에서 [1,2,3,4,5,6]
+  const EPS = [1, 2, 3, 4, 5, 6];
   t('variantOf: full→right, half→half, none→wrong, null→null',
     F.variantOf('full') === 'right' && F.variantOf('half') === 'half' && F.variantOf('none') === 'wrong' && F.variantOf(null) === null);
   const p = OURLOG.posts[1];
@@ -200,7 +200,9 @@ console.log('[말투] 캐릭터 톡 — 사람이 하는 말 (2026-11-17, docs/s
   t('fmtCount: 1,234 / 2.4만 / 8만', F.fmtCount(1234) === '1,234' && F.fmtCount(24000) === '2.4만' && F.fmtCount(80000) === '8만');
   const g = E.newGame(); g.badges = ['full', 'none', 'half', null, null, null];
   t('feedOf: 배지 있는 EP만, 최신 먼저', JSON.stringify(F.feedOf(g)) === JSON.stringify([{ ep: 3, variant: 'half' }, { ep: 2, variant: 'wrong' }, { ep: 1, variant: 'right' }]));
+  t('6편 모두 있음', [1, 2, 3, 4, 5, 6].every(i => OURLOG.posts[i]));
   t('imageKey: half는 right 그림', F.imageKey(p, 'half') === p.img.right);
+  t('imageKey: EP5 half=ep5-blur, wrong=ep5', F.imageKey(OURLOG.posts[5], 'half') === 'ep5-blur' && F.imageKey(OURLOG.posts[5], 'wrong') === 'ep5');
   const lines = EPS.flatMap(i => ['right', 'wrong', 'half'].map(v => ({ i, v, list: F.commentsFor(OURLOG.posts[i], v) })));
   none('댓글: 편·갈래마다 8~10개(half는 끼운 뒤)', lines.filter(x => x.list.length < 8 || x.list.length > 10).map(x => ({ ep: x.i, who: x.v, text: String(x.list.length) })));
   none('댓글: 40자 이하, 유행어 없음, 이름 하드코딩 없음', lines.flatMap(x => x.list.map(c => ({ ep: x.i, who: c.who, text: c.text })))
