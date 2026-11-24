@@ -18,9 +18,20 @@ export function normalize(text) {
   return [...s].slice(0, MAX_LEN).join('');
 }
 
-/* 공백 문자를 뺀 글자 수가 MIN_LEN 이상 */
+/* 적은 글 검사(2026-11-24 플레이테스트 [6] — 'ㅋㅋㅋㅋㅋ'·같은 글자 반복이 통과하던 것).
+   '' = 통과 / 'short' = 공백 뺀 글자가 MIN_LEN 미만 / 'letters' = 완성형 한글·영문이 MIN_LEN 미만(자음·모음·숫자·기호만) /
+   'repeat' = 한글·영문 글자 종류가 MIN_KINDS 미만(같은 글자 반복). 화면 안내는 strings.js ui.notes.issue */
+export const MIN_KINDS = 3;
+export function noteIssue(text) {
+  const chars = [...String(text == null ? '' : text).replace(/\s/g, '')];
+  if (chars.length < MIN_LEN) return 'short';
+  const letters = chars.filter(c => /[가-힣A-Za-z]/.test(c)).map(c => c.toLowerCase());
+  if (letters.length < MIN_LEN) return 'letters';
+  if (new Set(letters).size < MIN_KINDS) return 'repeat';
+  return '';
+}
 export function isValid(text) {
-  return [...String(text == null ? '' : text).replace(/\s/g, '')].length >= MIN_LEN;
+  return noteIssue(text) === '';
 }
 
 /* 매번 저장소에서 읽어 사본을 갈아 끼운다. 저장소가 던질 때만 지금 사본을 돌려준다 */

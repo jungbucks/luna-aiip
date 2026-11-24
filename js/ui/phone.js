@@ -32,7 +32,19 @@ export function showNotify({ room, preview }) {
   b.querySelector('.nb-time').textContent = STRINGS.ui.lockNow;
   $('homeHint').textContent = STRINGS.ui.notifyHint;
   setHome('notify');
+  placeNotify();
   b.classList.add('in');
+}
+
+/* 알림 배너는 점수 카드(EP 제목·수치) 바로 아래에 띄운다(2026-11-24 플레이테스트 [8] — 상단에 떠서 카드를 가렸다).
+   카드 높이는 편마다 다르다(EP1은 점수 설명 한 줄이 더 있다). 레이아웃 좌표(offset)로 재서 기기 틀의 scale()과 무관하다 */
+function placeNotify() {
+  const b = $('notifBanner'), w = document.querySelector('#homeScreen .home-widget'), home = $('homeScreen');
+  if (!w || !home) return;
+  let top = 0;
+  for (let el = w; el && el !== b.offsetParent; el = el.offsetParent) top += el.offsetTop;
+  top += w.offsetHeight - home.scrollTop + 8;
+  b.style.top = top > 0 ? top + 'px' : '';
 }
 
 export function clearNotify() {
@@ -143,5 +155,6 @@ export function initPhone({ onMessenger, onNotes, onSettings, onOurlog }) {
     a.onclick = () => { a.classList.remove('nope'); void a.offsetWidth; a.classList.add('nope'); };
   });
   window.addEventListener('popstate', onPopState);
+  window.addEventListener('resize', () => { if ($('notifBanner').classList.contains('in')) placeNotify(); });   // 창 크기가 바뀌면 카드 높이도 바뀐다
   sync();
 }

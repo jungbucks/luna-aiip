@@ -3,7 +3,9 @@
 지식재산권 6종 학습 선택형 스토리 웹게임(고교 수업용) + 자매 페이지 도감(`dogam.html`, AI 지재권 쟁점 12건).
 바닐라 ES 모듈, 빌드 없음. 스펙 `SPEC.md`(v3) · 계획 `ROADMAP.md`(10항목).
 
-## 현재 상태 (2026-11-20)
+## 현재 상태 (2026-11-24)
+
+- **플레이테스트 9항목 반영(2026-11-24)**: ① ourlog 재선택(half) 캡션 undefined → `ourlog-feed.js captionFor`(half 없으면 right, 없으면 빈 글) + EP별 half 캡션 ② 정산 팝업에서 새로 고치면 끝낸 EP 처음으로 돌아가던 것 → `bridge()`가 정산 직후 `nextEp`+`markEpStart`+저장(버튼은 `enterEp`만) ③ **오답 📈 ≤ 0**(EP1 +5→-5, EP2 +10→-5, EP6 +15→-10, SPEC §6.2) — 재선택 경로가 바로 맞힌 경로보다 📈가 높게 끝나지 않음, 엔딩 `fameLine(f, missed)`가 놓친 편 수를 말함 ④ 선택 직전 대화의 결론 줄을 지우고 C 질문 카드(`hint`)로 옮김(의견 대립은 남김) ⑤ O/X 정답 배치 XO·OX·XO·XO·OX·OX, EP5 두 번째 문항 = 동아리 공연 영상 유튜브 광고 ⑥ 처음 판단 이름표 = 바로 맞힘 / 다시 생각해서 맞힘 / 놓치고 그대로 진행, 수첩 글 `notes.js noteIssue`(완성형 한글·영문 5자 이상·3종 이상 — 'ㅋㅋㅋㅋㅋ'·'하하하하하' 막고 안내 `ui.notes.issue`) ⑦ ourlog 좋아요 = 게시물 올린 때의 📈(`state.postFame`, `recordPost`/`fameAt`, checkSave에 추가) ⑧ 알림 배너는 점수 카드 아래(`phone.js placeNotify`), 채팅 수치 칩·결과 팝업 델타·리포트 점수에 자금/인지도/신뢰 이름표, 선택 화면 [‹ 처음 화면으로](`#selBack`). 통화·달력은 이미 div+aria-hidden(장식) ⑨ 세아는 대표에게 존댓말·준호에게 반말, 상대가 바뀌면 `messages`의 `to`로 묶음을 나눔(`chat.js`). verify 163·E2E 214. ⚠️ 바뀐 대화·질문 카드·O/X·캡션 문구 교사 검수 대기.
 
 - **교육적 개선(2026-11-20, 교사 승인 범위)**: 법정·집행유예 → **회사 위기 점검 회의**(`engine.checkCrisis`, 신뢰 0 → 30 회복, `crisisCount`, 게임은 끝나지 않고 6편 완주). 회의는 놓친 결정을 `kind:'own'`(우리 권리 확보·관리: 특허·상표·영업비밀)과 `kind:'others'`(남의 권리 침해 위험: 저작권·초상권·퍼블리시티)로 나눠 보여 줌. 엔딩 = 운영 결과(위기·유니콘·생존) / 리포트는 **운영 결과와 학습 결과 분리**. `badges` = 처음 판단 기록(바로 맞힘·피드백 뒤 바꿈·바꾸지 않음), 학습 결과 = **새 사례 적용 O/X 두 문항 모두**(`quiz[ep]='2/2'|'1/2'|'0/2'`, `js/quiz.js learnOf`) — 재선택만으로 이해 인정 안 함, 처음 틀려도 적용하면 인정. 수첩 편별 질문(`notePrompt`)·산출물 교사 확인란. 6편 대화·선택지·결과·개념·질문 카드·O/X·ourlog 댓글 다시 씀(내용 원본 = data/*.js). 옛 저장 `courtCount`·`'court'`·옛 퀴즈 값은 불러올 때 호환. 법령 확인·미확인 목록 `docs/superpowers/specs/2026-11-20-education-improvement.md`. ⚠️ 문구 전부 교사 검수 대기. **원격에 아직 안 올림.**
 - **외부 검토 7항목 반영(2026-11-20)**: ① 제목 화면 모드 단추 = 기록 초기화 옆 글자 단추 ② 이어서 하기 = 유리 바탕+테두리(바탕이 글자색과 같던 것) ③ 선택지 다시 씀(오답에 그럴듯한 근거·정답에 대가), C = "잠깐, 확인할 게 있어.", **`hint` = C 질문 카드('~요?') / `concept` = 정답 요약(수첩·산출물·엔딩)** ④ HUD 이름표 자금/인지도/**신뢰**(화면 이름만, 키는 safety)·EP1 위젯에 뜻 한 줄, **통장 바닥**(정산 직전 💰0 → 세아 경고 + 다음 EP 정답 📈·🛡️ 절반 + 유니콘 불가, `broke`·`brokeEver`), EP3·4·5 오답 📈 감소, 리포트 인지도 한 줄 ⑤ 다시 선택하면 보낸 답장 취소선 + 시스템 줄 ⑥ 생존 엔딩 '소송'은 법정 갔을 때만, 엔딩·법정 스크롤은 상태바 아래에서·맨 위부터 ⑦ 델타 색 = 부호, 알림 배너·내레이션 카드 불투명, 팝업 ESC(단추 하나면 그 단추, 확인창은 그만두기)·Tab 가두기, 산출물 층 ESC·Tab, 장식 앱 = div aria-hidden, O/X 결과 제목 초록/주황, 반쪽 배지 첫 설명, **messages의 시스템 줄 `{sys, room}`**(EP6 코스모 담당자 나감 → 방 인원 (3)), 내레이션 단추 aria-label, 상태바 z-index 60(산출물 층 위). SPEC §6.1·6.2·6.4·6.7 개정.
@@ -94,7 +96,7 @@ _config.yml         Pages(Jekyll) 배포 범위: test·docs·CLAUDE/SPEC/ROADMAP
 
 ## 검증 (수정 후 필수)
 
-1. 게임 `node test/verify.mjs`(152건) — 미달 시 배포 금지. 도감 `node test/verify-dogam.mjs`(20건) + `node test/run-probe.mjs test/probe-dogam.html`(45건). 게임 E2E 201건.
+1. 게임 `node test/verify.mjs`(163건) — 미달 시 배포 금지. 도감 `node test/verify-dogam.mjs`(20건) + `node test/run-probe.mjs test/probe-dogam.html`(45건). 게임 E2E 214건.
 2. E2E 프로브(구조·흐름 변경 시): **`node test/run-probe.mjs`** 한 줄(종료 코드 0 = 전부 PASS). 배포본만으로 도는지는 `--pages`(올라갈 파일만 서빙). 가드는 `node test/run-probe.mjs test/probe-guard.html`. 캡처는 `node test/run-probe.mjs test/probe-shots.html --shot=<png> --url="/__probe.html?scene=home&theme=light&w=1366&h=700" --size=1366,700`. 아래는 실행기가 대신 해 주는 옛 수동 절차(원리 참고용): **게임과 같은 오리진에서 서빙 필수** — file:// 프로브 + http iframe은 크로스오리진으로 조용히 죽는다(2026-07-15 실제 발생). 절차: `probe.html`을 루트에 복사 → Node 정적 서버(scratchpad) → `msedge --headless=new --user-data-dir=<임시> --virtual-time-budget=20000 --dump-dom http://localhost:PORT/...` → 수확 후 복사본 삭제. 채팅은 타이핑 인디케이터 때문에 메시지당 최대 2탭.
 
 ## 참고 문서

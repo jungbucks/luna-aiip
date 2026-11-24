@@ -4,8 +4,9 @@ import { idolSVG, getIdol, getExpression } from './character.js';
 
 /* 수치 색은 결과(정답/오답)가 아니라 부호로: +는 초록, -는 빨강(2026-11-20) */
 export function deltaLine(delta) {
-  const part = (emoji, v) => (v ? `<span class="dl ${v > 0 ? 'up' : 'down'}">${emoji} ${v > 0 ? '+' : ''}${v}</span>` : '');
-  return [part('💰', delta.money), part('📈', delta.fame), part('🛡️', delta.safety)].filter(Boolean).join('  ');
+  // 이름표(자금·인지도·신뢰)를 홈 카드와 같게 붙인다(2026-11-24 플레이테스트 [8])
+  const part = (emoji, name, v) => (v ? `<span class="dl ${v > 0 ? 'up' : 'down'}">${emoji} ${name} ${v > 0 ? '+' : ''}${v}</span>` : '');
+  return [part('💰', '자금', delta.money), part('📈', '인지도', delta.fame), part('🛡️', '신뢰', delta.safety)].filter(Boolean).join('  ');
 }
 
 /* ESC·Tab(2026-11-20): 떠 있는 동안 Tab은 팝업 안에서만 돌고, ESC는 escBtn(닫기에 해당하는 단추)을 누른다.

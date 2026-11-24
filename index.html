@@ -71,6 +71,7 @@ window.__errs=[];addEventListener('error',function(e){__errs.push(e.message)});a
     <h2 class="sel-head">함께할 AI 아이돌을 골라 주세요</h2>
     <p class="sel-sub">이야기는 같지만, 무대에 서는 아이돌이 달라집니다</p>
     <div class="sel-row" id="selRow"></div>
+    <button type="button" class="title-reset sel-back" id="selBack">‹ 처음 화면으로</button>
   </section>
 
   <!-- 인트로 -->
@@ -123,7 +124,7 @@ window.__errs=[];addEventListener('error',function(e){__errs.push(e.message)});a
     <!-- 메신저 앱 -->
     <div id="phoneWrap" class="applayer">
       <div class="app-head"><button type="button" class="app-back" id="msgBack">‹</button><div class="chat-ava" id="chatAva"></div><span id="chatRoom"></span></div>
-      <div class="stat-pill">💰 <span class="js-stat" data-k="money"></span> · 📈 <span class="js-stat" data-k="fame"></span> · 🛡️ <span class="js-stat" data-k="safety"></span></div>
+      <div class="stat-pill">💰<i class="st-l">자금</i> <span class="js-stat" data-k="money"></span> · 📈<i class="st-l">인지도</i> <span class="js-stat" data-k="fame"></span> · 🛡️<i class="st-l">신뢰</i> <span class="js-stat" data-k="safety"></span></div>
       <div id="chatLog"></div>
       <div id="chatChoices"></div>
       <div class="composer" id="composer"><span id="chatTapHint"></span><span class="send" aria-hidden="true">↑</span></div>

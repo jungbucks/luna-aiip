@@ -5,7 +5,7 @@
 import { EPISODES } from '../../data/episodes.js';
 import { STRINGS } from '../../data/strings.js';
 import { OURLOG, ART_READY } from '../../data/ourlog.js';
-import { feedOf, commentsFor, imageKey, followersFor, likesFor, fmtCount, variantOf } from '../ourlog-feed.js';
+import { feedOf, commentsFor, imageKey, captionFor, followersFor, likesFor, fmtCount, variantOf, recordPost, fameAt } from '../ourlog-feed.js';
 import { esc } from './chat.js';
 import { idolSVG, getIdol, IDOLS } from './character.js';
 import { openApp, isOpen, onceClosed } from './phone.js';
@@ -62,16 +62,15 @@ function postHTML(item, state, liveEp, newest) {
   const S = STRINGS.ui.ourlog;
   const post = OURLOG.posts[item.ep];
   if (!post) return '';
-  const fame = state.stats ? state.stats.fame : 0;
   const mode = item.ep === liveEp ? 'live' : 'later';
   const list = commentsFor(post, item.variant);
-  const likes = likesFor(post, item.variant, fame, mode);
+  const likes = likesFor(post, item.variant, fameAt(state, item.ep), mode);   // 올린 때의 📈(지난 게시물이 지금 📈로 다시 계산되지 않게)
   const when = newest ? S.now : S.epTime(Number.isInteger(item.ep) ? item.ep : 0);
   return `<article class="ol-post" data-ep="${item.ep}" data-v="${item.variant}">
     <header class="ol-who"><span class="ol-ava ol-ava-s">${avatar()}</span><b>${esc(OURLOG.account.handle)}</b><span class="ol-time">${esc(when)}</span></header>
     ${artHTML(item.ep, item.variant, post)}
     <div class="ol-react"><span class="ol-ic">${ICON_LIKE}<b class="ol-likes">${int(likes)}</b></span><span class="ol-ic">${ICON_CMT}<span class="ol-ccount">${esc(S.comments(Number.isInteger(list.length) ? list.length : 0))}</span></span></div>
-    <p class="ol-cap">${esc(post.caption[item.variant])}</p>
+    <p class="ol-cap">${esc(captionFor(post, item.variant))}</p>
     <ul class="ol-comments">${list.map(c => `<li><b>${esc(c.who)}</b> ${esc(c.text)}</li>`).join('')}</ul>
     ${newest ? `<p class="ol-think">${esc(S.think)}</p>` : ''}
   </article>`;
@@ -107,7 +106,7 @@ function startLive(ep) {
   if (!art || reduced()) { $('olLive').hidden = true; return; }
   const ul = art.querySelector('.ol-comments'), likesEl = art.querySelector('.ol-likes'), countEl = art.querySelector('.ol-ccount');
   const post = OURLOG.posts[ep], state = getState();
-  const target = likesFor(post, art.dataset.v, state && state.stats ? state.stats.fame : 0, 'live');
+  const target = likesFor(post, art.dataset.v, fameAt(state, ep), 'live');
   const items = [...ul.children];
   items.forEach(li => li.remove());
   live = { art, ul, items, shown: 0, likesEl, countEl, target, top: $('olBody').scrollTop, timer: 0, hearts: new Set() };
@@ -237,6 +236,7 @@ export function offer(state, { onDone }) {
   const S = STRINGS.ui.ourlog;
   const post = OURLOG.posts[state.ep], variant = variantOf(state.badges[state.ep - 1]);
   if (!post || !variant) { onDone(); return; }             // 게시물이 없으면 알림도 없이 다음으로
+  recordPost(state, state.ep);                             // 지금 올라온 게시물 — 열든 넘어가든 이때의 📈로 좋아요를 센다(정산이 저장한다)
   $('olNCount').textContent = S.newComments(commentsFor(post, variant).length);
   const open = $('olOpen'), skip = $('olSkip');
   let used = false;                                        // 두 단추 모두 한 번 누르면 잠긴다(연타 방지)

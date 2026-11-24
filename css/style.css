@@ -110,6 +110,7 @@ button{font-family:inherit;cursor:pointer;color:inherit}
   display:flex;flex-direction:column;align-items:center;gap:5px;transition:transform .12s}
 .sel-card:hover{transform:translateY(-4px)}
 .sel-card:active{transform:scale(.97)}
+.sel-back{position:absolute;top:calc(var(--sb) + 6px);left:6px;text-decoration:none;font-weight:600;font-size:14px}   /* 제목 화면으로(2026-11-24) */
 .sel-card b{font-size:17px;font-weight:800}
 .sel-card i{font-style:normal;font-size:12.5px;color:var(--dim)}
 .sel-svg{width:110px}
@@ -187,6 +188,7 @@ button.tap-hint{display:block;background:none;border:0;padding:2px 0;font-weight
 .pop-body .delta{font-weight:800;font-size:16px;text-align:center}
 .pop-body .delta .dl.up{color:var(--good)}
 .pop-body .delta .dl.down{color:var(--bad)}
+.pop-body .delta .dl{display:inline-block;white-space:nowrap;margin:0 5px}   /* 이름표가 붙어 길어졌다 — 줄이 바뀌어도 이름과 숫자가 갈라지지 않게(2026-11-24) */
 .pop-title.ok{color:var(--good)}
 .pop-title.warn{color:var(--warn)}
 .pop-body .quiz-tag{font-size:15px;color:var(--dim);margin-bottom:6px}

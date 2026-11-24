@@ -43,7 +43,7 @@ console.log('[경로 B] 전부 오답(대가 진행) → 위기 점검 회의 EP
   }
   t('6편을 모두 지나감(중간에 끝나지 않음)', st.ep === 6 && st.badges.every(b => b === 'none'), 'ep ' + st.ep);
   t('위기 점검 회의 = EP3·EP4·EP6, 회의 뒤 신뢰 30으로 회복', JSON.stringify(crisisAt) === '[3,4,6]' && st.crisisCount === 3, JSON.stringify(crisisAt));
-  t('최종 스탯 10/25/30', st.stats.money === 10 && st.stats.fame === 25 && st.stats.safety === 30, fmt(st));
+  t('최종 스탯 10/0/30', st.stats.money === 10 && st.stats.fame === 0 && st.stats.safety === 30, fmt(st));
   t('엔딩 = crisis(운영 결과)', E.judgeEnding(st) === 'crisis');
   t('checkCrisis는 게임을 끝내지 않음(ending 미정)', (() => { const x = E.newGame(); x.stats.safety = 0; const r = E.checkCrisis(x); return r === 'crisis' && x.stats.safety === 30 && x.ending === null; })());
 }
@@ -54,7 +54,7 @@ console.log('[경로 C] 오답 EP1·EP4(대가 진행) + 나머지 정답 → �
   for (let i = 1; i <= 6; i++) (i === 1 || i === 4) ? playWrongAccept(st) : playRight(st);
   const end = E.judgeEnding(st);
   // 2026-11-20: EP4 오답 📈-5, EP4 끝 💰0 → 통장 바닥 → EP5 정답 보상 📈·🛡️ 절반(+5/+5), EP6 끝 💰0도 바닥(엔딩용)
-  t('최종 스탯 10/65/60', st.stats.money === 10 && st.stats.fame === 65 && st.stats.safety === 60, fmt(st));
+  t('최종 스탯 10/55/60', st.stats.money === 10 && st.stats.fame === 55 && st.stats.safety === 60, fmt(st));
   t('통장 바닥을 겪음(brokeEver)', st.brokeEver === true);
   t('완전 배지 4 + none 2', st.badges.filter(b => b === 'full').length === 4 && st.badges.filter(b => b === 'none').length === 2);
   t('위기 점검 회의 0회', st.crisisCount === 0);
@@ -64,16 +64,32 @@ console.log('[경로 C] 오답 EP1·EP4(대가 진행) + 나머지 정답 → �
 console.log('[경로 D] EP1 오답→[다시 선택]→정답 + 나머지 정답 → 반쪽 배지 → 생존');
 {
   const st = E.newGame();
-  E.chooseWrongRetry(st, 1, ep(1).choices.wrong.delta);   // 50% trunc: 💰-15 🛡-12 📈+2
+  E.chooseWrongRetry(st, 1, ep(1).choices.wrong.delta);   // 50% trunc: 💰-15 🛡-12 📈-2
   E.chooseRight(st, 1, ep(1).choices.right.delta);
   E.settle(st); E.nextEp(st);
-  t('EP1 종료 30/42/73 (trunc 검증)', st.stats.money === 30 && st.stats.fame === 42 && st.stats.safety === 73, fmt(st));
+  t('EP1 종료 30/38/73 (trunc 검증)', st.stats.money === 30 && st.stats.fame === 38 && st.stats.safety === 73, fmt(st));
   t('EP1 배지 = half', st.badges[0] === 'half');
   for (let i = 2; i <= 6; i++) playRight(st);
   const end = E.judgeEnding(st);
-  t('최종 스탯 30/97/100', st.stats.money === 30 && st.stats.fame === 97 && st.stats.safety === 100, fmt(st));
+  t('최종 스탯 30/93/100', st.stats.money === 30 && st.stats.fame === 93 && st.stats.safety === 100, fmt(st));
   t('반쪽 1 + 완전 5', st.badges.filter(b => b === 'half').length === 1 && st.badges.filter(b => b === 'full').length === 5);
   t('반쪽이 유니콘 차단 → survive', end === 'survive', end);
+}
+
+console.log('[인지도 밸런스] 오답은 📈를 올리지 않고, 다시 선택한 경로가 바로 맞힌 경로보다 📈가 높게 끝나지 않음 (2026-11-24 플레이테스트 [3])');
+{
+  t('오답 📈 ≤ 0 (6편)', EPISODES.every(e => (e.choices.wrong.delta.fame || 0) <= 0), EPISODES.map(e => e.choices.wrong.delta.fame).join());
+  const finalFame = k => {   // k편만 다시 선택, 나머지는 바로 맞힘(k=0이면 전부 바로 맞힘)
+    const st = E.newGame();
+    for (let i = 1; i <= 6; i++) {
+      if (i === k) E.chooseWrongRetry(st, i, ep(i).choices.wrong.delta);
+      E.chooseRight(st, i, ep(i).choices.right.delta); E.settle(st); if (i < 6) E.nextEp(st);
+    }
+    return st.stats.fame;
+  };
+  const base = finalFame(0);
+  t('편마다: 다시 선택한 판의 최종 📈 < 바로 맞힌 판', [1, 2, 3, 4, 5, 6].every(k => finalFame(k) < base), [1, 2, 3, 4, 5, 6].map(finalFame).join() + ' vs ' + base);
+  t('엔딩 📈 한 줄: 놓친 편이 있으면 그 수를 말함', STRINGS.fameLine(90, 3).includes('3편') && !STRINGS.fameLine(90, 0).includes('편에서'));
 }
 
 console.log('[통장 바닥] 정산 직전 💰0 → 다음 EP 정답 보상 절반·유니콘 불가 (SPEC §6.1-2, 2026-11-20)');
@@ -136,12 +152,12 @@ console.log('[데이터 정합] episodes.js');
     e.choices?.right?.label && e.choices?.right?.delta && e.choices?.right?.popup?.title && e.choices?.info?.label));
   t('SPEC §6.2 델타 일치', JSON.stringify(EPISODES.map(e => [e.choices.wrong.delta, e.choices.right.delta])) ===
     JSON.stringify([
-      [{ money: -30, safety: -25, fame: 5 }, { money: -15, safety: 15, fame: 20 }],
-      [{ money: -20, safety: -20, fame: 10 }, { money: -10, safety: 15, fame: 10 }],
+      [{ money: -30, safety: -25, fame: -5 }, { money: -15, safety: 15, fame: 20 }],
+      [{ money: -20, safety: -20, fame: -5 }, { money: -10, safety: 15, fame: 10 }],
       [{ money: -25, safety: -25, fame: -10 }, { money: -10, safety: 10, fame: 15 }],
       [{ money: -30, safety: -30, fame: -5 }, { money: -10, safety: 15, fame: 5 }],
       [{ money: -20, safety: -25, fame: -10 }, { money: -5, safety: 10, fame: 10 }],
-      [{ money: -25, safety: -25, fame: 15 }, { money: -15, safety: 15, fame: 15 }],
+      [{ money: -25, safety: -25, fame: -10 }, { money: -15, safety: 15, fame: 15 }],
     ]));
 }
 
@@ -225,6 +241,12 @@ console.log('[말투] 캐릭터 톡 — 사람이 하는 말 (2026-11-17, docs/s
   t('feedOf: 배지 있는 EP만, 최신 먼저', JSON.stringify(F.feedOf(g)) === JSON.stringify([{ ep: 3, variant: 'half' }, { ep: 2, variant: 'wrong' }, { ep: 1, variant: 'right' }]));
   t('6편 모두 있음', [1, 2, 3, 4, 5, 6].every(i => OURLOG.posts[i]));
   t('imageKey: half는 right 그림', F.imageKey(p, 'half') === p.img.right);
+  // 2026-11-24 플레이테스트 [1]: 재선택(half) 게시물 본문에 "undefined"가 나왔다
+  t('captionFor: 6편·3갈래 모두 빈 글이 아닌 문자열(undefined·null 없음)', EPS.every(i => ['right', 'wrong', 'half'].every(v => { const c = F.captionFor(OURLOG.posts[i], v); return typeof c === 'string' && c.length > 0 && !/undefined|null/.test(c); })));
+  t('captionFor: half 글이 없으면 right 글, 값이 없으면 빈 글', F.captionFor({ caption: { right: 'R' } }, 'half') === 'R' && F.captionFor({ caption: {} }, 'wrong') === '' && F.captionFor({}, 'right') === '' && F.captionFor(null, 'half') === '');
+  // [7]: 지난 게시물 좋아요가 지금 📈로 다시 계산돼 EP1·3·4가 같은 숫자였다
+  { const st = E.newGame(); st.stats.fame = 40; F.recordPost(st, 1); st.stats.fame = 70; F.recordPost(st, 3); st.stats.fame = 90;
+    t('fameAt: 게시물을 올린 때의 📈, 적어 두지 않은 편은 지금 📈', F.fameAt(st, 1) === 40 && F.fameAt(st, 3) === 70 && F.fameAt(st, 4) === 90 && F.likesFor(p, 'right', F.fameAt(st, 1), 'later') !== F.likesFor(p, 'right', F.fameAt(st, 3), 'later')); }
   t('imageKey: EP5 half=ep5-blur, wrong=ep5', F.imageKey(OURLOG.posts[5], 'half') === 'ep5-blur' && F.imageKey(OURLOG.posts[5], 'wrong') === 'ep5');
   const lines = EPS.flatMap(i => ['right', 'wrong', 'half'].map(v => ({ i, v, list: F.commentsFor(OURLOG.posts[i], v) })));
   none('댓글: 편·갈래마다 8~10개(half는 끼운 뒤)', lines.filter(x => x.list.length < 8 || x.list.length > 10).map(x => ({ ep: x.i, who: x.v, text: String(x.list.length) })));
@@ -374,7 +396,11 @@ console.log('[수첩] 알게 된 것 적기 (notes.js — 점수와 무관)');
   const N = await import('../js/notes.js');
   const mem = () => { const m = {}; return { getItem: k => (k in m ? m[k] : null), setItem: (k, v) => { m[k] = String(v); }, removeItem: k => { delete m[k]; } }; };
   const boom = { getItem() { throw new Error('x'); }, setItem() { throw new Error('x'); }, removeItem() { throw new Error('x'); } };
-  t('notes-valid: 5자부터', !N.isValid('1234') && N.isValid('12345') && !N.isValid('   \n  ') && !N.isValid(' 1 2 3 4 ') && N.isValid('가 나 다 라 마'));
+  t('notes-valid: 5자부터', !N.isValid('1234') && N.isValid('abcde') && !N.isValid('   \n  ') && !N.isValid(' 1 2 3 4 ') && N.isValid('가 나 다 라 마'));
+  t('notes-valid: 자음·모음·숫자만, 같은 글자 반복은 통과 못 함(완성형 한글·영문 5자·3종 이상, 2026-11-24)',
+    ['ㅋㅋㅋㅋㅋ', 'ㅠㅠㅠㅠㅠㅠ', '12345', '!!!!!!', '하하하하하', '가나가나가나', 'aaaaaa', 'ㅋㅋㅋ좋아요'].every(x => !N.isValid(x))
+    && N.noteIssue('ㅋㅋㅋㅋㅋ') === 'letters' && N.noteIssue('하하하하하') === 'repeat' && N.noteIssue('ㅋㅋ') === 'short'
+    && ['구독은 듣는 이용이다', 'license 확인', '허락받고 쓰자', '좋아요 ㅋㅋ 출원 먼저'].every(x => N.isValid(x)));
   t('notes-normalize: 200자로 자르고 앞뒤 공백 제거', N.normalize('  ' + '가'.repeat(250) + '  ').length === 200 && N.normalize('  abc  ') === 'abc');
   const s = mem();
   t('notes-save/load', N.saveNote(2, '  특허는 먼저 출원  ', s) === true && N.getNote(2, s) === '특허는 먼저 출원' && JSON.parse(s.getItem('luna_notes_v1'))[2] === '특허는 먼저 출원');
@@ -455,6 +481,23 @@ console.log('[저장 불러오기] 타입·범위·허용값 검사 (보안 검�
   { const o = JSON.parse(JSON.stringify(done)); delete o.crisisCount; o.courtCount = 2; o.ending = 'court'; o.quiz = { 1: 'ok', 2: 'more-ok', 3: 'missed' };
     const r = load(o, 'end');
     t('load: 옛 저장(법정 횟수·법정 엔딩·옛 퀴즈 값) → 위기 횟수·위기 엔딩으로 호환', !!r && r.game.crisisCount === 2 && r.game.ending === 'crisis' && !('courtCount' in r.game) && Q.learnAt(r.game, 2) === 'partial'); }
+  // 2026-11-24: ourlog 게시물 때의 📈(postFame) — 있으면 그대로, 모양이 틀리면 거부, 없으면 옛 저장처럼
+  { const x = JSON.parse(JSON.stringify(g)); x.postFame = { 1: 38, 2: 33 }; x.epStart.postFame = { 1: 38, 2: 33 };
+    const r = load(x);
+    t('load: postFame(게시물 때의 📈)은 그대로 불러옴', !!r && r.game.postFame[1] === 38 && r.game.epStart.postFame[2] === 33);
+    t('load: postFame 모양이 틀리면 거부', [y => { y.postFame = { 9: 1 }; }, y => { y.postFame = { 1: 101 }; }, y => { y.postFame = { 1: '<b>' }; }, y => { y.postFame = [1]; }].every(f => bad(f) === null)); }
+}
+
+console.log('[이어 하기] 정산을 마친 뒤 새로 고치면 다음 EP 처음에서 (2026-11-24 플레이테스트 [2])');
+{
+  // main.js bridge와 같은 순서: 정답·퀴즈·정산 → nextEp → markEpStart → 저장. 그 저장으로 이어 하면 EP2 처음, 배지·점수·퀴즈 유지, 정산은 한 번
+  const st = E.newGame(); R.markEpStart(st);
+  E.chooseRight(st, 1, ep(1).choices.right.delta); Q.record(st, 1, '2/2'); E.settle(st);
+  const after = JSON.parse(JSON.stringify(st.stats));
+  E.nextEp(st); R.markEpStart(st);
+  const back = R.resumePoint({ phase: 'ep', game: JSON.parse(JSON.stringify(st)) }).state;
+  t('정산 뒤 이어 하기 = EP2 처음, EP1 배지·퀴즈 남음', back.ep === 2 && back.badges[0] === 'full' && back.quiz && back.quiz[1] === '2/2' && back.retryUsed === false);
+  t('정산 💰+10은 한 번만(이어 한 점수 = 정산 직후 점수)', JSON.stringify(back.stats) === JSON.stringify(after) && after.money === 45, JSON.stringify(back.stats));
 }
 
 console.log('[배포] GitHub Pages에 올라갈 파일 (보안 검토 2026-11-18 A — 테스트 페이지가 같은 오리진에서 게임 저장을 지울 수 있었다)');

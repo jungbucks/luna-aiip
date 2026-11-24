@@ -17,6 +17,26 @@ export function commentsFor(post, variant) {
 /* half는 right 그림 */
 export const imageKey = (post, variant) => post.img[variant === 'half' ? 'right' : variant];
 
+/* 캡션: half 글이 없으면 right 글. 값이 문자열이 아니면 빈 글 — 화면에 undefined·null이 나오지 않게(2026-11-24 플레이테스트 [1]) */
+export function captionFor(post, variant) {
+  const c = post && post.caption ? post.caption : {};
+  const v = variant === 'half' && typeof c.half !== 'string' ? 'right' : variant;
+  return typeof c[v] === 'string' ? c[v] : '';
+}
+
+/* 게시물을 올린 때의 📈를 그 편에 적어 둔다(알림 카드가 뜨는 순간 = 게시물이 올라온 순간). 지난 게시물 좋아요가 지금 📈로 다시 계산되지 않게(플레이테스트 [7]) */
+export function recordPost(state, ep) {
+  if (!state || !state.stats || !Number.isInteger(state.stats.fame)) return;
+  state.postFame = { ...(state.postFame || {}), [ep]: state.stats.fame };
+}
+
+/* 그 게시물의 📈: 적어 둔 값, 없으면(옛 저장·아직 안 올린 편) 지금 📈 */
+export function fameAt(state, ep) {
+  const v = state && state.postFame ? state.postFame[ep] : undefined;
+  if (Number.isInteger(v)) return v;
+  return state && state.stats && Number.isInteger(state.stats.fame) ? state.stats.fame : 0;
+}
+
 /* 📈 0~100 → 팔로워. 오르면 늘고 내리면 준다 */
 export function followersFor(fame) {
   const f = Math.max(0, Math.min(100, Math.round(Number(fame) || 0)));

@@ -64,7 +64,7 @@ export function advance() {
     else autoTimer = setTimeout(advance, AUTO_GAP);
     return;
   }
-  const cont = idx > 0 && msgs[idx - 1].who === m.who;   // 같은 사람이 이어 말하면 이름·프로필 생략
+  const cont = idx > 0 && msgs[idx - 1].who === m.who && !m.to;   // 같은 사람이 이어 말하면 이름·프로필 생략. to = 말 상대가 바뀌어 묶음을 새로 연다(2026-11-24)
   typingEl = document.createElement('div');
   typingEl.className = 'msg show typing' + (cont ? ' cont' : '');
   typingEl.innerHTML = `<span class="ava" data-c="${avatarTone(m.who)}" aria-hidden="true"></span><div class="body">` +
@@ -80,7 +80,7 @@ function finalizeMsg() {
   const m = msgs[idx++];
   typingEl.classList.remove('typing');
   typingEl.querySelector('.bubble').innerHTML = esc(m.text);
-  if (idx >= msgs.length || msgs[idx].who !== m.who) {            // 묶음의 마지막 말풍선 옆에만 시각
+  if (idx >= msgs.length || msgs[idx].who !== m.who || msgs[idx].to) {   // 묶음의 마지막 말풍선 옆에만 시각
     typingEl.querySelector('.row').insertAdjacentHTML('beforeend', `<span class="tm">${nowLabel()}</span>`);
   }
   typingEl = null;
@@ -155,5 +155,5 @@ export function num(v) {
 /* 리포트·수첩·산출물 공통 점수 한 줄 */
 export function statsLine(s) {
   const st = s || {};
-  return `💰 ${num(st.money)} · 📈 ${num(st.fame)} · 🛡️ ${num(st.safety)}`;
+  return `💰 자금 ${num(st.money)} · 📈 인지도 ${num(st.fame)} · 🛡️ 신뢰 ${num(st.safety)}`;   // 이름표는 홈 카드와 같게(2026-11-24)
 }

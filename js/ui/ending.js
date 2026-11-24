@@ -75,7 +75,7 @@ export function renderEnding(state, endingKey, restartCb, productCb) {
       <p class="end-body">${esc(body).replace(/\n/g, '<br>')}</p>
       <h3>${esc(r.opsHead)}</h3>
       <div class="rp-stats">${statsLine(state.stats)}</div>
-      <p class="rp-fame">${esc(STRINGS.fameLine(state.stats.fame))}</p>
+      <p class="rp-fame">${esc(STRINGS.fameLine(state.stats.fame, state.badges.filter(b => b === 'none').length))}</p>
       <p class="rp-fame rp-crisis">${esc(r.crisisLine(num(crisis)))}</p>
       <p class="rp-note">${esc(r.opsNote)}</p>
       <h3>${esc(r.learnTitle)}</h3>

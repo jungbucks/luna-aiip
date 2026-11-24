@@ -9,7 +9,7 @@ import { esc, statsLine } from './chat.js';
 import { learnAt } from '../quiz.js';
 import { T } from './character.js';
 import { openApp, closeApp, lockApps, armBack, onSheetBack } from './phone.js';
-import { getNote, saveNote, isValid, MIN_LEN, MAX_LEN, buildProductText } from '../notes.js';
+import { getNote, saveNote, isValid, noteIssue, MIN_LEN, MAX_LEN, buildProductText } from '../notes.js';
 
 const $ = id => document.getElementById(id);
 let getState = () => null;
@@ -89,8 +89,9 @@ export function renderNotebook() {
 function bindWriteCard() {
   const input = $('noteInput'), save = $('noteSave');
   const refresh = () => {
-    const ok = isValid(input.value);
+    const issue = noteIssue(input.value), ok = !issue, S = STRINGS.ui.notes;
     save.disabled = !ok;
+    $('noteNeed').textContent = issue && S.issue[issue] ? S.issue[issue] : S.need(MIN_LEN);   // 왜 안 되는지 부드럽게(2026-11-24)
     $('noteNeed').style.visibility = ok ? 'hidden' : 'visible';
     $('noteCount').textContent = [...input.value].length + '/' + MAX_LEN;
   };

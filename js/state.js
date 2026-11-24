@@ -61,6 +61,10 @@ function checkGame(g, withStart) {
     need(isObj(g.quiz) && Object.keys(g.quiz).every(k => /^[1-6]$/.test(k) && QUIZ.includes(g.quiz[k])));
     out.quiz = { ...g.quiz };
   }
+  if (g.postFame !== undefined) {   // ourlog 게시물을 올린 때의 📈(2026-11-24) — 옛 저장에는 없다
+    need(isObj(g.postFame) && Object.keys(g.postFame).every(k => /^[1-6]$/.test(k) && intIn(g.postFame[k], 0, 100)));
+    out.postFame = { ...g.postFame };
+  }
   if (withStart && g.epStart !== undefined) out.epStart = checkGame(g.epStart, false);
   else need(g.epStart === undefined || withStart);
   return out;

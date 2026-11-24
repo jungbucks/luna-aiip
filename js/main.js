@@ -82,6 +82,11 @@ function boot() {
     `<button class="sel-card" data-idol="${k}" aria-label="${IDOLS[k].label} 선택">
       <div class="sel-svg">${idolSVG(k)}</div><b>${IDOLS[k].label}</b><i>${IDOLS[k].tag}</i></button>`).join('');
   $('selRow').querySelectorAll('.sel-card').forEach(btn => btn.onclick = () => pickIdol(btn.dataset.idol));
+  $('selBack').onclick = () => {   // 제목 화면으로(2026-11-24). 기록은 [새로 시작]에서 이미 지웠으니 이어 하기는 숨긴다
+    $('btnContinue').style.display = store.load() ? '' : 'none';
+    show('scr-title');
+    $('btnNew').focus({ preventScroll: true });
+  };
   const saved = store.load();
   $('btnContinue').style.display = saved ? '' : 'none';
   $('btnContinue').onclick = () => {   // 진행 중이면 EP 시작 상태에서 다시(점수 두 번 방지), 끝난 판이면 그 엔딩·리포트 그대로
@@ -348,12 +353,15 @@ function bridge() {
     return endingScene(end);
   }
   const next = EPISODES[G.ep];   // 다음 EP (0-index라 현재 ep가 곧 다음)
+  /* 정산이 끝난 순간 다음 EP의 시작 지점으로 저장(2026-11-24 플레이테스트 [2]) — 예전엔 [EP 시작] 단추를 눌러야 저장돼서
+     이 팝업에서 새로 고치면 방금 끝낸 EP 처음으로 돌아가 배지·점수가 사라졌다. 정산은 이 사본에 이미 들어 있어 두 번 들어가지 않는다 */
+  engine.nextEp(G); resume.markEpStart(G); store.save(G, 'ep');
   const B = STRINGS.broke;
   const zero = broke ? `<p class="money-zero"><b>${esc(B.who)}</b>: ${esc(B.text)}</p><p class="money-zero">${esc(B.rule)}</p>` : '';
   showPopup({
     title: STRINGS.bridgeSettle,
     html: `${zero}<p>${esc(STRINGS.bridgeNext(next)).replace(/\n/g, '<br>')}</p>`,
-    buttons: [{ label: `EP${next.id} 시작 →`, cb: () => { engine.nextEp(G); store.save(G, 'ep'); enterEp(); } }],
+    buttons: [{ label: `EP${next.id} 시작 →`, cb: enterEp }],
   });
 }
 
