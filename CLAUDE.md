@@ -3,7 +3,10 @@
 지식재산권 6종 학습 선택형 스토리 웹게임(고교 수업용) + 자매 페이지 도감(`dogam.html`, AI 지재권 쟁점 12건).
 바닐라 ES 모듈, 빌드 없음. 스펙 `SPEC.md`(v3) · 계획 `ROADMAP.md`(10항목).
 
-## 현재 상태 (2026-11-24)
+## 현재 상태 (2026-11-26)
+
+- **인증서(2026-11-26, 미커밋·미배포)**: 엔딩 화면 아래 카드의 **[인증서 받기]** → 이름 한 번 확정 → 1600×1000 PNG 미리보기 + [인증서 PNG 저장] + (휴대폰) [공유·사진에 저장]. 공용 파일 js/completion-certificate.js · css/completion-certificate.css — **윤리시티 4게임 배포 사본과 같은 파일, 고치면 다섯 곳 함께**(ethicity-data · ethicity-privacy · ethicity-publicness/publicness · ethicity-transparency, 맞추는 도구 D:/Works/_workspace/cert-preview/sync2.cjs). 그림 = 게임 대표 그림 배경(script 태그 data-art · data-art-focus) + 인물(data-figure 또는 mount의 art) + 큰 이름 + 인장(GAME CLEAR · 날짜 · 완주) + 회차마다 다른 별자리 + 번호표. 번호 = 접두어 + 6자리(LUNA-AB12CD, 0·1·I·O 없음, 서버 검증용 아님). 색 = data-paper · data-ink · data-accent. 루나는 main.js certExtras()가 고른 아이돌 그림 + 운영 결과 · 처음 판단 · 새 사례 적용 세 줄(문구 STRINGS.report.cert*). 단위 검사 node --test test/completion-certificate.test.cjs(12). ⚠️ E2E 프로브가 인증서 연결(기록 지우기가 GameCertificate.begin() 뒤로 미뤄져 비동기) 때문에 흔들린다 — --budget=150000에서 213/214, 돌 때마다 다른 곳에서 실패, 프로브에 기다림을 넣어야 함(미해결). verify [배포]는 두 파일을 git add 하면 통과. 실제 폰 저장 · Padlet 올리기 · 다섯 게임 엔딩에서 실제로 카드가 뜨는지는 미확인(캡처 도구 shoot.cjs로 그림과 카드만 봄).
+- **모바일 탭 하이라이트 끔(2026-11-26, push됨)**: `html{-webkit-tap-highlight-color:transparent}`(style.css·dogam.css).
 
 - **플레이테스트 9항목 반영(2026-11-24)**: ① ourlog 재선택(half) 캡션 undefined → `ourlog-feed.js captionFor`(half 없으면 right, 없으면 빈 글) + EP별 half 캡션 ② 정산 팝업에서 새로 고치면 끝낸 EP 처음으로 돌아가던 것 → `bridge()`가 정산 직후 `nextEp`+`markEpStart`+저장(버튼은 `enterEp`만) ③ **오답 📈 ≤ 0**(EP1 +5→-5, EP2 +10→-5, EP6 +15→-10, SPEC §6.2) — 재선택 경로가 바로 맞힌 경로보다 📈가 높게 끝나지 않음, 엔딩 `fameLine(f, missed)`가 놓친 편 수를 말함 ④ 선택 직전 대화의 결론 줄을 지우고 C 질문 카드(`hint`)로 옮김(의견 대립은 남김) ⑤ O/X 정답 배치 XO·OX·XO·XO·OX·OX, EP5 두 번째 문항 = 동아리 공연 영상 유튜브 광고 ⑥ 처음 판단 이름표 = 바로 맞힘 / 다시 생각해서 맞힘 / 놓치고 그대로 진행, 수첩 글 `notes.js noteIssue`(완성형 한글·영문 5자 이상·3종 이상 — 'ㅋㅋㅋㅋㅋ'·'하하하하하' 막고 안내 `ui.notes.issue`) ⑦ ourlog 좋아요 = 게시물 올린 때의 📈(`state.postFame`, `recordPost`/`fameAt`, checkSave에 추가) ⑧ 알림 배너는 점수 카드 아래(`phone.js placeNotify`), 채팅 수치 칩·결과 팝업 델타·리포트 점수에 자금/인지도/신뢰 이름표, 선택 화면 [‹ 처음 화면으로](`#selBack`). 통화·달력은 이미 div+aria-hidden(장식) ⑨ 세아는 대표에게 존댓말·준호에게 반말, 상대가 바뀌면 `messages`의 `to`로 묶음을 나눔(`chat.js`). verify 163·E2E 214. ⚠️ 바뀐 대화·질문 카드·O/X·캡션 문구 교사 검수 대기.
 

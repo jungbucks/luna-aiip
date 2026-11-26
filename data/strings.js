@@ -68,6 +68,8 @@ export const STRINGS = {
     crisisLine: n => `🗂️ 위기 점검 회의 ${n}번`,
     learnTitle: '📚 학습 결과',
     firstHead: '처음 판단', learnHead: '새 사례 적용',
+    // 수료증 그림에 넣는 줄(2026-11-26) — 운영 결과와 학습 결과를 따로 적는다
+    certOps: '운영 결과', certFirst: (a, b, c) => `바로 맞힘 ${a} · 다시 생각해서 맞힘 ${b} · 놓침 ${c}`, certLearn: (k, n) => `${n}편 중 ${k}편 두 문제 모두 맞힘`,
     // 처음 판단 = 그 편의 첫 결정 기록(배지 값). 학습 성취는 새 사례 적용으로 따로 본다
     badgeLabel: { full: '바로 맞힘', half: '다시 생각해서 맞힘', none: '놓치고 그대로 진행' },
     firstLabel: { full: '바로 맞힘', half: '다시 생각해서 맞힘', none: '놓치고 그대로 진행', none0: '—' },

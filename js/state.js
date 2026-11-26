@@ -5,6 +5,7 @@ const SCHEMA = 1;
 const defaultStorage = () => { try { return globalThis.localStorage; } catch (e) { return null; } };
 
 export function save(gameState, uiPhase) {
+  if (globalThis.GameCertificate && !globalThis.GameCertificate.current()) return;
   try {
     localStorage.setItem(KEY, JSON.stringify({ schemaVersion: SCHEMA, game: gameState, phase: uiPhase }));
   } catch (e) { /* 저장 실패는 치명적이지 않음(시크릿 모드 등) */ }

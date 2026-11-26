@@ -95,7 +95,10 @@ function boot() {
     if (p.ended) endingScene(engine.judgeEnding(G)); else enterEp();
   };
   const U = STRINGS.ui, S = U.settings;
-  $('btnNew').onclick = () => askWipe('btnNew', U.newTitle, U.newAsk, U.newNo, U.newYes, startNew);
+  $('btnNew').onclick = () => {
+    if (!$('scr-title').classList.contains('active')) return;
+    askWipe('btnNew', U.newTitle, U.newAsk, U.newNo, U.newYes, startNew);
+  };
   $('btnReset').onclick = () => askWipe('btnReset', S.reset, S.resetAsk, S.resetNo, S.resetYes, () => resetAll('btnReset'));
   show('scr-title');
 }
@@ -118,7 +121,7 @@ function wipeThen(then, backId) {
   const W = STRINGS.ui.wipeFail, left = [];
   if (!store.clear()) left.push(W.save);
   if (!clearNotes()) left.push(W.notes);
-  if (!left.length) return then();
+  if (!left.length) { if (window.GameCertificate) return window.GameCertificate.begin().then(then); return then(); }
   showPopup({
     title: W.title,
     html: `<p>${esc(W.ask)}</p><ul class="wipe-left">${left.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`,
@@ -379,6 +382,20 @@ function crisisScene(contCb) {
   focusIn($('courtBtn'));   // 키보드: 회의 화면의 단추로
 }
 
+/* 수료증 그림에 덧붙이는 것: 고른 아이돌 그림 + 운영 결과·처음 판단·새 사례 적용(공용 파일 js/completion-certificate.js는 게임 내용을 모른다) */
+function certExtras(key) {
+  const R = STRINGS.report, n = b => G.badges.filter(x => x === b).length;
+  const learned = EPISODES.filter(e => quiz.learnAt(G, e.id) === 'confirmed').length;
+  return {
+    art: `assets/characters/${IDOLS[G.idol] ? G.idol : getIdol()}-happy.png`,
+    lines: [
+      { label: R.certOps, value: (STRINGS.endings[key] || STRINGS.endings.survive).name },
+      { label: R.firstHead, value: R.certFirst(n('full'), n('half'), n('none')) },
+      { label: R.learnHead, value: R.certLearn(learned, EPISODES.length) },
+    ],
+  };
+}
+
 function endingScene(key) {
   if (key === 'unicorn') setExpression('happy');
   const U = STRINGS.ui;
@@ -389,6 +406,7 @@ function endingScene(key) {
       buttons: [{ label: U.restartNo, cls: 'ghost', cb: () => $('endRestart').focus() }, { label: U.restartYes, cls: 'danger', cb: () => resetAll('endRestart') }], esc: 0,
     }),
     () => openProduct((STRINGS.endings[key] || STRINGS.endings.survive).name, $('endProduct')));
+  if (G.ep === 6 && G.ending && window.GameCertificate) window.GameCertificate.mount($('scr-end'), certExtras(key));
   show('scr-end');
   $('scr-end').scrollTop = 0;                   // 늘 엔딩 맨 위부터(2026-11-20)
   focusIn($('scr-end').querySelector('h2'));   // 키보드·읽어 주기: 엔딩 제목부터(ending.js가 tabindex="-1"을 단다)
