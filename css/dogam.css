@@ -6,6 +6,7 @@
   --mag: #f472b6; --good: #34d399; --bad: #f87171; --warn: #fbbf24;
 }
 * { box-sizing: border-box; margin: 0; }
+html { -webkit-tap-highlight-color: transparent; }   /* 모바일에서 누를 때 파랗게 덮이는 기본 표시 끔 */
 body { background: var(--bg); color: var(--text); font-family: "Pretendard", "Malgun Gothic", system-ui, sans-serif; font-size: 17px; line-height: 1.75; word-break: keep-all; overflow-wrap: break-word; }
 .d-wrap { max-width: 54rem; margin: 0 auto; padding: 0 1rem; }
 a { color: var(--neon2); }

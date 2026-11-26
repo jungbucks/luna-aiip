@@ -38,6 +38,7 @@
 
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}   /* 페이지는 스크롤하지 않는다 — 폰 화면(.scr) 안에서만 */
+html{-webkit-tap-highlight-color:transparent}   /* 모바일에서 누를 때 화면이 파랗게 덮이는 기본 표시 끔 — 스토리 무대처럼 화면 전체가 클릭을 받는다. 키보드 초점 표시(:focus-visible)는 그대로 */
 body{background:var(--out);color:var(--ink);font-size:16px;line-height:1.6;word-break:keep-all;
   font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
   display:flex;align-items:center;justify-content:center}
